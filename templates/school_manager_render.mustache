@@ -1,0 +1,72 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_schoolmanager/school_manager_render
+
+    school_manager_render layout template.
+
+    Context variables required for this template:
+    * sitename - The name of the site
+    * output - The core renderer for the page
+    * bodyattributes - attributes for the body tag as a string of html attributes
+
+    Example context (json):
+    {
+        "messages": []html,
+        "links":    {'link' => url, 'name' => string},
+        "school_name": string,
+        "schools":  {'link' => url, 'name' => string},
+        "crews":    {'link' => url, 'name' => string},
+        "forms":    []html,
+        "manage":   bool,
+        "buttons":  {"primary": bool, "add_class": string, "link": url, "name": string}
+    }
+}}
+<div class="school-manager">
+    <div class="messages {{^messages}}empty{{/messages}}">
+        {{#messages}}{{{.}}}{{/messages}}
+    </div>
+    <div class="menu-links {{^links}}empty{{/links}}">
+        {{#links}}
+            <div><a href="{{{link}}}" class="menu-link">{{name}}</a></div>
+        {{/links}}
+    </div>
+    <div class="school-name {{^school_name}}empty{{/school_name}}">
+        <span>{{#str}}school, local_schoolmanager{{/str}}:</span>
+        <span>{{school_name}}</span>
+    </div>
+    <div class="school-manager-links schools {{^schools}}empty{{/schools}}">
+        {{#schools}}
+            <div><a href="{{{link}}}" class="school-link">{{name}}</a></div>
+        {{/schools}}
+    </div>
+    <div class="school-manager-links crews {{^crews}}empty{{/crews}}">
+        {{#crews}}
+            <div><a href="{{{link}}}" class="crew-link">{{name}}</a></div>
+        {{/crews}}
+    </div>
+    <div class="school-manager-forms {{^forms}}empty{{/forms}}">
+        {{#forms}}{{{.}}}{{/forms}}
+    </div>
+    {{#manage}}
+        <div class="control-panel">
+            {{#buttons}}
+                <a class="btn {{#primary}}btn-primary{{/primary}}{{^primary}}btn-default{{/primary}} {{add_class}}" href="{{{link}}}">{{name}}</a>
+            {{/buttons}}
+        </div>
+    {{/manage}}
+</div>

@@ -1,0 +1,18 @@
+body.path-local-schoolmanager #region-main {
+  overflow: visible;
+}
+body.path-local-schoolmanager .empty {
+  display: none;
+}
+body.path-local-schoolmanager .menu-links {
+  padding: 15px;
+}
+body.path-local-schoolmanager .menu-links > *:not(:last-child) {
+  margin-right: 10px;
+}
+body.path-local-schoolmanager .school-name {
+  padding: 20px;
+}
+body.path-local-schoolmanager .control-panel {
+  margin-top: 20px;
+}

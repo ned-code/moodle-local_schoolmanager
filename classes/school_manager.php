@@ -1,0 +1,622 @@
+<?php
+/**
+ * @package    local_schoolmanager
+ * @subpackage NED
+ * @copyright  2020 NED {@link http://ned.ca}
+ * @author     NED {@link http://ned.ca}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace local_schoolmanager;
+
+defined('MOODLE_INTERNAL') || die();
+/** @var \stdClass $CFG */
+require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
+
+/**
+ * @property-read int $view = self::CAP_CANT_VIEW_SM;
+ * @property-read int $manage_schools = self::CAP_CANT_EDIT;
+ * @property-read int $manage_crews = self::CAP_CANT_EDIT;
+ * @property-read int $manage_members = self::CAP_CANT_EDIT;
+ *
+ * @property-read \context $ctx;
+ * @property-read \stdClass $user;
+ * @property-read int $userid
+ * @property-read array $school_names
+ * @property-read array $schools
+ * @property-read array $potential_schools
+ * @property-read array $crew_names
+ * @property-read array $crews
+ */
+class school_manager{
+    const TABLE_SCHOOL = 'local_schoolmanager_school';
+    const TABLE_CREW = 'local_schoolmanager_crew';
+    const TABLE_COHORT = 'cohort';
+    const TABLE_MEMBERS = 'cohort_members';
+
+    const CAP_CANT_VIEW_SM = 0;
+    const CAP_SEE_OWN_SM = 1;
+    const CAP_SEE_ALL_SM = 2;
+
+    const CAP_CANT_EDIT = 0;
+    const CAP_CAN_EDIT = 1;
+
+    static protected $_school_managers = [];
+    static protected $_schools_data = [];
+    static protected $_all_schools_data_was_loaded = false;
+    static protected $_called_crews = [];
+
+    protected $_view = self::CAP_CANT_VIEW_SM;
+    protected $_manage_schools = self::CAP_CANT_EDIT;
+    protected $_manage_crews = self::CAP_CANT_EDIT;
+    protected $_manage_members = self::CAP_CANT_EDIT;
+
+    /** @var \context $_ctx */
+    protected $_ctx;
+    /** @var \stdClass $_user */
+    protected $_user;
+    protected $_userid = 0;
+
+    /** @var array $_school_names */
+    protected $_school_names = null;
+    /** @var array $_schools */
+    protected $_schools = null;
+    /** @var array $_cohorts */
+    protected $_potential_schools = null;
+    /** @var array array $crews - [schoolid => [crewid => crew_name]]*/
+    protected $_crew_names = [];
+    /** @var array array $crews - [schoolid => [crewid => crew]]*/
+    protected $_crews = [];
+
+    /**
+     * school_manager constructor.
+     */
+    public function __construct(){
+        global $USER;
+
+        $this->_ctx = \context_system::instance();
+        if (has_capability(PLUGIN_CAPABILITY.'viewallschooldashboards', $this->_ctx)){
+            $this->_view = self::CAP_SEE_ALL_SM;
+        } elseif (has_capability(PLUGIN_CAPABILITY.'viewownschooldashboard', $this->_ctx)){
+            $this->_view = self::CAP_SEE_OWN_SM;
+        } else {
+            $this->_view = self::CAP_CANT_VIEW_SM;
+        }
+
+        if ($this->_view == self::CAP_CANT_VIEW_SM){
+            return;
+        }
+
+        foreach (['manage_schools', 'manage_crews', 'manage_members'] as $cap){
+            $this->{'_'.$cap} = (int)has_capability(PLUGIN_CAPABILITY.$cap, $this->_ctx);
+        }
+
+        $this->_user = $USER;
+        $this->_userid = $USER->id;
+
+        self::$_school_managers[$this->_userid] = $this;
+    }
+
+    /**
+     * @return school_manager
+     */
+    static public function get_school_manager(){
+        global $USER;
+        $userid = $USER->id;
+
+        if (!isset(self::$_school_managers[$userid])){
+            self::$_school_managers[$userid] = new school_manager();
+        }
+
+        return self::$_school_managers[$userid];
+    }
+
+    public function __get($name){
+        $pr_name = '_' . $name;
+        $method = 'get_' . $name;
+        $res = null;
+
+        if (method_exists($this, $method)){
+            return $this->$method();
+        }
+
+        if (property_exists($this, $pr_name)){
+            $res = ($this::${$pr_name} ?? $this->$pr_name) ?? null;
+        } elseif(property_exists($this, $name)){
+            $res = ($this::${$name} ?? $this->$name) ?? null;
+        }
+
+        if (is_object($res)){
+            $res = clone($res);
+        }
+
+        return $res;
+    }
+
+    /**
+     * Return school(s) by its id(s)
+     * Warning: This function check none capabilities!
+     *
+     * @param array|int $ids
+     * @param bool      $only_one - return \stdClass of one school by first id if true
+     *
+     * @return array|\stdClass|false
+     */
+    static protected function _get_school_by_ids($ids, $only_one=false){
+        global $DB;
+        if (empty($ids)){
+            return $only_one ? false : [];
+        }
+
+        $ids = is_array($ids) ? $ids : [$ids];
+        if ($only_one){
+            $ids = [reset($ids)];
+        }
+        $ids_to_load = [];
+        $data = [];
+        foreach ($ids as $id){
+            if (isset(self::$_schools_data[$id])){
+                $data[$id] = self::$_schools_data[$id];
+            } else {
+                $ids_to_load[] = $id;
+            }
+        }
+
+        if (!self::$_all_schools_data_was_loaded && !empty($ids_to_load)){
+            list($sql, $params) = $DB->get_in_or_equal($ids_to_load, SQL_PARAMS_NAMED);
+            $add_data = $DB->get_records_sql("SELECT * FROM {".self::TABLE_SCHOOL."} AS school WHERE school.id $sql", $params) ?: [];
+            foreach ($add_data as $id => $add_datum){
+                self::$_schools_data[$id] = $add_datum;
+                $data[$id] = $add_datum;
+            }
+        }
+
+        return $only_one ? reset($data) : $data;
+    }
+
+    /**
+     * Return school(s) by its id(s)
+     * Check only id, which user can see
+     *
+     * @param array|int $ids
+     * @param bool      $only_one - return \stdClass of one school by first id if true
+     *
+     * @return array|\stdClass|false
+     */
+    public function get_school_by_ids($ids, $only_one=false){
+        $ids = is_array($ids) ? $ids : [$ids];
+        $possible_ids = $this->get_school_names();
+        $check_ids = [];
+        foreach ($ids as $id){
+            if (isset($possible_ids[$id])){
+                $check_ids[] = $id;
+            }
+        }
+
+        return self::_get_school_by_ids($check_ids, $only_one);
+    }
+
+    /**
+     * Check capabilities an show error if necessary
+     *
+     * @param array $check_other_capabilities_all - all of this capabilities should be
+     * @param array $check_other_capabilities_any - any of this capabilities should be
+     * @param bool  $ignore_base_capability       - check or not base capability
+     */
+    public function show_error_if_necessary($check_other_capabilities_all=[], $check_other_capabilities_any=[], $ignore_base_capability=false){
+        $pr_error = function(){
+            print_error('nopermissions', 'error', '', get_string('checkpermissions', 'core_role'));
+        };
+        $ctx = $this->_ctx;
+
+        if (!$ignore_base_capability && $this->_view == self::CAP_CANT_VIEW_SM){
+            $pr_error();
+        }
+        if (!empty($check_other_capabilities_all) && !has_all_capabilities($check_other_capabilities_all, $ctx)){
+            $pr_error();
+        }
+        if (!empty($check_other_capabilities_any) && !has_any_capability($check_other_capabilities_any, $ctx)){
+            $pr_error();
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function get_school_names(){
+        global $DB;
+        do{
+            if (!is_null($this->_school_names)){
+                break;
+            }
+
+            $this->_school_names = [];
+            if ($this->_view == self::CAP_CANT_VIEW_SM){
+                break;
+            }
+
+            if ($this->_view == self::CAP_SEE_ALL_SM){
+              if ($this::$_all_schools_data_was_loaded){
+                  foreach ($this::$_schools_data as $school){
+                      $this->_school_names[$school->id] = $school->name;
+                  }
+              } else {
+                  $this->_school_names = $DB->get_records_menu(self::TABLE_SCHOOL, [], false, 'id, name');
+              }
+            } elseif ($this->_view == self::CAP_SEE_OWN_SM){
+                $this->_school_names = $DB->get_records_sql_menu("
+                    SELECT school.id, school.name 
+                    FROM {".self::TABLE_SCHOOL."} AS school
+                    JOIN {".self::TABLE_MEMBERS."} AS members
+                        ON members.cohortid = school.id
+                    WHERE members.userid = :userid",
+                    ['userid' => $this->userid]);
+            }
+
+            $this->_school_names = $this->_school_names ?: [];
+        } while(false);
+
+        return $this->_school_names;
+    }
+
+    /**
+     * @return array
+     */
+    public function get_schools(){
+        global $DB;
+        do{
+            if (!is_null($this->_schools)){
+                break;
+            }
+
+            $this->_schools = [];
+            if ($this->_view == self::CAP_CANT_VIEW_SM){
+                break;
+            }
+
+            if ($this->_view == self::CAP_SEE_ALL_SM){
+                if (!$this::$_all_schools_data_was_loaded){
+                    $this::$_schools_data = $DB->get_records(self::TABLE_SCHOOL);
+                    $this::$_all_schools_data_was_loaded = true;
+                }
+                $this->_schools = $this::$_schools_data;
+            } elseif ($this->_view == self::CAP_SEE_OWN_SM){
+                $this->_schools = self::_get_school_by_ids($this->get_school_names());
+            }
+
+            $this->_schools = $this->_schools ?: [];
+        } while(false);
+
+        return $this->_schools;
+    }
+
+    /**
+     * Return moodle cohort, which can become schools
+     *
+     * @param null $cohortid
+     *
+     * @return array
+     */
+    public function get_potential_schools($cohortid=null){
+        global $DB;
+        do{
+            if (!is_null($this->_potential_schools)){
+                break;
+            }
+
+            if ($this->_view == self::CAP_CANT_VIEW_SM || !$this->can_manage_schools()){
+                $this->_potential_schools = [];
+                break;
+            }
+
+            $sql = ["SELECT cohort.* 
+                    FROM {".self::TABLE_COHORT."} AS cohort
+                    LEFT JOIN {".self::TABLE_SCHOOL."} AS school
+                        ON school.id = cohort.id"];
+            $where = ["school.id IS NULL"];
+            $params = [];
+
+            if ($this->_view == self::CAP_SEE_OWN_SM){
+                $sql[] = "JOIN {".self::TABLE_MEMBERS."} AS members
+                        ON members.cohortid = school.id";
+                $where[] = 'members.userid = :userid';
+                $params['userid'] = $this->_userid;
+            }
+
+            if (!is_null($cohortid)){
+                $where[] = 'cohort.id = :cohortid';
+                $params['cohortid'] = $cohortid;
+            }
+
+            $sql = join("\n", $sql);
+            $where = empty($where) ? '' : ("\nWHERE (" . join(') AND (', $where) . ')');
+            $cohorts = $DB->get_records_sql($sql.$where, $params) ?: [];
+
+            $potential_schools = [];
+            foreach ($cohorts as $id => $cohort){
+                $code = trim($cohort->idnumber ?? '');
+                // Schools have 4-digits code
+                if (strlen($code) == 4){
+                    $potential_schools[$id] = $cohort;
+                }
+            }
+
+            if (!is_null($cohortid)){
+                return $potential_schools[$cohortid] ?? null;
+            }
+
+            $this->_potential_schools = $potential_schools ?: [];
+        } while(false);
+
+        return !is_null($cohortid) ? ($this->_potential_schools[$cohortid] ?? null) : $this->_potential_schools;
+    }
+
+    /**
+     * Function for get_crew_names and get_crews
+     *
+     * @param      $check_data
+     * @param null $schoolid
+     * @param bool $get_only_names
+     *
+     * @return array
+     */
+    protected function _get_crew_data($check_data, $schoolid=null, $get_only_names=false){
+        global $DB;
+        $data = [];
+        do{
+
+            if ($schoolid && !is_array($schoolid) && isset($check_data[$schoolid])){
+                break;
+            }
+
+            if (is_null($schoolid)){
+                $schoolids = array_keys($this->school_names);
+            } else {
+                $schoolids = is_array($schoolid) ? $schoolid : [$schoolid];
+            }
+
+            $schoolids = array_diff($schoolids, array_keys($check_data));
+            if (empty($schoolids)){
+                break;
+            }
+
+            list($sql_param, $params) = $DB->get_in_or_equal($schoolids, SQL_PARAMS_NAMED);
+            $select = $get_only_names ? "crew.id, crew.name, crew.schoolid" : "crew.*";
+            $sql = "SELECT $select
+                    FROM {".self::TABLE_CREW."} AS crew
+                    WHERE crew.schoolid $sql_param";
+            $crews = $DB->get_records_sql($sql, $params);
+            if (empty($crews)){
+                break;
+            }
+
+            foreach ($crews as $crew){
+                $data[$crew->schoolid][$crew->id] = $get_only_names ? $crew->name : $crew;
+                if (!$get_only_names && !isset($this->_crew_names[$crew->schoolid][$crew->id])){
+                    $this->_crew_names[$crew->schoolid][$crew->id] = $crew->name;
+                }
+            }
+
+        } while(false);
+
+        if (is_null($schoolid)){
+            $res_data = $data;
+        } elseif (is_array($schoolid)){
+            $res_data = [];
+            foreach ($schoolid as $id){
+                if (isset($data[$id])){
+                    $res_data[$id] = $data[$id];
+                }
+            }
+        } else {
+            $res_data = $data[$schoolid] ?? [];
+        }
+
+        return [$data, $res_data];
+    }
+
+    /**
+     * @param int|array $schoolid
+     *
+     * @return array
+     */
+    public function get_crew_names($schoolid=null){
+        list($this->_crew_names, $res_data) = $this->_get_crew_data($this->_crew_names, $schoolid, true);
+        return $res_data;
+    }
+
+    /**
+     * @param int|array $schoolid
+     *
+     * @return array
+     */
+    public function get_crews($schoolid=null){
+        list($this->_crews, $res_data) = $this->_get_crew_data($this->_crews, $schoolid, false);
+        return $res_data;
+    }
+
+    /**
+     * Be careful with using this function in circle, it loads data from DB by one row
+     *
+     * @param      $crewid
+     * @param null $schoolid
+     *
+     * @return \stdClass|null
+     */
+    public function get_crew_by_id($crewid, $schoolid=null){
+        global $DB;
+        if (!is_null($schoolid)){
+            if (isset($this->_crews[$schoolid][$crewid])){
+                return $this->_crews[$schoolid][$crewid];
+            } elseif(isset($this->_crews[$schoolid])){
+                return null;
+            }
+        }
+
+        $crew = self::$_called_crews[$crewid] ?? $DB->get_record(self::TABLE_CREW, ['id' => $crewid]);
+        if ($crew){
+            if (isset($this->school_names[$crew->schoolid])){
+                self::$_called_crews[$crewid] = $crew;
+                return $crew;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function can_manage_schools(){
+        return $this->_manage_schools == self::CAP_CAN_EDIT;
+    }
+
+    /**
+     * @return bool
+     */
+    public function can_manage_crews(){
+        return $this->_manage_crews == self::CAP_CAN_EDIT;
+    }
+
+    /**
+     * @return bool
+     */
+    public function can_manage_members(){
+        return $this->_manage_members == self::CAP_CAN_EDIT;
+    }
+
+    /**
+     * Save school object in the table
+     *
+     * @param $data
+     *
+     * @return bool|int
+     */
+    public function save_school($data){
+        global $DB;
+        $data = (object)$data;
+        if (!($data->id ?? false) || !$this->can_manage_schools()){
+            return false;
+        }
+
+        if ($school = $this->get_school_by_ids($data->id, true)){
+            $new = false;
+        } elseif ($school = $this->get_potential_schools($data->id)){
+            $new = true;
+        } else {
+            return false;
+        }
+
+        $up_data = new \stdClass();
+        $up_data->id = $school->id;
+        $up_data->name = $school->name;
+        $up_data->code = $school->code ?? $school->idnumber;
+        $up_data->url = $data->url ?? '';
+        $up_data->city = $data->city ?? '';
+        $up_data->country = $data->country ?? $this->_user->country ?? '';
+        $up_data->logo = $data->logo ?? 0;
+        $up_data->startdate = $data->startdate ?? time();
+        $up_data->enddate = $data->enddate ?? (time() + 365*24*3600);
+        $up_data->note = $data->note ?? '';
+
+        if ($new){
+            self::$_schools_data[$school->id] = $up_data;
+            $this->_schools[$school->id] = $up_data;
+            $this->_school_names[$school->id] = $school->name;
+            return $DB->insert_record_raw(self::TABLE_SCHOOL, $up_data, false, false, true);
+        } else {
+            self::$_schools_data[$school->id] = $up_data;
+            $this->_schools[$school->id] = $up_data;
+            return $DB->update_record(self::TABLE_SCHOOL, $up_data);
+        }
+    }
+
+    /**
+     * Delete school object from the table
+     *
+     * @param $id
+     *
+     * @return bool|int
+     */
+    public function delete_school($id){
+        global $DB;
+        if (!$school = $this->get_school_by_ids($id, true)){
+            return false;
+        }
+
+        $DB->delete_records(self::TABLE_SCHOOL, ['id' => $id]);
+        $DB->delete_records(self::TABLE_CREW, ['schoolid' => $id]);
+        $DB->set_field(self::TABLE_MEMBERS, 'crewid', null, ['cohortid' => $id]);
+
+        $school->idnumber = $school->code;
+        $this->_potential_schools[$id] = $school;
+        unset(self::$_schools_data[$id]);
+        unset($this->_schools[$id]);
+        unset($this->_school_names[$id]);
+        unset($this->_crews[$id]);
+        unset($this->_crew_names[$id]);
+        return true;
+    }
+
+    /**
+     * Save crew object in the table
+     *
+     * @param $data
+     *
+     * @return bool|int
+     */
+    public function save_crew($data){
+        global $DB;
+        $data = (object)$data;
+        if (!($data->schoolid ?? false) || !$this->can_manage_crews()){
+            return false;
+        }
+
+        if (!($this->school_names[$data->schoolid] ?? false)){
+            return false;
+        }
+
+        $up_data = new \stdClass();
+        $up_data->id = $data->id;
+        $up_data->schoolid = $data->schoolid;
+        $up_data->name = $data->name ?? '';
+        $up_data->code = $data->code ?? '';
+        $up_data->program = $data->program ?? 0;
+        $year = time() + 365*24*3600;
+        $up_data->admissiondate = $data->admissiondate ??  $year;
+        $up_data->graduationdate = $data->graduationdate ?? $year;
+        $up_data->courses = $data->courses ?? 0;
+        $up_data->note = $data->note ?? '';
+
+        if (!$data->id){
+            $up_data->id = $DB->insert_record_raw(self::TABLE_CREW, $up_data, true, false, false);
+            if (isset($this->_crews[$data->schoolid])){
+                $this->_crews[$data->schoolid][$up_data->id] = $up_data;
+            }
+            return $up_data->id;
+        } else {
+            return $DB->update_record(self::TABLE_CREW, $up_data);
+        }
+    }
+
+    /**
+     * Delete crew object from the table
+     *
+     * @param      $id
+     * @param null $schoolid
+     *
+     * @return bool|int
+     */
+    public function delete_crew($id, $schoolid=null){
+        global $DB;
+        if (!$crew = $this->get_crew_by_id($id, $schoolid)){
+            return false;
+        }
+
+        $DB->delete_records(self::TABLE_CREW, ['id' => $id]);
+        $DB->set_field(self::TABLE_MEMBERS, 'crewid', null, ['crewid' => $id]);
+
+        unset($this->_crews[$crew->schoolid][$id]);
+        unset($this->_crew_names[$crew->schoolid][$id]);
+        return true;
+    }
+}

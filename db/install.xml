@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/schoolmanager/db" VERSION="2020081700" COMMENT="XMLDB file for Moodle local/schoolmanager"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_schoolmanager_school" COMMENT="Each record represents one moodle cohort as school">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="The same to id of cohort table"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="4-digits school code"/>
+        <FIELD NAME="url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="city" TYPE="char" LENGTH="120" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="country" TYPE="char" LENGTH="2" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="logo" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0 means no image uploaded, positive values are revisions that prevent caching problems, negative values are reserved for future use"/>
+        <FIELD NAME="startdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="enddate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="note" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="parentid" TYPE="foreign" FIELDS="id" REFTABLE="cohort" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_schoolmanager_crew" COMMENT="Each record represents one subcohort as a subgroup of the school">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="schoolid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Connection to school table"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="2" NOTNULL="false" SEQUENCE="false" COMMENT="2-digits cohort code"/>
+        <FIELD NAME="program" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false" COMMENT="Academic Program"/>
+        <FIELD NAME="admissiondate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="graduationdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="courses" TYPE="int" LENGTH="5" DEFAULT="0" NOTNULL="true" SEQUENCE="false" COMMENT="Courses per year"/>
+        <FIELD NAME="note" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="schoolid" TYPE="foreign" FIELDS="schoolid" REFTABLE="local_schoolmanager_school" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
