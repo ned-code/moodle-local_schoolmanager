@@ -27,6 +27,8 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
  * @property-read array $potential_schools
  * @property-read array $crew_names
  * @property-read array $crews
+ * @property-read array $school_users = [];
+ * @property-read array $crew_users = [];
  */
 class school_manager{
     const TABLE_SCHOOL = 'local_schoolmanager_school';
@@ -45,6 +47,7 @@ class school_manager{
     static protected $_schools_data = [];
     static protected $_all_schools_data_was_loaded = false;
     static protected $_called_crews = [];
+    static protected $_called_crew_schoolids = [];
 
     protected $_view = self::CAP_CANT_VIEW_SM;
     protected $_manage_schools = self::CAP_CANT_EDIT;
@@ -63,11 +66,14 @@ class school_manager{
     protected $_schools = null;
     /** @var array $_cohorts */
     protected $_potential_schools = null;
-    /** @var array array $crews - [schoolid => [crewid => crew_name]]*/
+    /** @var array array $_crew_names - [schoolid => [crewid => crew_name]]*/
     protected $_crew_names = [];
-    /** @var array array $crews - [schoolid => [crewid => crew]]*/
+    /** @var array array $_crews - [schoolid => [crewid => crew]]*/
     protected $_crews = [];
-
+    /** @var array array $_school_users - [schoolid => [userid => user]]*/
+    protected $_school_users = [];
+    /** @var array array $_crew_users - [cohortid => [userid => user]]*/
+    protected $_crew_users = [];
     /**
      * school_manager constructor.
      */
@@ -366,6 +372,7 @@ class school_manager{
         do{
 
             if ($schoolid && !is_array($schoolid) && isset($check_data[$schoolid])){
+                $data = $check_data;
                 break;
             }
 
@@ -373,6 +380,7 @@ class school_manager{
                 $schoolids = array_keys($this->school_names);
             } else {
                 $schoolids = is_array($schoolid) ? $schoolid : [$schoolid];
+                $schoolids = array_intersect(array_keys($this->school_names), $schoolids);
             }
 
             $schoolids = array_diff($schoolids, array_keys($check_data));
@@ -395,6 +403,7 @@ class school_manager{
                 if (!$get_only_names && !isset($this->_crew_names[$crew->schoolid][$crew->id])){
                     $this->_crew_names[$crew->schoolid][$crew->id] = $crew->name;
                 }
+                self::$_called_crew_schoolids[$crew->id] = $crew->schoolid;
             }
 
         } while(false);
@@ -457,10 +466,143 @@ class school_manager{
         if ($crew){
             if (isset($this->school_names[$crew->schoolid])){
                 self::$_called_crews[$crewid] = $crew;
+                self::$_called_crew_schoolids[$crewid] = $crew->schoolid;
                 return $crew;
             }
         }
         return null;
+    }
+
+    public function get_schoolid_by_crewids($crewids, $return_one=false){
+        global $DB;
+        $res = [];
+        $to_load = [];
+        $crewids = is_array($crewids) ? $crewids : [$crewids];
+        foreach ($crewids as $crewid){
+            if (isset(self::$_called_crew_schoolids[$crewid])){
+                $schoolid = self::$_called_crew_schoolids[$crewid];
+                if (isset($this->school_names[$schoolid])){
+                    $res[$crewid] = $schoolid;
+                }
+            } else {
+                $to_load[] = $crewid;
+            }
+        }
+
+        if (!empty($to_load) && (!$return_one || empty($res))){
+            list($sql_param, $params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            $sql = "SELECT crew.id, crew.schoolid
+                    FROM {".self::TABLE_CREW."} AS crew
+                    WHERE crew.id $sql_param";
+            $crews = $DB->get_records_sql($sql, $params);
+            foreach ($crews as $crew){
+                self::$_called_crew_schoolids[$crew->id] = $crew->schoolid;
+                if (isset($this->school_names[$crew->schoolid])){
+                    $res[$crew->id] = $crew->schoolid;
+                }
+            }
+        }
+
+        return $return_one ? (reset($res) ?: null) : $res;
+    }
+
+    /**
+     * Load users by schoolid for this course
+     * Note: this fill crew_users too
+     *
+     * @param null $schoolid
+     * @param bool $return_one - return onl first value, if true
+     *
+     * @return array|null
+     */
+    public function get_school_students($schoolid=null, $return_one=true){
+        global $DB;
+        if (is_null($schoolid)){
+            if (count($this->_school_users) == count($this->school_names)){
+                return $this->_school_users;
+            }
+            $schoolids = array_keys($this->school_names);
+        } else {
+            $schoolids = is_array($schoolid) ? $schoolid : [$schoolid];
+            $schoolids = array_intersect(array_keys($this->school_names), $schoolids);
+        }
+
+        $res = [];
+        $to_load = [];
+        foreach ($schoolids as $schoolid){
+            if (isset($this->_school_users[$schoolid])){
+                $res[$schoolid] = $this->_school_users[$schoolid];
+            } else {
+                $to_load[] = $schoolid;
+            }
+        }
+
+        if (!empty($to_load) && (!$return_one || empty($res))){
+            list($sql_param, $params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
+                    FROM {user} AS u
+                    JOIN {".self::TABLE_MEMBERS."} AS m
+                        ON m.userid = u.id
+                    WHERE m.cohortid $sql_param";
+            $members = $DB->get_records_sql($sql, $params);
+            foreach ($members as $member){
+                $this->_school_users[$member->schoolid][$member->id] = $member;
+                $this->_crew_users[$member->crewid][$member->id] = $member;
+                $res[$member->schoolid][$member->id] = $member;
+            }
+        }
+
+        return $return_one ? (reset($res) ?: null) : $res;
+    }
+
+    /**
+     * Load users by $crewid for this course
+     *
+     * @param null $crewid
+     * @param bool $return_one - return onl first value, if true
+     *
+     * @return array|null
+     */
+    public function get_crew_students($crewid=null, $return_one=true){
+        global $DB;
+        if (is_null($crewid)){
+            $this->get_school_students();
+            return $return_one ? reset($this->_crew_users) : $this->_crew_users;
+        } else {
+            $crewids = is_array($crewid) ? $crewid : [$crewid];
+        }
+
+        $res = [];
+        $to_load = [];
+        foreach ($crewids as $crewid){
+            if (isset($this->_crew_users[$crewid])){
+                $res[$crewid] = $this->_crew_users[$crewid];
+            } else {
+                $to_load[] = $crewid;
+            }
+        }
+
+        if (!empty($to_load) && (!$return_one || empty($res))){
+            list($sql_param, $params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            $add_where = '';
+            if (in_array(0, $to_load)){
+                $add_where .= ' OR m.crewid IS NULL';
+            }
+            $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
+                    FROM {user} AS u
+                    JOIN {".self::TABLE_MEMBERS."} AS m
+                        ON m.userid = u.id
+                    WHERE m.crewid $sql_param $add_where";
+            $members = $DB->get_records_sql($sql, $params);
+            foreach ($members as $member){
+                if (isset($this->school_names[$member->schoolid])){
+                    $this->_crew_users[$member->crewid][$member->id] = $member;
+                    $res[$member->crewid][$member->id] = $member;
+                }
+            }
+        }
+
+        return $return_one ? (reset($res) ?: null) : $res;
     }
 
     /**
@@ -618,5 +760,51 @@ class school_manager{
         unset($this->_crews[$crew->schoolid][$id]);
         unset($this->_crew_names[$crew->schoolid][$id]);
         return true;
+    }
+
+    /**
+     * @param int $schoolid
+     * @param int|array $userids
+     * @param int $crewid
+     *
+     * @return bool
+     */
+    public function change_users_crew($schoolid, $userids, $crewid){
+        global $DB;
+
+        $userids = is_array($userids) ? $userids : [$userids];
+        if (!$this->can_manage_members() || empty($userids)){
+            return false;
+        }
+
+        if ($crewid){
+            $crew_names = $this->get_crew_names($schoolid);
+            if (!isset($crew_names[$crewid])){
+                return false;
+            }
+        } else {
+            $crewid = null;
+        }
+
+        list($sql_param, $params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        $params['schoolid'] = $schoolid;
+        $sql = "cohortid = :schoolid AND userid $sql_param";
+
+        if ($DB->set_field_select(self::TABLE_MEMBERS, 'crewid', $crewid, $sql, $params)){
+            if (isset($this->_school_users[$schoolid])){
+                foreach ($this->_school_users[$schoolid] as $userid => &$user){
+                    if (in_array($userid, $userids)){
+                        $old_crewid = $user->crewid;
+                        unset($this->_crew_users[$old_crewid][$userid]);
+                        $user->crewid = $crewid;
+                        $this->_crew_users[$crewid][$userid] = $user;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

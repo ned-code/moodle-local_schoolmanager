@@ -32,6 +32,7 @@
         "schools":  {'link' => url, 'name' => string},
         "crews":    {'link' => url, 'name' => string},
         "forms":    []html,
+        "tables":    []html,
         "manage":   bool,
         "buttons":  {"primary": bool, "add_class": string, "link": url, "name": string}
     }
@@ -61,6 +62,9 @@
     </div>
     <div class="school-manager-forms {{^forms}}empty{{/forms}}">
         {{#forms}}{{{.}}}{{/forms}}
+    </div>
+    <div class="school-manager-tables {{^tables}}empty{{/tables}}">
+        {{#tables}}{{{.}}}{{/tables}}
     </div>
     {{#manage}}
         <div class="control-panel">
