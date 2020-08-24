@@ -49,6 +49,7 @@ $string['schoolsavedsuccessfully'] = 'School saved successfully';
 $string['schooldeletedsuccessfully'] = 'School deleted successfully';
 $string['crewsavedsuccessfully'] = 'Cohort saved successfully';
 $string['crewdeletedsuccessfully'] = 'Cohort deleted successfully';
+$string['usersupdatedsuccessfully'] = 'Users updated successfully';
 
 $string['schoolname'] = 'School Name';
 $string['schoolid'] = 'School ID';
@@ -64,3 +65,6 @@ $string['academicprogram'] = 'Academic Program';
 $string['admissiondate'] = 'Admission Date';
 $string['expectedgraduation'] = 'Expected Graduation';
 $string['coursesperyear'] = 'Courses per year';
+$string['users'] = 'Users';
+$string['nousersatschool'] = 'There are no users at this school now.';
+$string['newcrewforusers'] = 'Select cohort for chosen users';

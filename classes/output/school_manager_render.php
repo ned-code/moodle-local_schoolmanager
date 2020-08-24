@@ -31,8 +31,11 @@ class school_manager_render implements \renderable, \templatable{
 
     const PAGE_SCHOOL = 0;
     const PAGE_CREW = 1;
+    const PAGE_USER = 2;
 
-    const PAGES = [self::PAGE_SCHOOL, self::PAGE_CREW];
+    const PAGES = [self::PAGE_SCHOOL, self::PAGE_CREW, self::PAGE_USER];
+
+    const FORM_USERS_TO_CHANGE = 'users_to_change';
 
     /** @var \core_renderer $_o */
     protected $_o;
@@ -233,10 +236,6 @@ class school_manager_render implements \renderable, \templatable{
                     }
                 }
             }
-            if ($SM->school_names[$this->_schoolid] ?? false){
-                $this->c->links[] =
-                    ['link' => $this->get_my_url(null, false, self::PAGE_CREW), 'name' => SM\str('crews')];
-            }
             $this->c->forms[] = $form->draw();
         }
     }
@@ -283,6 +282,94 @@ class school_manager_render implements \renderable, \templatable{
         }
     }
 
+    protected function _page_edit_users(){
+        $SM = $this->_SM;
+        $users = $SM->get_school_students($this->_schoolid, true);
+        if (empty($users)){
+            $this->c->messages[] = $this->o->notification(SM\str('nousersatschool'), \core\output\notification::NOTIFY_INFO);
+            return;
+        }
+
+        $school = $SM->get_school_by_ids($this->_schoolid, true);
+        $crews = $SM->get_crews($this->_schoolid);
+        $can_manage = $SM->can_manage_members();
+
+        if ($can_manage){
+            $form = new SM\forms\edit_users_form($this->get_my_url(), ['schoolid' => $this->_schoolid]);
+            if($data = $form->get_data()){
+                if ($SM->change_users_crew($this->_schoolid, $data->{self::FORM_USERS_TO_CHANGE}, $data->crewid)){
+                    $this->c->messages[] =
+                        $this->o->notification(SM\str('usersupdatedsuccessfully'), \core\output\notification::NOTIFY_SUCCESS);
+                }
+            }
+            $user_table = $this->user_edit_table($school, $crews, $users, $this->o, $can_manage);
+            $form->set_prehtml($user_table ? \html_writer::table($user_table) : '');
+            $this->c->forms[] = $form->draw();
+        } else {
+            $user_table = self:: user_edit_table($school, $crews, $users, $this->o, $can_manage);
+            $this->c->tables[] = \html_writer::table($user_table);
+        }
+    }
+
+    /**
+     * Get user html table
+     *
+     * @param \stdClass         $school
+     * @param \stdClass[]       $crews
+     * @param \stdClass[]       $users
+     * @param \core_renderer    $output
+     * @param bool              $can_manage
+     *
+     * @return \html_table
+     */
+    static public function user_edit_table($school, $crews, $users, $output, $can_manage=false){
+        $table = new \html_table();
+        $table->head = [];
+        $schoolcode = $school->code ?? '';
+        $togglegroup = self::FORM_USERS_TO_CHANGE;
+
+        if ($can_manage){
+            $mastercheckbox = new \core\output\checkbox_toggleall($togglegroup, true, [
+                'id' => $togglegroup,
+                'name' => $togglegroup,
+                'value' => 0,
+                'label' => '',
+                'selectall' => '',
+                'deselectall' => '',
+                'labelclasses' => '',
+            ]);
+            $table->head[] = $output->render($mastercheckbox);
+        }
+        array_push($table->head, get_string('username'), SM\str('crewname'), SM\str('crewcode'));
+
+        foreach ($users as $user){
+            $cells = [];
+            if ($can_manage){
+                $checkbox = new \core\output\checkbox_toggleall($togglegroup, false, [
+                    'id' => $togglegroup . $user->id,
+                    'name' => $togglegroup.'[]',
+                    'classes' => 'user-checkbox',
+                    'value' => $user->id,
+                    'label' => '',
+                ]);
+                $cells[] = SM\cell($output->render($checkbox), 'select');
+            }
+            $cells[] = SM\cell(fullname($user), 'username');
+            $cells[] = SM\cell($crews[$user->crewid]->name ?? '', 'crewname');
+            $crewcode = $crews[$user->crewid]->code ?? '';
+            if ($schoolcode && $crewcode){
+                $code = $schoolcode.'-'.$crewcode;
+            } else {
+                $code = $schoolcode or $crewcode;
+            }
+            $cells[] = SM\cell($code, 'crewcode');
+            $row = SM\row($cells, 'userid-'.$user->id);
+            $table->data[] = $row;
+        }
+
+        return $table;
+    }
+
     /**
      * Function to export the renderer data in a format that is suitable for a
      * mustache template. This means:
@@ -312,11 +399,26 @@ class school_manager_render implements \renderable, \templatable{
                 } else {
                     $this->_page_edit_create_school();
                 }
-            } elseif ($this->_page == self::PAGE_CREW){
-                // Crew page
-                $this->_page_edit_create_crew();
+
+                if ($SM->school_names[$this->_schoolid] ?? false){
+                    $this->c->links[] =
+                        ['link' => $this->get_my_url(null, false, self::PAGE_CREW), 'name' => SM\str('crews')];
+                    $this->c->links[] =
+                        ['link' => $this->get_my_url(null, false, self::PAGE_USER), 'name' => SM\str('users')];
+                }
+            } else {
                 $this->c->school_name = $SM->school_names[$this->schoolid];
                 $this->c->links[] = ['link' => self::get_url(), 'name' => SM\str('schools')];
+
+                if ($this->_page == self::PAGE_CREW){
+                    $this->_page_edit_create_crew();
+                    $this->c->links[] =
+                        ['link' => $this->get_my_url(null, false, self::PAGE_USER), 'name' => SM\str('users')];
+                } elseif($this->_page == self::PAGE_USER){
+                    $this->_page_edit_users();
+                    $this->c->links[] =
+                        ['link' => $this->get_my_url(null, false, self::PAGE_CREW), 'name' => SM\str('crews')];
+                }
             }
 
         }
@@ -351,6 +453,7 @@ class school_manager_content extends \stdClass{
     public $forms = [];
     public $links = [];
     public $manage = false;
+    public $tables = [];
     public $buttons = [];
     public $school_name = '';
 

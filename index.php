@@ -38,7 +38,15 @@ $PAGE->set_context($SM->ctx);
 $PAGE->set_url($SMR->get_my_url());
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
-$PAGE->navbar->add($title);
+$PAGE->navbar->add($title, $SMR::get_url());
+switch($SMR->page){
+    case $SMR::PAGE_CREW:
+        $PAGE->navbar->add(SM\str('crews'), $SMR->get_my_url(null, false));
+        break;
+    case $SMR::PAGE_USER:
+        $PAGE->navbar->add(SM\str('users'), $SMR->get_my_url());
+        break;
+}
 
 echo $OUTPUT->header();
 $SMR->render();
