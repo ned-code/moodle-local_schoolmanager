@@ -36,6 +36,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="parentid" TYPE="foreign" FIELDS="id" REFTABLE="cohort" REFFIELDS="id"/>
         <KEY NAME="schoolid" TYPE="foreign" FIELDS="schoolid" REFTABLE="local_schoolmanager_school" REFFIELDS="id"/>
       </KEYS>
     </TABLE>

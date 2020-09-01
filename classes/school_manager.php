@@ -43,11 +43,17 @@ class school_manager{
     const CAP_CANT_EDIT = 0;
     const CAP_CAN_EDIT = 1;
 
+    const FIELD_ROLE = 'default_role';
+    const DEF_MEMBER_ROLE = 'Student';
+
     static protected $_school_managers = [];
     static protected $_schools_data = [];
     static protected $_all_schools_data_was_loaded = false;
     static protected $_called_crews = [];
     static protected $_called_crew_schoolids = [];
+
+    static protected $_default_role_field_id = null;
+    static protected $_default_role_default_value = null;
 
     protected $_view = self::CAP_CANT_VIEW_SM;
     protected $_manage_schools = self::CAP_CANT_EDIT;
@@ -78,7 +84,7 @@ class school_manager{
      * school_manager constructor.
      */
     public function __construct(){
-        global $USER;
+        global $USER, $DB;
 
         $this->_ctx = \context_system::instance();
         if (has_capability(PLUGIN_CAPABILITY.'viewallschooldashboards', $this->_ctx)){
@@ -101,6 +107,12 @@ class school_manager{
         $this->_userid = $USER->id;
 
         self::$_school_managers[$this->_userid] = $this;
+
+        if (is_null(self::$_default_role_field_id)){
+            $record = $DB->get_record('user_info_field', ['shortname' => self::FIELD_ROLE], 'id, defaultdata');
+            self::$_default_role_field_id = $record->id ?? false;
+            self::$_default_role_default_value = $record->defaultdata ?? '';
+        }
     }
 
     /**
@@ -376,7 +388,7 @@ class school_manager{
                 break;
             }
 
-            if (is_null($schoolid)){
+            if (!$schoolid){
                 $schoolids = array_keys($this->school_names);
             } else {
                 $schoolids = is_array($schoolid) ? $schoolid : [$schoolid];
@@ -408,7 +420,7 @@ class school_manager{
 
         } while(false);
 
-        if (is_null($schoolid)){
+        if (!$schoolid){
             $res_data = $data;
         } elseif (is_array($schoolid)){
             $res_data = [];
@@ -510,14 +522,19 @@ class school_manager{
      * Load users by schoolid for this course
      * Note: this fill crew_users too
      *
-     * @param null $schoolid
-     * @param bool $return_one - return onl first value, if true
+     * @param null   $schoolid
+     * @param bool   $return_one - return onl first value, if true
+     * @param string|array $role_names - "Student" by default
+     * @param bool   $use_cache
      *
      * @return array|null
      */
-    public function get_school_students($schoolid=null, $return_one=true){
+    public function get_school_students($schoolid=null, $return_one=true, $role_names=self::DEF_MEMBER_ROLE, $use_cache=true){
         global $DB;
-        if (is_null($schoolid)){
+        $def_role = $role_names == self::DEF_MEMBER_ROLE;
+        $role_names = empty($role_names) ? [] : (is_array($role_names) ? $role_names : [$role_names]);
+        $use_cache = $use_cache && $def_role;
+        if (!$schoolid){
             if (count($this->_school_users) == count($this->school_names)){
                 return $this->_school_users;
             }
@@ -530,7 +547,7 @@ class school_manager{
         $res = [];
         $to_load = [];
         foreach ($schoolids as $schoolid){
-            if (isset($this->_school_users[$schoolid])){
+            if (isset($this->_school_users[$schoolid]) && $use_cache){
                 $res[$schoolid] = $this->_school_users[$schoolid];
             } else {
                 $to_load[] = $schoolid;
@@ -538,13 +555,32 @@ class school_manager{
         }
 
         if (!empty($to_load) && (!$return_one || empty($res))){
-            list($sql_param, $params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            $params = [];
+            list($sql_param, $school_params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            $params = array_merge($params, $school_params);
+            $where = ["m.cohortid $sql_param"];
             $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
                     FROM {user} AS u
                     JOIN {".self::TABLE_MEMBERS."} AS m
                         ON m.userid = u.id
-                    WHERE m.cohortid $sql_param";
-            $members = $DB->get_records_sql($sql, $params);
+                    ";
+            if (self::$_default_role_field_id && !empty($role_names)){
+                $field_id = self::$_default_role_field_id;
+                $sql .= "LEFT JOIN {user_info_data} uid
+                            ON uid.userid = u.id AND uid.fieldid = '$field_id'
+                ";
+
+                list($where_role, $rn_params) = $DB->get_in_or_equal($role_names, SQL_PARAMS_NAMED, 'rolename');
+                $params = array_merge($params, $rn_params);
+
+                if (in_array(self::$_default_role_default_value, $role_names)){
+                    $where_role .= ' OR uid.data IS NULL';
+                }
+
+                $where[] = 'uid.data ' . $where_role;
+            }
+            $where = empty($where) ? '' : ('WHERE (' . join(') AND (', $where) . ')');
+            $members = $DB->get_records_sql("$sql $where", $params);
             foreach ($members as $member){
                 $this->_school_users[$member->schoolid][$member->id] = $member;
                 $this->_crew_users[$member->crewid][$member->id] = $member;
@@ -558,15 +594,20 @@ class school_manager{
     /**
      * Load users by $crewid for this course
      *
-     * @param null $crewid
-     * @param bool $return_one - return onl first value, if true
+     * @param null   $crewid
+     * @param bool   $return_one - return onl first value, if true
+     * @param string|array $role_names - "Student by default
+     * @param bool   $use_cache
      *
      * @return array|null
      */
-    public function get_crew_students($crewid=null, $return_one=true){
+    public function get_crew_students($crewid=null, $return_one=true, $role_names=self::DEF_MEMBER_ROLE, $use_cache=true){
         global $DB;
+        $def_role = $role_names == self::DEF_MEMBER_ROLE;
+        $role_names = empty($role_names) ? [] : (is_array($role_names) ? $role_names : [$role_names]);
+        $use_cache = $use_cache && $def_role;
         if (is_null($crewid)){
-            $this->get_school_students();
+            $this->get_school_students(null, $return_one, $role_names, $use_cache);
             return $return_one ? reset($this->_crew_users) : $this->_crew_users;
         } else {
             $crewids = is_array($crewid) ? $crewid : [$crewid];
@@ -575,7 +616,7 @@ class school_manager{
         $res = [];
         $to_load = [];
         foreach ($crewids as $crewid){
-            if (isset($this->_crew_users[$crewid])){
+            if (isset($this->_crew_users[$crewid]) && $use_cache){
                 $res[$crewid] = $this->_crew_users[$crewid];
             } else {
                 $to_load[] = $crewid;
@@ -583,17 +624,34 @@ class school_manager{
         }
 
         if (!empty($to_load) && (!$return_one || empty($res))){
-            list($sql_param, $params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
-            $add_where = '';
+            $params = [];
+            list($sql_param, $crew_params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            $params = array_merge($params, $crew_params);
+            $where = ["m.crewid $sql_param"];
             if (in_array(0, $to_load)){
-                $add_where .= ' OR m.crewid IS NULL';
+                $where[0] .= ' OR m.crewid IS NULL';
             }
             $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
                     FROM {user} AS u
                     JOIN {".self::TABLE_MEMBERS."} AS m
-                        ON m.userid = u.id
-                    WHERE m.crewid $sql_param $add_where";
-            $members = $DB->get_records_sql($sql, $params);
+                        ON m.userid = u.id";
+            if (self::$_default_role_field_id && !empty($role_names)){
+                $field_id = self::$_default_role_field_id;
+                $sql .= "LEFT JOIN {user_info_data} uid
+                            ON uid.userid = u.id AND uid.fieldid = '$field_id'
+                ";
+
+                list($where_role, $rn_params) = $DB->get_in_or_equal($role_names, SQL_PARAMS_NAMED, 'rolename');
+                $params = array_merge($params, $rn_params);
+
+                if (in_array(self::$_default_role_default_value, $role_names)){
+                    $where_role .= ' OR uid.data IS NULL';
+                }
+
+                $where[] = 'uid.data ' . $where_role;
+            }
+            $where = empty($where) ? '' : ('WHERE (' . join(') AND (', $where) . ')');
+            $members = $DB->get_records_sql("$sql\n$where", $params);
             foreach ($members as $member){
                 if (isset($this->school_names[$member->schoolid])){
                     $this->_crew_users[$member->crewid][$member->id] = $member;
@@ -729,13 +787,45 @@ class school_manager{
         $up_data->courses = $data->courses ?? 0;
         $up_data->note = $data->note ?? '';
 
+        $school_code = $DB->get_field(self::TABLE_SCHOOL, 'code', ['id' => $data->schoolid]);
+        $code = '';
+        if (!empty($school_code) && !empty($up_data->code)){
+            $code = $school_code . '-' . $up_data->code;
+            if (!$data->id && $DB->record_exists('cohort', ['idnumber' => $code])){
+                $code = '';
+            }
+        }
+
+        if (empty($code)) {
+            $count = $DB->count_records(self::TABLE_CREW, ['schoolid' => $up_data->schoolid]) + 1;
+            $count = $count > 9 ? $count : ('0' . $count);
+            $code = $school_code . '-' . $count;
+        }
+
+        $cohort = (object)[
+            'contextid' => 1,
+            'name' => $up_data->name,
+            'idnumber' => $code,
+            'description' => '',
+            'descriptionformat' => 1,
+            'visible' => 1,
+            'component' => PLUGIN_NAME,
+            'timemodified' => time(),
+        ];
+
         if (!$data->id){
-            $up_data->id = $DB->insert_record_raw(self::TABLE_CREW, $up_data, true, false, false);
+            $cohort->timecreated = $cohort->timemodified;
+            if ($new_id = $DB->insert_record(self::TABLE_COHORT, $cohort, true)){
+                $up_data->id = $new_id;
+            }
+            $DB->insert_record_raw(self::TABLE_CREW, $up_data,  false, false, true);
             if (isset($this->_crews[$data->schoolid])){
                 $this->_crews[$data->schoolid][$up_data->id] = $up_data;
             }
             return $up_data->id;
         } else {
+            $cohort->id = $data->id;
+            $DB->update_record(self::TABLE_COHORT, $cohort);
             return $DB->update_record(self::TABLE_CREW, $up_data);
         }
     }
@@ -755,6 +845,7 @@ class school_manager{
         }
 
         $DB->delete_records(self::TABLE_CREW, ['id' => $id]);
+        $DB->delete_records(self::TABLE_COHORT, ['id' => $id]);
         $DB->set_field(self::TABLE_MEMBERS, 'crewid', null, ['crewid' => $id]);
 
         unset($this->_crews[$crew->schoolid][$id]);
