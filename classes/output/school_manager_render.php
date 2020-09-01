@@ -323,6 +323,7 @@ class school_manager_render implements \renderable, \templatable{
      * @return \html_table
      */
     static public function user_edit_table($school, $crews, $users, $output, $can_manage=false){
+        global $PAGE;
         $table = new \html_table();
         $table->head = [];
         $schoolcode = $school->code ?? '';
@@ -355,7 +356,11 @@ class school_manager_render implements \renderable, \templatable{
                 $cells[] = SM\cell($output->render($checkbox), 'select');
             }
             $cells[] = SM\cell(fullname($user), 'username');
-            $cells[] = SM\cell($crews[$user->crewid]->name ?? '', 'crewname');
+            $crewname = $crews[$user->crewid]->name ?? '';
+            if ($PAGE->theme->name == 'ned_boost'){
+                $crewname = SM\link(['/my', ['schoolid' => $school->id]], $crewname);
+            }
+            $cells[] = SM\cell($crewname, 'crewname');
             $crewcode = $crews[$user->crewid]->code ?? '';
             if ($schoolcode && $crewcode){
                 $code = $schoolcode.'-'.$crewcode;
