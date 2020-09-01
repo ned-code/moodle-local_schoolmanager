@@ -386,6 +386,7 @@ class school_manager_render implements \renderable, \templatable{
      * @return \stdClass|array
      */
     public function export_for_template(\renderer_base $output){
+        global $PAGE;
         $this->c->output = $output;
         $SM = $this->_SM;
         $SM->show_error_if_necessary();
@@ -397,6 +398,12 @@ class school_manager_render implements \renderable, \templatable{
             // Main page
             $this->_page_main();
         } elseif (!is_null($this->_schoolid)){
+            if ($this->_schoolid){
+                if ($PAGE->theme->name == 'ned_boost'){
+                    $this->c->links[] = ['link' => new \moodle_url('/my', ['schoolid' => $this->_schoolid]),
+                        'name' => SM\str('schoolinfo')];
+                }
+            }
             if ($this->_page == self::PAGE_SCHOOL){
                 // School page
                 if ($this->_schoolid == 0){

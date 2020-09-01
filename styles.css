@@ -4,6 +4,9 @@
 body.path-local-schoolmanager #region-main {
   overflow: visible;
 }
+body.path-local-schoolmanager #region-main-box {
+  width: 100%;
+}
 body.path-local-schoolmanager .menu-links {
   display: flex;
   font-size: larger;
@@ -12,7 +15,7 @@ body.path-local-schoolmanager .menu-links {
   margin-bottom: 20px;
 }
 body.path-local-schoolmanager .menu-links > *:not(:last-child) {
-  margin-right: 10px;
+  margin-right: 20px;
 }
 body.path-local-schoolmanager .school-name {
   padding: 20px 0;
