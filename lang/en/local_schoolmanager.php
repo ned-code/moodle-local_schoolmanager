@@ -68,3 +68,4 @@ $string['coursesperyear'] = 'Courses per year';
 $string['users'] = 'Users';
 $string['nousersatschool'] = 'There are no users at this school now.';
 $string['newcrewforusers'] = 'Select cohort for chosen users';
+$string['schoolinfo'] = 'School Info';
