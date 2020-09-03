@@ -717,6 +717,10 @@ class school_manager{
         $up_data->startdate = $data->startdate ?? time();
         $up_data->enddate = $data->enddate ?? (time() + 365*24*3600);
         $up_data->note = $data->note ?? '';
+        // save logo
+        $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
+            PLUGIN_NAME, 'logo', $up_data->id);
+        $up_data->logo = !empty($data->logo) ? $data->logo_filemanager : 0;
 
         if ($new){
             self::$_schools_data[$school->id] = $up_data;
@@ -746,6 +750,9 @@ class school_manager{
         $DB->delete_records(self::TABLE_SCHOOL, ['id' => $id]);
         $DB->delete_records(self::TABLE_CREW, ['schoolid' => $id]);
         $DB->set_field(self::TABLE_MEMBERS, 'crewid', null, ['cohortid' => $id]);
+        // remove logo
+        $fs = get_file_storage();
+        $fs->delete_area_files($this->ctx->id, PLUGIN_NAME, 'logo', $id);
 
         $school->idnumber = $school->code;
         $this->_potential_schools[$id] = $school;
@@ -897,5 +904,40 @@ class school_manager{
         }
 
         return false;
+    }
+
+    /**
+     * @param $schoolid
+     *
+     * @return \moodle_url|false
+     */
+    static public function get_logo_url($schoolid){
+        static $_data = [];
+        if (!$schoolid){
+            return false;
+        }
+
+        if (!isset($_data[$schoolid])){
+            $fs = get_file_storage();
+            $files = $fs->get_area_files(\context_system::instance()->id, PLUGIN_NAME, 'logo', $schoolid,
+                "itemid, filepath, filename", false);
+            $logourl = false;
+
+            foreach ($files as $file) {
+                $logourl = \moodle_url::make_pluginfile_url(
+                    $file->get_contextid(),
+                    $file->get_component(),
+                    $file->get_filearea(),
+                    $file->get_itemid(),
+                    $file->get_filepath(),
+                    $file->get_filename()
+                );
+                break;
+            }
+
+            $_data[$schoolid] = $logourl;
+        }
+
+        return $_data[$schoolid];
     }
 }

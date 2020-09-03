@@ -28,20 +28,13 @@ class edit_school_form extends \moodleform {
         global $CFG;
         $mform = $this->_form;
         $cancel_link = $this->_customdata['cancel'] ?? false;
-        $schoolid = $this->_customdata['schoolid'] ?? 0;
+        $this->_schoolid = $this->_customdata['schoolid'] ?? 0;
         $SM = SM\school_manager::get_school_manager();
         $user = $SM->user;
 
-        $filemanageroptions = [
-            'maxbytes'       => $CFG->maxbytes,
-            'subdirs'        => 0,
-            'maxfiles'       => 1,
-            'accepted_types' => 'web_image'
-        ];
-
-        if ($school = $SM->get_school_by_ids($schoolid, true)){
+        if ($school = $SM->get_school_by_ids($this->_schoolid, true)){
             $this->_new = false;
-        } elseif ($school = ($SM->get_potential_schools($schoolid) ?? false)){
+        } elseif ($school = ($SM->get_potential_schools($this->_schoolid) ?? false)){
             $this->_new = true;
         } else {
             print_error('nopermissions', 'error', '', 'There is no school or potential school for edit!');
@@ -50,7 +43,7 @@ class edit_school_form extends \moodleform {
         $this->_school = $school;
         $this->_can_manage = $SM->can_manage_schools();
 
-        $mform->addElement('hidden', 'schoolid', $schoolid);
+        $mform->addElement('hidden', 'schoolid', $this->_schoolid);
         $mform->setType('schoolid', PARAM_INT);
         $mform->addElement('hidden', 'new', (int)$this->_new);
         $mform->setType('new', PARAM_INT);
@@ -75,18 +68,13 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('country', $SM->user->country);
         }
 
-        /* TODO save logo
-        if (!$this->_new){
-            $mform->addElement('static', 'currentpicture', get_string('currentpicture'));
-        }
+        //Logo
         if ($this->_can_manage){
-            $mform->addElement('checkbox', 'deletepicture', get_string('deletepicture'));
-            $mform->setDefault('deletepicture', 0);
-
-            $mform->addElement('filemanager', 'logo', get_string('newpicture'), '', $filemanageroptions);
-            $mform->addHelpButton('imagefile', 'newpicture');
+            $mform->addElement('filemanager', 'logo_filemanager', SM\str('logo'), null,
+                ['accepted_types' => ['.png','.jpg'], 'maxfiles' => 1]);
+        } else {
+            $mform->addElement('static', 'currentpicture', SM\str('logo'));
         }
-        */
 
         $mform->addElement('date_selector', 'startdate', SM\str('schoolyearstartdate'));
         $mform->setType('startdate', PARAM_INT);
@@ -119,23 +107,6 @@ class edit_school_form extends \moodleform {
      */
     public function definition_after_data() {
         $mform = $this->_form;
-        /* TODO
-        // Print picture.
-        $context = \context_user::instance($user->id, MUST_EXIST);
-        $fs = get_file_storage();
-        $hasuploadedpicture = ($fs->file_exists($context->id, 'user', 'icon', 0, '/', 'f2.png') || $fs->file_exists($context->id, 'user', 'icon', 0, '/', 'f2.jpg'));
-        if (!empty($user->picture) && $hasuploadedpicture) {
-            $imagevalue = $OUTPUT->user_picture($user, array('courseid' => SITEID, 'size' => 64));
-        } else {
-            $imagevalue = get_string('none');
-        }
-        $imageelement = $mform->getElement('currentpicture');
-        $imageelement->setValue($imagevalue);
-
-        if ($mform->elementExists('deletepicture') && !$hasuploadedpicture) {
-            $mform->removeElement('deletepicture');
-        }
-        */
 
         if (!$this->_can_manage){
             /** @var \HTML_QuickForm_group | \HTML_QuickForm_select | \HTML_QuickForm_element  $elem */
@@ -144,6 +115,14 @@ class edit_school_form extends \moodleform {
                 if ($type != 'html' && $type != 'cancel'){
                     $mform->hardFreeze($elem->getName());
                 }
+            }
+            // set static logo image
+            $imageelement = $mform->getElement('currentpicture');
+            $logourl = SM\school_manager::get_logo_url($this->_schoolid);
+            if ($logourl){
+                $imageelement->setValue(\html_writer::img($logourl, 'logo'));
+            } else {
+                $imageelement->setValue(get_string('none'));
             }
         } else {
             $mform->hardFreeze('name');
@@ -168,6 +147,10 @@ class edit_school_form extends \moodleform {
     public function set_data($default_values){
         $default_values->schoolid = $default_values->id ?? null;
         $default_values->note = ['text' => $default_values->note ?? '', 'format' => 1];
+        if ($default_values->schoolid && $this->_can_manage){
+            file_prepare_standard_filemanager($default_values, 'logo', ['subdirs' => 0],
+                \context_system::instance(), SM\PLUGIN_NAME, 'logo', $default_values->schoolid);
+        }
         parent::set_data($default_values);
     }
 

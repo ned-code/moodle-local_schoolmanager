@@ -27,3 +27,27 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__.'/local_lib.php');
+
+/**
+ * Serves intro attachment files.
+ *
+ * @param mixed $course course or id of the course
+ * @param mixed $cm course module or id of the course module
+ * @param context $context
+ * @param string $filearea
+ * @param array $args
+ * @param bool $forcedownload
+ * @param array $options additional options affecting the file serving
+ * @return null|false if file not found, does not return if found - just send the file
+ */
+function local_schoolmanager_pluginfile($course, $cm, context $context, $filearea, $args, $forcedownload, array $options = array()) {
+    $relativepath = implode('/', $args);
+    $fullpath = "/{$context->id}/local_schoolmanager/$filearea/$relativepath";
+
+    $fs = get_file_storage();
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+        return false;
+    }
+    send_stored_file($file, 0, 0, $forcedownload, $options);
+    return null;
+}
