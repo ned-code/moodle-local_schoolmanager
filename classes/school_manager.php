@@ -559,6 +559,7 @@ class school_manager{
             list($sql_param, $school_params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
             $params = array_merge($params, $school_params);
             $where = ["m.cohortid $sql_param"];
+            $groupby = ['u.id'];
             $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
                     FROM {user} AS u
                     JOIN {".self::TABLE_MEMBERS."} AS m
@@ -580,7 +581,8 @@ class school_manager{
                 $where[] = 'uid.data ' . $where_role;
             }
             $where = empty($where) ? '' : ('WHERE (' . join(') AND (', $where) . ')');
-            $members = $DB->get_records_sql("$sql $where", $params);
+            $groupby = empty($groupby) ? '' : ("\nGROUP BY " . join(', ', $groupby));
+            $members = $DB->get_records_sql("$sql $where $groupby", $params);
             foreach ($members as $member){
                 $this->_school_users[$member->schoolid][$member->id] = $member;
                 $this->_crew_users[$member->crewid][$member->id] = $member;
