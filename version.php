@@ -28,4 +28,4 @@ $plugin->version  = 2020100100.2;    // The current plugin version (Date: YYYYMM
 $plugin->requires = 2017051500.00; // This is Moodle 3.3 (Build: 20170515).
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->component = 'local_schoolmanager';
-$plugin->release = '0.1.0';
+$plugin->release = '0.1.3';
