@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2021012000;    // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version  = 2021012003.03;    // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires = 2017051500.00; // This is Moodle 3.3 (Build: 20170515).
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->component = 'local_schoolmanager';
