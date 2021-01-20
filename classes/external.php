@@ -45,6 +45,7 @@ use external_description;
 use moodle_url;
 use local_kica as KICA;
 use completion_info;
+use core_tag_tag;
 
 /**
  * External functions
@@ -218,113 +219,152 @@ class external extends \external_api {
         return new external_function_parameters(
             [
                 'studentid' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
-                'courseid' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
+                'courseids' => new external_multiple_structure(
+                    new external_value(PARAM_INT, 'Course ID'), 'An array of Course IDs', VALUE_DEFAULT, array()
+                ),
             ]
         );
     }
 
-    public static function get_student_activities($studentid, $courseid) {
+    public static function get_student_activities($studentid, $courseids) {
         global $DB, $CFG, $USER;
 
         require_once($CFG->dirroot . '/course/lib.php');
 
         $params = self::validate_parameters(self::get_student_activities_parameters(),
-            ['studentid' => $studentid, 'courseid' => $courseid]
+            ['studentid' => $studentid, 'courseids' => $courseids]
         );
-
 
         $context = context_user::instance($USER->id);
         self::validate_context($context);
 
-        if (!$params['studentid'] || !$params['courseid']) {
+        if (!$params['studentid']) {
             return [];
         }
-        if (!$course = $DB->get_record('course', ['id' => $params['courseid']])) {
-            return [];
-        }
+
         if (!$user = $DB->get_record('user', ['id' => $params['studentid'], 'deleted' => 0])) {
+            return [];
+        }
+
+        if ($params['courseids']) {
+            list($coursefilter, $courseparams) = $DB->get_in_or_equal($params['courseids']);
+            $courses = $DB->get_records_select('course', "id {$coursefilter}", $courseparams);
+        } else {
+            $courses = enrol_get_users_courses($params['studentid'], true, null, null);
+        }
+
+        if (!$courses) {
             return [];
         }
 
         $return = [];
 
-        // Retrieve course_module data for all modules in the course
-        $modinfo = get_fast_modinfo($course, $user->id);
-        $activities = $modinfo->get_cms();
+        foreach ($courses as $course) {
+            // Retrieve course_module data for all modules in the course
+            $modinfo = get_fast_modinfo($course, $user->id);
+            $activities = $modinfo->get_cms();
 
-        $deadlinemanager = new deadline_manager($course->id);
+            $deadlinemanager = new deadline_manager($course->id);
 
-        foreach ($activities as $mod) {
-            $data = [];
+            foreach ($activities as $mod) {
+                $data = [];
+                $data['studentid'] = $user->id;
 
-            $data['studentid'] = $user->id;
+                if (!$mod->uservisible) {
+                    continue;
+                }
 
+                if (!$tags = core_tag_tag::get_item_tags_array('core', 'course_modules', $mod->id)) {
+                    continue;
+                }
 
-            if (!$mod->uservisible) {
-                continue;
-            }
+                $issummative = false;
+                $isformative = false;
 
-            if (!$deadlinemanager->is_enabled_activity($mod->id)) {
-                continue;
-            }
+                if (in_array('Summative', $tags) || in_array('summative', $tags)) {
+                    $issummative = true;
+                }
 
-            $classname = '\block_ned_teacher_tools\mod\deadline_manager_'. $mod->modname;
-            if (!class_exists($classname)) {
-                continue;
-            }
+                if (in_array('Formative', $tags) || in_array('formative', $tags)) {
+                    $isformative = true;
+                }
 
-            $module = new $classname($mod);
+                if (!$issummative && !$isformative) {
+                    continue;
+                }
 
-            $activityname = $module->get_activity_name();
+                if (!$instance = $DB->get_record($mod->modname, ['id' => $mod->instance])) {
+                    continue;
+                }
 
-            $deadline = $module->get_user_effective_access($user->id);
-            if (empty($deadline)) {
-                continue;
-            }
+                $duedate =0;
+                if ($deadlinemanager->is_enabled_activity($mod->id)) {
+                    $classname = '\block_ned_teacher_tools\mod\deadline_manager_' . $mod->modname;
+                    if (class_exists($classname)) {
+                        $module = new $classname($mod);
+                        $duedate = $module->get_user_effective_access($user->id);
+                    }
+                }
 
-            $kicaavg = \local_kica\helper::get_course_average($user->id, $course->id, 5);
+                $kicaavg = \local_kica\helper::get_course_average($user->id, $course->id, 5);
 
-            $kica = $DB->get_record('local_kica', array('courseid' => $course->id));
-            $itemparams = [
-                'courseid' => $course->id,
-                'itemtype' => 'mod',
-                'itemmodule' => $mod->modname,
-                'iteminstance' => $mod->instance,
-            ];
-            $kicaitem = new KICA\kica_item($itemparams);
-            $finalgrade = '';
-            if ($kica && $kicaitem->id) {
-                $kicagrade = new KICA\grade($user->id, $kicaitem->id, $kica->pullfromgradebook);
-                $grade = $kicagrade->get_grade();
-                $default[4] = $gradetimecreated = $kicagrade->timecreated;
-                $default[5] = $gradetime = $kicagrade->timemodified;
-                $finalgrade = $grade->finalgrade;
-            }
+                $kica = $DB->get_record('local_kica', array('courseid' => $course->id));
+                $itemparams = [
+                    'courseid' => $course->id,
+                    'itemtype' => 'mod',
+                    'itemmodule' => $mod->modname,
+                    'iteminstance' => $mod->instance,
+                ];
+                $kicaitem = new KICA\kica_item($itemparams);
+                $finalgrade = '';
+                if ($kica && $kicaitem->id) {
+                    $kicagrade = new KICA\grade($user->id, $kicaitem->id, $kica->pullfromgradebook);
+                    $grade = $kicagrade->get_grade();
+                    $default[4] = $gradetimecreated = $kicagrade->timecreated;
+                    $default[5] = $gradetime = $kicagrade->timemodified;
+                    $finalgrade = $grade->finalgrade;
+                }
 
-            // Completion.
-            $sqlcompletion = "SELECT cmc.* 
+                // Completion.
+                $sqlcompletion = "SELECT cmc.* 
                                 FROM {course_modules_completion} cmc
                           INNER JOIN {course_modules} cm 
                                  ON cmc.coursemoduleid = cm.id
                                WHERE cmc.coursemoduleid = ? 
                                  AND cmc.userid = ? 
                                  AND cm.deletioninprogress = 0";
-            $completion = $DB->get_record_sql($sqlcompletion, [$mod->id, $user->id]);
-            $submissionstatus = 'notcompleted';
-            if (!empty($completion) && $completion->completionstate > 1) {
-                $submissionstatus = 'completed';
+                $completion = $DB->get_record_sql($sqlcompletion, [$mod->id, $user->id]);
+                $submissionstatus = 'notcompleted';
+                if (!empty($completion) && $completion->completionstate > 1) {
+                    $submissionstatus = 'completed';
+                }
+
+                if (empty($duedate)) {
+                    if ($mod->modname == 'assign') {
+                        $duedate = $instance->cutoffdate;
+                    } else if ($mod->modname == 'quiz') {
+                        $duedate = $instance->timeclose;
+                    }
+                }
+
+                $data['courseid'] = $course->id;
+                $data['activityid'] = $mod->id;
+                $data['activityname'] = $mod->get_formatted_name();
+                $data['activiturl'] = (new moodle_url('/mod/' . $mod->modname . '/view.php', ['id' => $mod->id]))->out();
+                $data['activitytype'] = $mod->modname;
+                $data['duedate'] = (!empty($duedate)) ? userdate($duedate) : '';
+                $data['submissionstatus'] = $submissionstatus;
+                $data['activitygrade'] = $finalgrade;
+                $data['coursegrade'] = $kicaavg;
+                if ($isformative) {
+                    $data['tags'][] = 'Formative';
+                }
+                if ($issummative) {
+                    $data['tags'][] = 'Summative';
+                }
+
+                $return[] = $data;
             }
-
-            $data['activityname'] = $activityname;
-            $data['activiturl'] = (new moodle_url('/mod/'.$mod->modname.'/view.php', ['id' => $mod->id]))->out();
-            //$data['activitytype'] = s($mod->get_module_type_name());
-            $data['activitytype'] = $mod->modname;
-            $data['duedate'] = userdate($deadline);
-            $data['submissionstatus'] = $submissionstatus;
-            $data['activitygrade'] = $finalgrade;
-            $data['coursegrade'] = $kicaavg;
-
-            $return[] = $data;
         }
 
 
@@ -340,12 +380,17 @@ class external extends \external_api {
         return new external_multiple_structure(
             new external_single_structure([
                 'studentid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                'courseid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                'activityid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
                 'activityname'    => new external_value(PARAM_RAW, '', VALUE_OPTIONAL),
                 'activiturl'    => new external_value(PARAM_URL, '', VALUE_OPTIONAL),
                 'activitytype'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'duedate'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'submissionstatus'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'activitygrade'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'tags' => new external_multiple_structure(
+                    new external_value(PARAM_TEXT, 'Tag name'), 'An array of tagname', VALUE_DEFAULT, array()
+                ),
             ])
         );
     }
