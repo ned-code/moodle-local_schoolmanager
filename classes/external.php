@@ -101,6 +101,14 @@ class external extends \external_api {
 
         $classdata = [];
 
+        $sqlgrade = "SELECT gg.id, gg.userid, gg.finalgrade, gg.rawgrademax 
+                       FROM {grade_items} gi 
+                       JOIN {grade_grades} gg
+                         ON gi.id = gg.itemid
+                      WHERE gi.itemtype = 'course'
+                        AND gi.iteminstance = ? 
+                        AND gg.userid = ?";
+
         $sql = "SELECT g.id,
                        g.courseid, 
                        g.name classname, 
@@ -131,6 +139,18 @@ class external extends \external_api {
                     'courseid' => $data->courseid,
                     'group' => $data->id,
                 ]);
+
+                $coursefinalgrade = '';
+                $coursefinalgrademax = '';
+                if ($coursegrade = $DB->get_record_sql($sql, [$data->courseid, $data->userid])) {
+                    if (!is_null($coursegrade->finalgrade)) {
+                        $coursefinalgrade = round($coursegrade->finalgrade);
+                    }
+                    if (!is_null($coursegrade->rawgrademax)) {
+                        $coursefinalgrademax = round($coursegrade->rawgrademax);
+                    }
+                }
+
                 $classdata[$data->id] = [
                     'courseid' => $data->courseid,
                     'coursename' => $data->coursename,
@@ -160,6 +180,8 @@ class external extends \external_api {
                 'id' => $data->userid,
                 'firstname' => $data->firstname,
                 'lastname' => $data->lastname,
+                'coursegrade' => $coursefinalgrade,
+                'coursegrademax' => $coursefinalgrademax,
                 'roles' => $roles,
             ];
         }
@@ -194,6 +216,8 @@ class external extends \external_api {
                             'id' => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
                             'firstname' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                             'lastname' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                            'coursegrade' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                            'coursegrademax' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                             'roles' => new external_multiple_structure(
                                 new external_single_structure(
                                     array(
@@ -317,12 +341,14 @@ class external extends \external_api {
                 ];
                 $kicaitem = new KICA\kica_item($itemparams);
                 $finalgrade = '';
+                $activitymaxgrade = '';
                 if ($kica && $kicaitem->id) {
                     $kicagrade = new KICA\grade($user->id, $kicaitem->id, $kica->pullfromgradebook);
                     $grade = $kicagrade->get_grade();
                     $default[4] = $gradetimecreated = $kicagrade->timecreated;
                     $default[5] = $gradetime = $kicagrade->timemodified;
-                    $finalgrade = $grade->finalgrade;
+                    $finalgrade = (is_null($grade->finalgrade)) ? '' : $grade->finalgrade;
+                    $activitymaxgrade = $kicaitem->get_grademax();
                 }
 
                 // Completion.
@@ -355,6 +381,7 @@ class external extends \external_api {
                 $data['duedate'] = (!empty($duedate)) ? userdate($duedate) : '';
                 $data['submissionstatus'] = $submissionstatus;
                 $data['activitygrade'] = $finalgrade;
+                $data['activitymaxgrade'] = $activitymaxgrade;
                 $data['coursegrade'] = $kicaavg;
                 if ($isformative) {
                     $data['tags'][] = 'Formative';
@@ -388,6 +415,7 @@ class external extends \external_api {
                 'duedate'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'submissionstatus'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'activitygrade'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'activitymaxgrade'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'tags' => new external_multiple_structure(
                     new external_value(PARAM_TEXT, 'Tag name'), 'An array of tagname', VALUE_DEFAULT, array()
                 ),
