@@ -132,7 +132,9 @@ class external extends \external_api {
                    AND u.deleted = 0 
                    AND gm.userid IN (SELECT cm.userid FROM {cohort_members} cm WHERE cm.cohortid = :cohortid)";
 
-        $rs = $DB->get_recordset_sql($sql, array_merge($courseparams, ['cohortid' => $school->id]) );
+        $courseparams['cohortid'] = $school->id;
+
+        $rs = $DB->get_recordset_sql($sql, $courseparams);
         foreach ($rs as $data) {
             if (!isset($classdata[$data->id])) {
                 $classurl = new \moodle_url('/blocks/ned_teacher_tools/progress_report.php', [
@@ -142,7 +144,7 @@ class external extends \external_api {
 
                 $coursefinalgrade = '';
                 $coursefinalgrademax = '';
-                if ($coursegrade = $DB->get_record_sql($sql, [$data->courseid, $data->userid])) {
+                if ($coursegrade = $DB->get_record_sql($sqlgrade, [$data->courseid, $data->userid])) {
                     if (!is_null($coursegrade->finalgrade)) {
                         $coursefinalgrade = round($coursegrade->finalgrade);
                     }
