@@ -323,7 +323,7 @@ class school_manager_render implements \renderable, \templatable{
      * @return \html_table
      */
     static public function user_edit_table($school, $crews, $users, $output, $can_manage=false){
-        global $PAGE, $CFG;
+        global $PAGE;
         $table = new \html_table();
         $table->head = [];
         $schoolcode = $school->code ?? '';
@@ -343,10 +343,6 @@ class school_manager_render implements \renderable, \templatable{
         }
         array_push($table->head, get_string('username'), SM\str('crewname'), SM\str('crewcode'));
 
-        if (file_exists("{$CFG->dirroot}/local/academic_integrity/lib.php")) {
-            require_once("{$CFG->dirroot}/local/academic_integrity/lib.php");
-        }
-
         foreach ($users as $user){
             $cells = [];
             if ($can_manage){
@@ -362,8 +358,9 @@ class school_manager_render implements \renderable, \templatable{
 
             $ai_flag = "";
 
-            if (file_exists("{$CFG->dirroot}/local/academic_integrity/lib.php")) {
-                $ai_flag = local_academic_integrity_flag($user->id, \context_course::instance(1)); // FIXME What's the context for the viewer? Should this be system?
+            if (class_exists('\local_academic_integrity\ai_flag')) {
+                $ai_flag = \local_academic_integrity\ai_flag::flag($user->id,
+                            \context_system::instance());
             }
 
             $cells[] = SM\cell(fullname($user) . $ai_flag, 'username');
