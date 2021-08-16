@@ -76,5 +76,46 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
 
         upgrade_plugin_savepoint(true, 2020083100, 'local', 'schoolmanager');
     }
+
+    if ($oldversion < 2021073100) {
+
+        // Define field usermodified to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'note');
+
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field timecreated to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'usermodified');
+
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field timemodified to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timecreated');
+
+        // Conditionally launch add field timemodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define key usermodified (foreign) to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $key = new xmldb_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+
+        // Launch add key usermodified.
+        $dbman->add_key($table, $key);
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2021073100, 'local', 'schoolmanager');
+    }
+
     return true;
 }

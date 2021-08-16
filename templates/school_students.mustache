@@ -1,0 +1,110 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_schoolmanager/school_students
+
+    school_manager_render layout template.
+
+    Context variables required for this template:
+    * sitename - The name of the site
+    * output - The core renderer for the page
+    * bodyattributes - attributes for the body tag as a string of html attributes
+}}
+<div class="row">
+    <div class="col-md-9">
+        <table class="generaltable">
+            <thead>
+            <tr>
+                <th>{{#str}}studentname, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}deadlineextentions, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}aiv, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}aiv30, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}gpa, local_schoolmanager{{/str}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#students}}
+                <tr>
+                    <td class="username userid-{{{id}}}"><a href="{{{userlink}}}">{{{name}}}</a>
+                        {{#academic_integrity}}
+                            <span class="fa fa-circle fa-fw academic-integrity {{{academic_integrity.class}}}" title="{{#str}} local_academic_integrity_title, local_academic_integrity, {{academic_integrity.title}} {{/str}}"></span>
+                        {{/academic_integrity}}
+                    </td>
+                    <td class="lastaceess">{{lastaccess}}</td>
+                    <td class="deadlineextentions text-center">{{deadlineextentions}}</td>
+                    <td class="aiv text-center">{{aiv}}</td>
+                    <td class="aiv30 text-center">{{aiv30}}</td>
+                    <td class="gpa text-center">{{gpa}}</td>
+                </tr>
+            {{/students}}
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                {{#str}}summary, local_schoolmanager{{/str}}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-9">{{#str}}activestudents, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{activestudents}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}averagegrade, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{averagegrade}}%</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}aivschoolyear, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{aivschoolyear}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}aiv30schoolyear, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{aiv30schoolyear}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}deadlineextensions, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{deadlineextensions}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{#js}}
+    require(['jquery', 'local_ned_controller/tablesorter'], function($, Tablesorter) {
+        $(document).ready(function() {
+            $(function() {
+                let $datatables = $('.generaltable');
+                let opt = {
+                    headers: {},
+                    cssAsc: 'sort-up',
+                    cssDesc: 'sort-down',
+                    cssNone: 'sort-none',
+                    textAttribute: 'data-sort-value',
+                    emptyTo: 'bottom',
+                    sortStable: true,
+                };
+
+                $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');
+                $datatables.find('th:not(.sorter-false)').addClass('sorter-true');
+                $datatables.find('tr.nosort > td').attr('data-sort-value', '');
+                $datatables.tablesorter(opt);
+            });
+        });
+    });
+{{/js}}

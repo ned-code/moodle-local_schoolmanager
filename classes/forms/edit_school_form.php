@@ -68,7 +68,12 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('country', $SM->user->country);
         }
 
-        //Logo
+        // Timezone
+        $choices = \core_date::get_list_of_timezones($CFG->timezone, true);
+        $mform->addElement('select', 'timezone', get_string('timezone'), $choices);
+        $mform->setDefault('timezone', $CFG->timezone);
+
+        // Logo
         if ($this->_can_manage){
             $mform->addElement('filemanager', 'logo_filemanager', SM\str('logo'), null,
                 ['accepted_types' => ['.png','.jpg'], 'maxfiles' => 1]);

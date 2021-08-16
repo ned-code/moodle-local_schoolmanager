@@ -97,3 +97,6 @@ $settings->add($configlink('view_schoolmanager',SM\PLUGIN_URL, true));
 $settings->add($configheading('general'));
 //$settings->add($configyesno('disabled', 0));
 $settings->add($configtextarea('academic_program','','',"1 Year",PARAM_TEXT, 10, 3));
+$courses = [0 => get_string('choose')] + $DB->get_records_select_menu('course', 'id > 1', null, 'fullname ASC', 'id,fullname');
+$settings->add($configselect('general_cert_course', '', '', 0, $courses));
+$settings->add($configselect('advanced_cert_course', '', '', 0, $courses));

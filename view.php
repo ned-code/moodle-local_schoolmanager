@@ -24,32 +24,40 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use local_schoolmanager as SM;
+use local_schoolmanager\school_handler as SH;
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
-require_login();
+$schoolid = optional_param('schoolid', 0, PARAM_INT);
+$view = optional_param('view', '', PARAM_ALPHA);
 
-$SMR = new SM\output\school_manager_render();
-$SM = $SMR->SM;
-
-$title = $SMR::get_title();
-
-$PAGE->set_context($SM->ctx);
-$PAGE->set_url($SMR->get_my_url());
-$PAGE->set_title($title);
-$PAGE->set_heading($title);
-$PAGE->set_pagelayout('schoolmanager');
-$PAGE->navbar->add($title, $SMR::get_url());
-switch($SMR->page){
-    case $SMR::PAGE_CREW:
-        $PAGE->navbar->add(SM\str('crews'), $SMR->get_my_url(null, false));
-        break;
-    case $SMR::PAGE_USER:
-        $PAGE->navbar->add(SM\str('users'), $SMR->get_my_url());
-        break;
+if (!$schoolid) {
+    $view = SH::VIEW_SCHOOLS;
 }
 
-echo $OUTPUT->header();
-$SMR->render();
-echo $OUTPUT->footer();
+require_login();
 
+$contextsystem = context_system::instance();
+
+if (!has_any_capability([
+    'local/schoolmanager:viewownschooldashboard',
+    'local/schoolmanager:viewallschooldashboards'], $contextsystem)) {
+    throw new moodle_exception('permission');
+}
+
+$thispageurl = new moodle_url('/local/schoolmanager/view.php');
+$title = get_string('pluginname', 'local_schoolmanager');
+
+$PAGE->set_context($contextsystem);
+$PAGE->set_pagelayout('schoolmanager');
+$PAGE->set_url($thispageurl);
+$PAGE->set_title($title);
+$PAGE->set_heading($title);
+$PAGE->navbar->add($title, $thispageurl);
+echo $OUTPUT->header();
+
+$renderer = $PAGE->get_renderer('local_schoolmanager');
+$renderable = new SM\output\school($schoolid, $view);
+echo $renderer->render($renderable);
+echo $OUTPUT->footer();

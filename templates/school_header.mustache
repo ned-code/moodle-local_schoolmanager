@@ -1,0 +1,67 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_schoolmanager/school_header
+
+    school_manager_render layout template.
+
+    Context variables required for this template:
+    * sitename - The name of the site
+    * output - The core renderer for the page
+    * bodyattributes - attributes for the body tag as a string of html attributes
+}}
+{{#showheader}}
+    <div class="row school-header">
+        <div class="col-md-6 d-flex align-items-center">
+            {{#logourl}}
+                <img src="{{logourl}}">
+            {{/logourl}}
+            {{^logourl}}
+                <span class="school-shortname">{{shortname}}</span>
+            {{/logourl}}
+        </div>
+        <div class="col-md-6 d-flex justify-content-end">
+            <div class="d-table float-right">
+                <div>
+                    <strong>{{{name}}}</strong>
+                </div>
+                <div>
+                    <strong>{{city}}, {{country}} - {{localtime}}</strong>{{#timezone}} ({{timezone}}){{/timezone}}
+                </div>
+                <div>
+                    {{#str}}schoolyear, local_schoolmanager{{/str}}: <strong>{{schoolyear}}</strong>
+                </div>
+                <div>
+                    {{#str}}administrator{{/str}}: <strong>{{administrator}}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row school-body p-4">
+        <div class="col-md-9">
+            <a class="btn {{#show_students}}btn-primary{{/show_students}}{{^show_students}}btn-secondary{{/show_students}}" href="{{btn_students_url}}">{{#str}}students, local_schoolmanager{{/str}}</a>
+            <a class="btn {{#show_staff}}btn-primary{{/show_staff}}{{^show_staff}}btn-secondary{{/show_staff}}" href="{{btn_staff_url}}">{{#str}}staff, local_schoolmanager{{/str}}</a>
+            <a class="btn {{#show_school}}btn-primary{{/show_school}}{{^show_school}}btn-secondary{{/show_school}}" href="{{btn_school_url}}">{{#str}}school, local_schoolmanager{{/str}}</a>
+        </div>
+        <div class="col-md-3">
+            {{#caneditschool}}
+                <a class="btn btn-secondary float-right" href="{{editschoolurl}}">{{#str}}editschool, local_schoolmanager{{/str}}</a>
+            {{/caneditschool}}
+        </div>
+
+    </div>
+{{/showheader}}

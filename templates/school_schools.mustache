@@ -1,0 +1,79 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_schoolmanager/school_students
+
+    school_manager_render layout template.
+
+    Context variables required for this template:
+    * sitename - The name of the site
+    * output - The core renderer for the page
+    * bodyattributes - attributes for the body tag as a string of html attributes
+}}
+<div class="row mt-6">
+    <div class="col-md-12">
+        <table id="school-list" class="generaltable">
+            <thead>
+            <tr>
+                <th>{{#str}}name, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}city, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}country, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}timezone, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}students, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}cts, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}schoolyear, local_schoolmanager{{/str}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#schools}}
+                <tr>
+                    <td class="school-name- school-{{{id}}}"><a href="{{{schoolurl}}}">{{{name}}}</a></td>
+                    <td class="school-city">{{city}}</td>
+                    <td class="school-country">{{country}}</td>
+                    <td class="school-timezone">{{timezone}}</td>
+                    <td class="school-students">{{numberofstudents}}</td>
+                    <td class="school-cts">{{numberofcts}}</td>
+                    <td class="school-schoolyear">{{schoolyear}}</td>
+                </tr>
+            {{/schools}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{#js}}
+    require(['jquery', 'local_ned_controller/tablesorter'], function($, Tablesorter) {
+        $(document).ready(function() {
+            $(function() {
+                let $datatables = $('#school-list');
+                let opt = {
+                    headers: {},
+                    cssAsc: 'sort-up',
+                    cssDesc: 'sort-down',
+                    cssNone: 'sort-none',
+                    textAttribute: 'data-sort-value',
+                    emptyTo: 'bottom',
+                    sortStable: true,
+                };
+
+                $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');
+                $datatables.find('th:not(.sorter-false)').addClass('sorter-true');
+                $datatables.find('tr.nosort > td').attr('data-sort-value', '');
+                $datatables.tablesorter(opt);
+            });
+        });
+    });
+{{/js}}

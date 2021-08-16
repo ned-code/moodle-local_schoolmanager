@@ -37,40 +37,40 @@
         "buttons":  {"primary": bool, "add_class": string, "link": url, "name": string}
     }
 }}
-<div class="school-manager">
-    <div class="messages {{^messages}}empty{{/messages}}">
-        {{#messages}}{{{.}}}{{/messages}}
-    </div>
-    <div class="menu-links {{^links}}empty{{/links}}">
-        {{#links}}
-            <div><a href="{{{link}}}" class="menu-link">{{name}}</a></div>
-        {{/links}}
-    </div>
-    <div class="school-name {{^school_name}}empty{{/school_name}}">
-        <span>{{#str}}school, local_schoolmanager{{/str}}:</span>
-        <span>{{school_name}}</span>
-    </div>
-    <div class="school-manager-links schools {{^schools}}empty{{/schools}}">
-        {{#schools}}
-            <div><a href="{{{link}}}" class="school-link">{{name}}</a></div>
-        {{/schools}}
-    </div>
-    <div class="school-manager-links crews {{^crews}}empty{{/crews}}">
-        {{#crews}}
-            <div><a href="{{{link}}}" class="crew-link">{{name}}</a></div>
-        {{/crews}}
-    </div>
-    <div class="school-manager-forms {{^forms}}empty{{/forms}}">
-        {{#forms}}{{{.}}}{{/forms}}
-    </div>
-    <div class="school-manager-tables {{^tables}}empty{{/tables}}">
-        {{#tables}}{{{.}}}{{/tables}}
-    </div>
-    {{#manage}}
-        <div class="control-panel">
-            {{#buttons}}
-                <a class="btn {{#primary}}btn-primary{{/primary}}{{^primary}}btn-default{{/primary}} {{add_class}}" href="{{{link}}}">{{name}}</a>
-            {{/buttons}}
+<div class="school">
+    {{#showheader}}
+        {{>local_schoolmanager/school_header}}
+    {{/showheader}}
+    <div class="school-page">
+        <div class="messages {{^messages}}empty{{/messages}}">
+            {{#messages}}{{{.}}}{{/messages}}
         </div>
-    {{/manage}}
+        <div class="school-name {{^school_name}}empty{{/school_name}}">
+            <span>{{#str}}school, local_schoolmanager{{/str}}:</span>
+            <span>{{school_name}}</span>
+        </div>
+        <div class="school-manager-links schools {{^schools}}empty{{/schools}}">
+            {{#schools}}
+                <div><a href="{{{link}}}" class="school-link">{{name}}</a></div>
+            {{/schools}}
+        </div>
+        <div class="school-manager-links crews {{^crews}}empty{{/crews}}">
+            {{#crews}}
+                <div><a href="{{{link}}}" class="crew-link">{{name}}</a></div>
+            {{/crews}}
+        </div>
+        <div class="school-manager-forms {{^forms}}empty{{/forms}}">
+            {{#forms}}{{{.}}}{{/forms}}
+        </div>
+        <div class="school-manager-tables {{^tables}}empty{{/tables}}">
+            {{#tables}}{{{.}}}{{/tables}}
+        </div>
+        {{#manage}}
+            <div class="control-panel">
+                {{#buttons}}
+                    <a class="btn {{#primary}}btn-primary{{/primary}}{{^primary}}btn-default{{/primary}} {{add_class}}" href="{{{link}}}">{{name}}</a>
+                {{/buttons}}
+            </div>
+        {{/manage}}
+    </div>
 </div>

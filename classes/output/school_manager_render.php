@@ -443,8 +443,18 @@ class school_manager_render implements \renderable, \templatable{
             }
 
         }
+        if ($this->SM->get_school_by_ids($this->_schoolid)) {
+            $header = new school_header($this->_schoolid ?? 0, $this->_page);
+            $headerdata = $header->export_for_template($output);
+        }
+        $data = $this->c->export();
+        if (!empty($headerdata)) {
+            foreach ($headerdata as $key => $item){
+                $data->$key = $item;
+            }
+        }
 
-        return $this->c->export();
+        return $data;
     }
 
     /**

@@ -45,6 +45,9 @@ class school_manager{
 
     const FIELD_ROLE = 'default_role';
     const DEF_MEMBER_ROLE = 'Student';
+    const STAFF_ROLES = ['Classroom Teacher', 'School Administrator', 'Classroom Assistant', 'Guidance Counsellor', 'Online Teacher'];
+    const SCHOOL_ADMINISTRTOR_ROLE = 'School Administrator';
+    const SCHOOL_CT_ROLE = 'Classroom Teacher';
 
     static protected $_school_managers = [];
     static protected $_schools_data = [];
@@ -182,7 +185,12 @@ class school_manager{
 
         if (!self::$_all_schools_data_was_loaded && !empty($ids_to_load)){
             list($sql, $params) = $DB->get_in_or_equal($ids_to_load, SQL_PARAMS_NAMED);
-            $add_data = $DB->get_records_sql("SELECT * FROM {".self::TABLE_SCHOOL."} AS school WHERE school.id $sql", $params) ?: [];
+            $add_data = $DB->get_records_sql("SELECT school.*,
+                                                     coh.timezone
+                                                FROM {".self::TABLE_SCHOOL."} AS school
+                                     LEFT OUTER JOIN {".self::TABLE_COHORT."} AS coh
+                                                  ON school.id = coh.id
+                                               WHERE school.id $sql", $params) ?: [];
             foreach ($add_data as $id => $add_datum){
                 self::$_schools_data[$id] = $add_datum;
                 $data[$id] = $add_datum;
@@ -732,6 +740,7 @@ class school_manager{
         } else {
             self::$_schools_data[$school->id] = $up_data;
             $this->_schools[$school->id] = $up_data;
+            $DB->execute('UPDATE {'.self::TABLE_COHORT.'} SET timezone = ?', [$data->timezone]);
             return $DB->update_record(self::TABLE_SCHOOL, $up_data);
         }
     }
