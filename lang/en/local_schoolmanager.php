@@ -103,3 +103,6 @@ $string['timezone'] = 'Time Zone';
 $string['users'] = 'Users';
 $string['usersupdatedsuccessfully'] = 'Users updated successfully';
 $string['editschool'] = 'Edit school';
+$string['academicintegrity'] = 'Academic Integrity';
+$string['classdateextensions'] = 'Class Date Extensions';
+$string['deadlinenotifications'] = 'Deadline Notifications';

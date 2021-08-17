@@ -1,105 +1,106 @@
 #page-local-schoolmanager-index .empty {
   display: none;
 }
-body.path-local-schoolmanager #region-main {
+body.pagelayout-schoolmanager #region-main {
   overflow: visible;
   background-color: #ECEEEF;
   border: 0;
 }
-body.path-local-schoolmanager #region-main-box {
+body.pagelayout-schoolmanager #region-main-box {
   width: 100%;
 }
-body.path-local-schoolmanager .menu-links {
+body.pagelayout-schoolmanager .menu-links {
   display: flex;
   font-size: larger;
   background-color: #ffffcc;
   padding: 10px;
   margin-bottom: 20px;
 }
-body.path-local-schoolmanager .menu-links > *:not(:last-child) {
+body.pagelayout-schoolmanager .menu-links > *:not(:last-child) {
   margin-right: 20px;
 }
-body.path-local-schoolmanager .school-name {
+body.pagelayout-schoolmanager .school-name {
   padding: 20px 0;
   font-size: larger;
   font-family: cursive;
   font-weight: bold;
 }
-body.path-local-schoolmanager .school-manager-links {
+body.pagelayout-schoolmanager .school-manager-links {
   padding: 5px 20px;
 }
-body.path-local-schoolmanager .control-panel {
+body.pagelayout-schoolmanager .control-panel {
   margin-top: 20px;
 }
-.path-local-schoolmanager .schoolmanager-header {
+.pagelayout-schoolmanager .schoolmanager-header {
   margin: 0;
   background-color: #0672b1;
   padding: 20px;
 }
-.path-local-schoolmanager .container,
-.path-local-schoolmanager .container-fluid,
-.path-local-schoolmanager .container-sm,
-.path-local-schoolmanager .container-md,
-.path-local-schoolmanager .container-lg,
-.path-local-schoolmanager .container-xl,
-.path-local-schoolmanager div#region-main-box {
+.pagelayout-schoolmanager .container,
+.pagelayout-schoolmanager .container-fluid,
+.pagelayout-schoolmanager .container-sm,
+.pagelayout-schoolmanager .container-md,
+.pagelayout-schoolmanager .container-lg,
+.pagelayout-schoolmanager .container-xl,
+.pagelayout-schoolmanager div#region-main-box {
   padding-right: 0;
   padding-left: 0;
 }
-.path-local-schoolmanager  .school {
+.pagelayout-schoolmanager  .school,
+.pagelayout-schoolmanager  .page-content-wrapper {
   margin: 0 10%;
 }
-.path-local-schoolmanager .school-header {
+.pagelayout-schoolmanager .school-header {
   background-color: #ddd;
   padding: 20px 20px;
 }
-.path-local-schoolmanager .school-page {
+.pagelayout-schoolmanager .school-page {
   padding: 25px;
   border: 1px solid #ddd;
   margin-right: -15px;
   margin-left: -15px;
   background-color: white;
 }
-.path-local-schoolmanager #region-main {
+.pagelayout-schoolmanager #region-main {
   padding-top: 0;
   padding-right: 0;
   padding-left: 0;
 }
-.path-local-schoolmanager span#maincontent {
+.pagelayout-schoolmanager span#maincontent {
   display: none;
 }
-.path-local-schoolmanager .school-header img {
+.pagelayout-schoolmanager .school-header img {
   max-height: 90px;
 }
 .schoolmanager-header .btn.btn-secondary.active {
   background-color: yellow !important;
 }
 
-.path-local-schoolmanager table.tablesorter thead tr th {
+.pagelayout-schoolmanager table.tablesorter thead tr th {
   cursor: pointer;
 }
-.path-local-schoolmanager table.tablesorter thead tr th.tablesorter-headerDesc:after,
-.path-local-schoolmanager table.tablesorter thead tr th.tablesorter-headerAsc:after,
-.path-local-schoolmanager table.tablesorter thead tr th.header:after {
+.pagelayout-schoolmanager table.tablesorter thead tr th.tablesorter-headerDesc:after,
+.pagelayout-schoolmanager table.tablesorter thead tr th.tablesorter-headerAsc:after,
+.pagelayout-schoolmanager table.tablesorter thead tr th.header:after {
   font-family: FontAwesome;
   float: right;
 }
-.path-local-schoolmanager table.tablesorter thead tr th.header:after {
+.pagelayout-schoolmanager table.tablesorter thead tr th.header:after {
   content: "\f0dc";
 }
-.path-local-schoolmanager table.tablesorter thead tr th.tablesorter-headerAsc:after {
+.pagelayout-schoolmanager table.tablesorter thead tr th.tablesorter-headerAsc:after {
   content: "\f0de";
 }
-.path-local-schoolmanager table.tablesorter thead tr th.tablesorter-headerDesc:after {
+.pagelayout-schoolmanager table.tablesorter thead tr th.tablesorter-headerDesc:after {
   content: "\f0dd";
 }
-.path-local-schoolmanager table.tablesorter thead tr th .tablesorter-header-inner {
+.pagelayout-schoolmanager table.tablesorter thead tr th .tablesorter-header-inner {
   display: inline;
 }
-.path-local-schoolmanager .generaltable {
+.pagelayout-schoolmanager .generaltable {
   border: 1px solid #ddd;
 }
-.path-local-schoolmanager .school-shortname {
+.pagelayout-schoolmanager .school-shortname {
   font-size: 1.5rem;
   font-weight: bold;
 }
