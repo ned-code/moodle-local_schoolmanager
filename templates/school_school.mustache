@@ -58,3 +58,18 @@
         </div>
     </div>
 </div>
+{{#hasdifferenttimezone}}
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="alert alert-danger mt-4 text-align-center">
+                {{# str }} differenttimezonewarning, block_ned_teacher_tools {{/ str }}
+                <div>
+                    <a href="{{edittimezoneurl}}">
+                        {{# str }} resettimezoneforall, local_schoolmanager {{/ str }}
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{{/hasdifferenttimezone}}

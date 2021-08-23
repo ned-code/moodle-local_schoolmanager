@@ -358,4 +358,21 @@ class school_handler {
     }
 
     public static function get_timezone() {}
+
+    /**
+     * @param $cohort
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function has_different_timezone_users_in_school($cohort) {
+        global $DB;
+
+        $sql = "SELECT cm.id, cm.userid, u.firstname, u.lastname,u.timezone
+                  FROM {cohort_members} cm
+                  JOIN {user} u ON cm.userid = u.id
+                 WHERE cm.cohortid = ?
+                   AND u.timezone != ?";
+
+        return $DB->record_exists_sql($sql, [$cohort->id, $cohort->timezone]);
+    }
 }

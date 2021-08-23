@@ -106,3 +106,4 @@ $string['editschool'] = 'Edit school';
 $string['academicintegrity'] = 'Academic Integrity';
 $string['classdateextensions'] = 'Class Date Extensions';
 $string['deadlinenotifications'] = 'Deadline Notifications';
+$string['resettimezoneforall'] = 'Click here to reset timezone for all school members';
