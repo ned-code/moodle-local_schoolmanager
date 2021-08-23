@@ -192,10 +192,9 @@ class school implements \renderable, \templatable {
             try {
                 $data->caneditschool = true;
                 $data->editschoolurl = new \moodle_url('/local/schoolmanager/index.php', ['schoolid' => $this->schoolid]);
-                $this->sm->show_error_if_necessary();
-
                 $data->hasdifferenttimezone = SH::has_different_timezone_users_in_school($this->persistent->get_cohort());
                 $data->edittimezoneurl = new \moodle_url('/blocks/ned_teacher_tools/cohort.php');
+                $this->sm->show_error_if_necessary();
             } catch (Exception $e) {
                // Do nothing.
             }
