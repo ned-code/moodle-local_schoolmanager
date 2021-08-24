@@ -59,6 +59,8 @@ class school implements \renderable, \templatable {
      * @return \stdClass
      */
     public function export_for_template(\renderer_base $output) {
+        global $PAGE;
+
         $contextsystem = \context_system::instance();
 
         $header = new school_header($this->schoolid, $this->view);
@@ -193,12 +195,16 @@ class school implements \renderable, \templatable {
                 $data->caneditschool = true;
                 $data->editschoolurl = new \moodle_url('/local/schoolmanager/index.php', ['schoolid' => $this->schoolid]);
                 $data->hasdifferenttimezone = SH::has_different_timezone_users_in_school($this->persistent->get_cohort());
-                $data->edittimezoneurl = new \moodle_url('/blocks/ned_teacher_tools/cohort.php');
+                $data->edittimezoneurl = (new \moodle_url('/local/schoolmanager/view.php', [
+                    'view' => $this->view,
+                    'schoolid' => $this->schoolid,
+                    'action' => 'resettimezone'
+                ]))->out(false);
+                $data->isadmin = is_siteadmin();
                 $this->sm->show_error_if_necessary();
             } catch (Exception $e) {
                // Do nothing.
             }
-
         }
 
         if ($this->view == SH::VIEW_SCHOOLS) {

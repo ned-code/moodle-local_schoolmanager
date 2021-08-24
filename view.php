@@ -31,9 +31,15 @@ require_once(__DIR__ . '/lib.php');
 
 $schoolid = optional_param('schoolid', 0, PARAM_INT);
 $view = optional_param('view', '', PARAM_ALPHA);
+$action = optional_param('action', '', PARAM_TEXT);
 
 if (!$schoolid) {
     $view = SH::VIEW_SCHOOLS;
+} else {
+    if ($action == 'resettimezone' && is_siteadmin()) {
+        $school = new SM\school($schoolid);
+        $school->reset_time_zone();
+    }
 }
 
 require_login();

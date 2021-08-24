@@ -20,6 +20,9 @@ class school extends persistent implements cacheable_object  {
     /** Table name for the persistent. */
     const TABLE = 'local_schoolmanager_school';
 
+    /**
+     * @var
+     */
     protected $cohort;
 
     /**
@@ -125,13 +128,24 @@ class school extends persistent implements cacheable_object  {
         return $this->cohort;
     }
 
+    /**
+     * @return mixed
+     */
     public function get_timezone() {
         return $this->cohort->timezone;
     }
 
+    /**
+     * @return string
+     */
     public function get_localtime() {
         return userdate(time(), '%I:%M %p', $this->cohort->timezone);
     }
+
+    /**
+     * @return string
+     * @throws \coding_exception
+     */
     public function get_schoolyear() {
         return date('j M Y', $this->get('startdate')) . ' - ' .  date('j M Y', $this->get('enddate'));
     }
@@ -142,5 +156,22 @@ class school extends persistent implements cacheable_object  {
     public function set_cohort() {
         global $DB;
         $this->cohort = $DB->get_record('cohort', ['id' => $this->get('id')]);
+    }
+
+    /**
+     * @throws \dml_exception
+     */
+    public function reset_time_zone() {
+        global $DB;
+        $sql = "SELECT u.id, u.timezone
+                  FROM {cohort_members} cm
+                  JOIN {user} u ON cm.userid = u.id
+                 WHERE cm.cohortid = ?";
+        if ($users = $DB->get_records_sql($sql, [$this->cohort->id])) {
+            foreach ($users as $user) {
+                $user->timezone = $this->cohort->timezone;
+                $DB->update_record('user', $user);
+            }
+        }
     }
 }
