@@ -740,7 +740,7 @@ class school_manager{
         } else {
             self::$_schools_data[$school->id] = $up_data;
             $this->_schools[$school->id] = $up_data;
-            $DB->execute('UPDATE {'.self::TABLE_COHORT.'} SET timezone = ?', [$data->timezone]);
+            $DB->execute('UPDATE {'.self::TABLE_COHORT.'} SET timezone = ? WHERE id = ?', [$data->timezone, $data->schoolid]);
             return $DB->update_record(self::TABLE_SCHOOL, $up_data);
         }
     }
