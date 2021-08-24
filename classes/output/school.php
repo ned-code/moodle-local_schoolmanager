@@ -59,7 +59,7 @@ class school implements \renderable, \templatable {
      * @return \stdClass
      */
     public function export_for_template(\renderer_base $output) {
-        global $PAGE;
+        global $PAGE, $OUTPUT;
 
         $contextsystem = \context_system::instance();
 
@@ -219,11 +219,23 @@ class school implements \renderable, \templatable {
                 if ($students = $this->sm->get_school_students($school->id, true, $this->sm::DEF_MEMBER_ROLE, false)) {
                     $school->numberofstudents = count($students);
                 }
-
                 $school->numberofcts = 0;
                 if ($cts = $this->sm->get_school_students($school->id, true, $this->sm::SCHOOL_CT_ROLE, false)) {
                     $school->numberofcts = count($cts);
                 }
+                $actions = [];
+                $actions[] = array(
+                    'url' =>  new \moodle_url('/local/schoolmanager/index.php', ['schoolid' => $school->id]),
+                    'icon' => new \pix_icon('i/edit', get_string('edit')),
+                    'attributes' => array('class' => 'action-edit')
+                );
+
+                $actionshtml = array();
+                foreach ($actions as $action) {
+                    $action['attributes']['role'] = 'button';
+                    $actionshtml[] = $OUTPUT->action_icon($action['url'], $action['icon'], null, $action['attributes']);
+                }
+                $school->actionlinks = \html_writer::span(implode('', $actionshtml), 'class-item-actions item-actions');
             }
             $data->schools = array_values($schools);
         }
