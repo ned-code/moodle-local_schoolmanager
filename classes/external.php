@@ -332,9 +332,9 @@ class external extends \external_api {
                     }
                 }
 
-                $kicaavg = \local_kica\helper::get_course_average($user->id, $course->id, 5);
-
-                $kica = $DB->get_record('local_kica', array('courseid' => $course->id));
+                if ($kica = $DB->get_record('local_kica', array('courseid' => $course->id))) {
+                    $kicaavg = \local_kica\helper::get_course_average($user->id, $course->id, 5);
+                }
                 $itemparams = [
                     'courseid' => $course->id,
                     'itemtype' => 'mod',
