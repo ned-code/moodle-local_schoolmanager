@@ -25,8 +25,8 @@
 $string['pluginname'] = 'NED School Manager';
 
 // Capabilities
-$string['schoolmanager:viewownschooldashboard'] = 'View own school dashboard';
-$string['schoolmanager:viewallschooldashboards'] = 'View all school dashboards';
+$string['schoolmanager:viewownschooldashboard'] = 'View own school manager';
+$string['schoolmanager:viewallschooldashboards'] = 'View all school manager';
 $string['schoolmanager:manage_schools'] = 'Manage schools';
 $string['schoolmanager:manage_crews'] = 'Manage cohorts';
 $string['schoolmanager:manage_members'] = 'Manage cohort members';
