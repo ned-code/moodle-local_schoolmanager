@@ -74,7 +74,7 @@ class school implements \renderable, \templatable {
                 $aiv30schoolyear = 0;
                 $deadlineextensions = 0;
                 foreach ($data->students as $student) {
-                    $student->userlink = new \moodle_url('/user/profile.php', ['id' => $student->id]);
+                    $student->userlink = new \moodle_url('/my/index.php', ['userid' => $student->id]);
                     $ai_flag = "";
                     if (class_exists('\local_academic_integrity\ai_flag')) {
                         $ai_flag = \local_academic_integrity\ai_flag::flag($student->id, $contextsystem);
