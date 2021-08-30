@@ -146,12 +146,7 @@ class school implements \renderable, \templatable {
                 if ($staff->profile['default_role'] == 'Classroom Teacher') {
                     $data->classroomteachers++;
                 }
-                $classes = SH::get_classes($staff, $this->schoolid);
-                $staff->classes = count($classes);
-                $staff->students = 0;
-                $staff->deadlineextentions = 0;
-                $staff->aivreports = 0;
-                $staff->aivreports30 = 0;
+
                 if (isset($completioncertgen) && $completioncertgen->is_course_complete($staff->id)) {
                     $data->generalcert++;
                 }
@@ -159,28 +154,36 @@ class school implements \renderable, \templatable {
                     $data->advancedcert++;
                 }
 
-
-                foreach ($classes as $index => $class) {
-                    $staff->students += count($class['users']);
-                    $courseid = $class['courseid'];
-                    if (!isset($courses[$courseid])) {
-                        $courses[$courseid] = get_course($courseid);
-                    }
-                    foreach ($class['users'] as $user) {
-                        $activestudents[$user['id']] = $user['id'];
-                        $staff->deadlineextentions += SH::get_user_number_of_dl_extensions((object)$user, [$courses[$courseid]]);
-                        $staff->aivreports += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'));
-                        $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 30);
-                        if (!is_null($user['coursegrade'])) {
-                            $gpas[] =  $user['coursegrade'];
+                if ($staff->role === 'Classroom Teacher') {
+                    $classes = SH::get_classes($staff, $this->schoolid);
+                    $staff->classes = count($classes);
+                    $staff->students = 0;
+                    $staff->deadlineextentions = 0;
+                    $staff->aivreports = 0;
+                    $staff->aivreports30 = 0;
+                    foreach ($classes as $index => $class) {
+                        $staff->students += count($class['users']);
+                        $courseid = $class['courseid'];
+                        if (!isset($courses[$courseid])) {
+                            $courses[$courseid] = get_course($courseid);
+                        }
+                        foreach ($class['users'] as $user) {
+                            $activestudents[$user['id']] = $user['id'];
+                            $staff->deadlineextentions += SH::get_user_number_of_dl_extensions((object)$user, [$courses[$courseid]]);
+                            $staff->aivreports += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'));
+                            $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 30);
+                            if (!is_null($user['coursegrade'])) {
+                                $gpas[] = $user['coursegrade'];
+                            }
                         }
                     }
+
+                    $data->aivschoolyear += $staff->aivreports;
+                    $data->aiv30schoolyear += $staff->aivreports30;
+                    $data->deadlineextentions += $staff->deadlineextentions;
+                    $data->activestudents = count($activestudents);
                 }
                 $staff->lastaccess = SH::get_user_lastaccess($staff);
-                $data->aivschoolyear += $staff->aivreports;
-                $data->aiv30schoolyear += $staff->aivreports30;
-                $data->deadlineextentions += $staff->deadlineextentions;
-                $data->activestudents = count($activestudents);
             }
 
             $data->staffs = array_values($data->staffs);
