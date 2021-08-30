@@ -45,7 +45,7 @@ class school_manager{
 
     const FIELD_ROLE = 'default_role';
     const DEF_MEMBER_ROLE = 'Student';
-    const STAFF_ROLES = ['Classroom Teacher', 'School Administrator', 'Classroom Assistant', 'Guidance Counsellor', 'Online Teacher'];
+    const STAFF_ROLES = ['Classroom Teacher', 'School Administrator', 'Classroom Assistant', 'Guidance Counsellor', 'Online Teacher', 'District Administrator'];
     const SCHOOL_ADMINISTRTOR_ROLE = 'School Administrator';
     const SCHOOL_CT_ROLE = 'Classroom Teacher';
 
