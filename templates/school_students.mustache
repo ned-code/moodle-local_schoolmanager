@@ -31,16 +31,17 @@
             <tr>
                 <th>{{#str}}studentname, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}deadlineextentions, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}aiv, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}aiv30, local_schoolmanager{{/str}}</th>
+                <th data-toggle="tooltip" title="{{#str}}studentextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
+                <th data-toggle="tooltip" title="{{#str}}studentaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aiv, local_schoolmanager{{/str}}</th>
+                <th  data-toggle="tooltip" title="{{#str}}studentaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aiv30, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}gpa, local_schoolmanager{{/str}}</th>
             </tr>
             </thead>
             <tbody>
             {{#students}}
                 <tr>
-                    <td class="username userid-{{{id}}}"><a href="{{{userlink}}}">{{{name}}}</a>
+                    <td class="username userid-{{{id}}}">
+                        <a target="_blank" href="{{{userlink}}}">{{{name}}}</a>
                         {{#academic_integrity}}
                             <span class="fa fa-circle fa-fw academic-integrity {{{academic_integrity.class}}}" title="{{#str}} local_academic_integrity_title, local_academic_integrity, {{academic_integrity.title}} {{/str}}"></span>
                         {{/academic_integrity}}
@@ -98,6 +99,11 @@
                     textAttribute: 'data-sort-value',
                     emptyTo: 'bottom',
                     sortStable: true,
+                        widgetOptions: {
+                        headerTitle_useAria  : true,
+                        headerTitle_tooltip  : 'tooltip',
+                        headerTitle_callback : updateTooltips
+                    }
                 };
 
                 $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');

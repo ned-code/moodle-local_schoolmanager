@@ -34,15 +34,15 @@
                 <th>{{#str}}classes, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}students, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}deadlineextentions, local_schoolmanager{{/str}}</th>
-                <th data-toggle="tooltip" title="{{#str}}aivreportstiooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
-                <th data-toggle="tooltip" data-title="{{#str}}aivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
+                <th data-toggle="tooltip" title="{{#str}}staffextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
+                <th data-toggle="tooltip" title="{{#str}}staffaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
+                <th data-toggle="tooltip" data-title="{{#str}}staffaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
             </tr>
             </thead>
             <tbody>
             {{#staffs}}
                 <tr>
-                    <td class="username userid-{{{id}}}"><a href="{{{userlink}}}">{{{name}}}</a></td>
+                    <td class="username userid-{{{id}}}"><a target="_blank" href="{{{userlink}}}">{{{name}}}</a></td>
                     <td class="role">{{role}}</td>
                     <td class="classes text-center">{{classes}}</td>
                     <td class="students text-center">{{students}}</td>
