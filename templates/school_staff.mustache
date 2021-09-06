@@ -35,8 +35,8 @@
                 <th>{{#str}}students, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}deadlineextentions, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}aivreports, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
+                <th data-toggle="tooltip" title="{{#str}}aivreportstiooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
+                <th data-toggle="tooltip" data-title="{{#str}}aivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
             </tr>
             </thead>
             <tbody>
@@ -64,10 +64,6 @@
                 <div class="row">
                     <div class="col-md-9">{{#str}}activestudents, local_schoolmanager{{/str}}</div>
                     <div class="col-md-3">{{activestudents}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-md-9">{{#str}}averagegrade, local_schoolmanager{{/str}}</div>
-                    <div class="col-md-3">{{averagegrade}}%</div>
                 </div>
                 <div class="row">
                     <div class="col-md-9">{{#str}}aivschoolyear, local_schoolmanager{{/str}}</div>
@@ -113,6 +109,12 @@
                     textAttribute: 'data-sort-value',
                     emptyTo: 'bottom',
                     sortStable: true,
+                    widgets: ['headerTitles'],
+                    widgetOptions: {
+                        headerTitle_useAria  : true,
+                        headerTitle_tooltip  : 'tooltip',
+                        headerTitle_callback : updateTooltips
+                    }
                 };
 
                 $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');

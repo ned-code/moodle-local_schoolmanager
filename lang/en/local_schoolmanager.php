@@ -107,3 +107,5 @@ $string['academicintegrity'] = 'Academic Integrity';
 $string['classdateextensions'] = 'Class Date Extensions';
 $string['deadlinenotifications'] = 'Deadline Notifications';
 $string['resettimezoneforall'] = 'Click here to reset timezone for all school members';
+$string['aivreportstiooltip'] = 'Total Academic Integrity Violations';
+$string['aivreports30tooltip'] = 'Academic Integrity Violations in the last 30 days';

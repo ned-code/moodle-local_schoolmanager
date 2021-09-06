@@ -143,6 +143,7 @@ class school implements \renderable, \templatable {
                 foreach ($data->staffs as $staff) {
                     profile_load_custom_fields($staff);
                     $staff->name = fullname($staff);
+                    $staff->userlink = new \moodle_url('/user/profile.php', ['id' => $staff->id]);
                     $staff->role = $staff->profile['default_role'];
                     if ($staff->profile['default_role'] == 'Classroom Teacher') {
                         $data->classroomteachers++;
@@ -173,9 +174,6 @@ class school implements \renderable, \templatable {
                                 $staff->deadlineextentions += SH::get_user_number_of_dl_extensions((object)$user, [$courses[$courseid]]);
                                 $staff->aivreports += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'));
                                 $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 30);
-                                if (!is_null($user['coursegrade'])) {
-                                    $gpas[] = $user['coursegrade'];
-                                }
                             }
                         }
 
@@ -186,12 +184,7 @@ class school implements \renderable, \templatable {
                     }
                     $staff->lastaccess = SH::get_user_lastaccess($staff);
                 }
-
                 $data->staffs = array_values($data->staffs);
-
-                if ($gpas) {
-                    $data->averagegrade = round(array_sum($gpas) / count($gpas), 0);
-                }
             }
         }
 
