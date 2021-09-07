@@ -145,6 +145,9 @@ class school implements \renderable, \templatable {
                     $staff->name = fullname($staff);
                     $staff->userlink = new \moodle_url('/user/profile.php', ['id' => $staff->id]);
                     $staff->role = $staff->profile['default_role'];
+                    $staff->deadlineextentions = '';
+                    $staff->aivreports = '';
+                    $staff->aivreports30 = '';
                     if ($staff->profile['default_role'] == 'Classroom Teacher') {
                         $data->classroomteachers++;
                     }
