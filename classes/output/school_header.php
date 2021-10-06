@@ -64,9 +64,8 @@ class school_header implements \renderable, \templatable {
             $data->logourl = $logourl->out();
         } else {
             $name = $this->school->get('name');
-            $arr = explode('-', $name);
-            if (isset($arr[1])) {
-                $data->shortname = trim($arr[1]);
+            if (($pos = strpos($name, '-')) !== false) {
+                $data->shortname = trim(substr($name, $pos + 1 ));
             }
         }
         if ($this->school->get_cohort()) {
