@@ -300,23 +300,21 @@ class external extends \external_api {
                     continue;
                 }
 
-                if (!$tags = core_tag_tag::get_item_tags_array('core', 'course_modules', $mod->id)) {
+                if (!in_array($mod->modname, ['assign', 'quiz'])) {
                     continue;
                 }
 
                 $issummative = false;
                 $isformative = false;
 
-                if (in_array('Summative', $tags) || in_array('summative', $tags)) {
-                    $issummative = true;
-                }
+                if ($tags = core_tag_tag::get_item_tags_array('core', 'course_modules', $mod->id)) {
+                    if (in_array('Summative', $tags) || in_array('summative', $tags)) {
+                        $issummative = true;
+                    }
 
-                if (in_array('Formative', $tags) || in_array('formative', $tags)) {
-                    $isformative = true;
-                }
-
-                if (!$issummative && !$isformative) {
-                    continue;
+                    if (in_array('Formative', $tags) || in_array('formative', $tags)) {
+                        $isformative = true;
+                    }
                 }
 
                 if (!$instance = $DB->get_record($mod->modname, ['id' => $mod->instance])) {
@@ -351,16 +349,23 @@ class external extends \external_api {
                     $default[5] = $gradetime = $kicagrade->timemodified;
                     $finalgrade = (is_null($grade->finalgrade)) ? '' : $grade->finalgrade;
                     $activitymaxgrade = $kicaitem->get_grademax();
+                } else {
+                    if ($gradeitem = $DB->get_record('grade_items', $itemparams)) {
+                        $activitymaxgrade = $gradeitem->grademax;
+                        if ($grade = $DB->get_record('grade_grades', ['itemid' => $gradeitem->id, 'userid' => $user->id])) {
+                            $finalgrade = $grade->finalgrade ?? '';
+                        }
+                    }
                 }
 
                 // Completion.
                 $sqlcompletion = "SELECT cmc.* 
-                                FROM {course_modules_completion} cmc
-                          INNER JOIN {course_modules} cm 
-                                 ON cmc.coursemoduleid = cm.id
-                               WHERE cmc.coursemoduleid = ? 
-                                 AND cmc.userid = ? 
-                                 AND cm.deletioninprogress = 0";
+                                    FROM {course_modules_completion} cmc
+                              INNER JOIN {course_modules} cm 
+                                     ON cmc.coursemoduleid = cm.id
+                                   WHERE cmc.coursemoduleid = ? 
+                                     AND cmc.userid = ? 
+                                     AND cm.deletioninprogress = 0";
                 $completion = $DB->get_record_sql($sqlcompletion, [$mod->id, $user->id]);
                 $submissionstatus = 'notcompleted';
                 if (!empty($completion) && $completion->completionstate > 1) {
@@ -385,6 +390,7 @@ class external extends \external_api {
                 $data['activitygrade'] = $finalgrade;
                 $data['activitymaxgrade'] = $activitymaxgrade;
                 $data['coursegrade'] = $kicaavg;
+                $data['tags'] = [];
                 if ($isformative) {
                     $data['tags'][] = 'Formative';
                 }
