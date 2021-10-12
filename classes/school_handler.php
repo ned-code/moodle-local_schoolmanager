@@ -10,10 +10,13 @@
 namespace local_schoolmanager;
 
 use block_ned_teacher_tools\deadline_manager as DM;
+use block_ned_teacher_tools\utils;
 use theme_ned_boost\output\core_renderer;
 use theme_ned_boost\output\course;
 use theme_ned_boost\output\dashboard_content;
 use theme_ned_boost\shared_lib as NED;
+use local_kica as KICA;
+use function block_ned_teacher_tools\is_kica_exists;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -177,7 +180,8 @@ class school_handler {
         if ($courses) {
             $courseaverages = [];
             foreach ($courses as $course) {
-                $courseaverage = \block_ned_teacher_tools\get_course_grade($course->id, $user->id, 5);
+                //$courseaverage = \block_ned_teacher_tools\get_course_grade($course->id, $user->id, 5);
+                $courseaverage = self::get_course_grade($course->id, $user->id, 5);
                 if ($courseaverage != '-') {
                     $courseaverages[] = $courseaverage;
                 }
@@ -374,5 +378,25 @@ class school_handler {
                    AND u.timezone != ?";
 
         return $DB->record_exists_sql($sql, [$cohort->id, $cohort->timezone]);
+    }
+
+    /**
+     * @param $courseid
+     * @param $userid
+     * @param $precision
+     *
+     * @return float|string
+     */
+    // TODO load (count) all of them, if we need all user grades form course
+    public static function get_course_grade($courseid, $userid, $precision=2){
+        if (is_kica_exists() && utils::kica_gradebook_enabled($courseid)){
+            $finalgrade = KICA\helper::get_course_average($userid, $courseid, $precision, false, true);
+        } else {
+            $courseitem = \grade_item::fetch_course_item($courseid);
+            $coursegrade = new \grade_grade(array('itemid' => $courseitem->id, 'userid' => $userid));
+            $coursegrade->grade_item =& $courseitem;
+            $finalgrade = $coursegrade->finalgrade;
+        }
+        return is_null($finalgrade) ? '-' : round($finalgrade, $precision);
     }
 }

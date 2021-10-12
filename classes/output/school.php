@@ -84,10 +84,10 @@ class school implements \renderable, \templatable {
                     $courses = enrol_get_users_courses($student->id);
                     $student->deadlineextentions = SH::get_user_number_of_dl_extensions($student, $courses);
                     $deadlineextensions += $student->deadlineextentions;
-                    $student->gpa = SH::get_user_gpa($student, $courses);
+                    /*$student->gpa = SH::get_user_gpa($student, $courses);
                     if (!is_null($student->gpa)) {
                         $gpas[] = $student->gpa;
-                    }
+                    }*/
                     /*$participationpower = SH::get_user_ppa($student, $courses); // TODO: It slows down the page loading.
                     $student->ppa = NED::str(\theme_ned_boost\output\course::get_participation_power_status_by_power($participationpower));
                     if (!is_null($participationpower)) {
@@ -100,9 +100,9 @@ class school implements \renderable, \templatable {
                 }
                 $data->students = array_values($data->students);
                 $data->activestudents = count($data->students);
-                if ($gpas) {
+                /*if ($gpas) {
                     $data->averagegrade = round(array_sum($gpas) / count($gpas), 0);
-                }
+                }*/
                 if ($ppas) {
                     $participationpower = array_sum($ppas) / count($ppas);
                     $data->averagepp = NED::str(\theme_ned_boost\output\course::get_participation_power_status_by_power($participationpower));
