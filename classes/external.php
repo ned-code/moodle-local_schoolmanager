@@ -375,7 +375,31 @@ class external extends \external_api {
                 if (empty($duedate)) {
                     if ($mod->modname == 'assign') {
                         $duedate = $instance->cutoffdate;
+                        $sql = "SELECT su.*,
+                                       ag.grade,
+                                       ac.commenttext, ac.commentformat
+                                  FROM {assign_submission} su
+                       LEFT OUTER JOIN {assign_grades} ag
+                                    ON su.assignment = ag.assignment
+                                   AND su.userid = ag.userid
+                                   AND su.attemptnumber = ag.attemptnumber
+                       LEFT OUTER JOIN {assignfeedback_comments} ac
+                                    ON ag.id = ac.grade
+                                 WHERE su.assignment = ?
+                                   AND su.userid = ?
+                                   AND su.latest = 1
+                                   AND su.status = ?";
+
+                        if ($submission = $DB->get_record_sql($sql, [$instance->id, $user->id, ASSIGN_SUBMISSION_STATUS_SUBMITTED], IGNORE_MULTIPLE)) {
+                            if ($submission->grade == -1 || is_null($submission->grade)) {
+                                $submissionstatus = 'waitingforgrade';
+                            }
+                        }
                     } else if ($mod->modname == 'quiz') {
+                        $sql = "SELECT * FROM {quiz_attempts} qa WHERE qa.quiz = ? AND qa.userid = ? AND qa.state = 'finished' AND qa.sumgrades IS NULL";
+                        if ($DB->record_exists_sql($sql, [$instance->id, $user->id])) {
+                            $submissionstatus = 'waitingforgrade';
+                        }
                         $duedate = $instance->timeclose;
                     }
                 }
