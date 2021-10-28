@@ -372,10 +372,8 @@ class external extends \external_api {
                     $submissionstatus = 'completed';
                 }
 
-                if (empty($duedate)) {
-                    if ($mod->modname == 'assign') {
-                        $duedate = $instance->cutoffdate;
-                        $sql = "SELECT su.*,
+                if ($mod->modname == 'assign') {
+                    $sql = "SELECT su.*,
                                        ag.grade,
                                        ac.commenttext, ac.commentformat
                                   FROM {assign_submission} su
@@ -390,16 +388,22 @@ class external extends \external_api {
                                    AND su.latest = 1
                                    AND su.status = ?";
 
-                        if ($submission = $DB->get_record_sql($sql, [$instance->id, $user->id, ASSIGN_SUBMISSION_STATUS_SUBMITTED], IGNORE_MULTIPLE)) {
-                            if ($submission->grade == -1 || is_null($submission->grade)) {
-                                $submissionstatus = 'waitingforgrade';
-                            }
-                        }
-                    } else if ($mod->modname == 'quiz') {
-                        $sql = "SELECT * FROM {quiz_attempts} qa WHERE qa.quiz = ? AND qa.userid = ? AND qa.state = 'finished' AND qa.sumgrades IS NULL";
-                        if ($DB->record_exists_sql($sql, [$instance->id, $user->id])) {
+                    if ($submission = $DB->get_record_sql($sql, [$instance->id, $user->id, ASSIGN_SUBMISSION_STATUS_SUBMITTED], IGNORE_MULTIPLE)) {
+                        if ($submission->grade == -1 || is_null($submission->grade)) {
                             $submissionstatus = 'waitingforgrade';
                         }
+                    }
+                } else if ($mod->modname == 'quiz') {
+                    $sql = "SELECT * FROM {quiz_attempts} qa WHERE qa.quiz = ? AND qa.userid = ? AND qa.state = 'finished' AND qa.sumgrades IS NULL";
+                    if ($DB->record_exists_sql($sql, [$instance->id, $user->id])) {
+                        $submissionstatus = 'waitingforgrade';
+                    }
+                }
+
+                if (empty($duedate)) {
+                    if ($mod->modname == 'assign') {
+                        $duedate = $instance->cutoffdate;
+                    } else if ($mod->modname == 'quiz') {
                         $duedate = $instance->timeclose;
                     }
                 }
