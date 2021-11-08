@@ -727,6 +727,7 @@ class school_manager{
         $up_data->startdate = $data->startdate ?? time();
         $up_data->enddate = $data->enddate ?? (time() + 365*24*3600);
         $up_data->note = $data->note ?? '';
+        $up_data->synctimezone = $data->synctimezone ?? 0;
         // save logo
         $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
             PLUGIN_NAME, 'logo', $up_data->id);

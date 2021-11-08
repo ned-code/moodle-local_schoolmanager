@@ -117,5 +117,20 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021073100, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2021110800) {
+
+        // Define field synctimezone to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('synctimezone', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'usermodified');
+
+        // Conditionally launch add field synctimezone.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2021110800, 'local', 'schoolmanager');
+    }
+
     return true;
 }

@@ -114,3 +114,4 @@ $string['studentaivreportstooltip'] = 'Total Academic Integrity Violations';
 $string['studentaivreports30tooltip'] = 'Academic Integrity Violations in the last 30 days';
 $string['studentextentionstooltip'] = 'Deadline Extensions';
 $string['extentions'] = 'Extentions';
+$string['synctimezone'] = 'Sync timezones for all members';

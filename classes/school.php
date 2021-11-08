@@ -70,6 +70,9 @@ class school extends persistent implements cacheable_object  {
             'note' => array(
                 'type' => PARAM_RAW,
             ),
+            'synctimezone' => array(
+                'type' => PARAM_INT,
+            ),
         );
     }
 

@@ -73,6 +73,10 @@ class edit_school_form extends \moodleform {
         $mform->addElement('select', 'timezone', get_string('timezone'), $choices);
         $mform->setDefault('timezone', $CFG->timezone);
 
+        // Sync timezone
+        $mform->addElement('selectyesno', 'synctimezone', get_string('synctimezone', 'local_schoolmanager'));
+        $mform->setDefault('synctimezone', 0);
+
         // Logo
         if ($this->_can_manage){
             $mform->addElement('filemanager', 'logo_filemanager', SM\str('logo'), null,

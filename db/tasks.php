@@ -15,17 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * School manager tasks
+ *
  * @package    local_schoolmanager
- * @subpackage NED
- * @copyright  2020 NED {@link http://ned.ca}
- * @author     NED {@link http://ned.ca}
+ * @copyright  Michael Gardener <mgardener@cissq.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2021110801;
-$plugin->requires = 2017051500.00;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->component = 'local_schoolmanager';
-$plugin->release = '0.1.3';
+$tasks = array(
+    array(
+        'classname' => 'local_schoolmanager\task\sync_timezones',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '18',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    )
+);
