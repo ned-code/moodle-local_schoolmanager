@@ -78,6 +78,7 @@ class school_header implements \renderable, \templatable {
         $data->city = $this->school->get('city');
         $data->country = $this->school->get('country');
         $data->schoolwebsite = $this->school->get('url');
+        $data->synctimezone = $this->school->get('synctimezone');
 
 
         $data->schoolyear = $this->school->get_schoolyear();

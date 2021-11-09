@@ -42,7 +42,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-4">{{#str}}timezone, local_schoolmanager{{/str}}:</div>
-                    <div class="col-md-8"><strong>{{timezone}} ({{localtime}})</strong></div>
+                    <div class="col-md-8"><strong>{{timezone}} ({{localtime}})</strong>{{#synctimezone}} <i class="fa fa-users" aria-hidden="true"></i>{{/synctimezone}}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-4">{{#str}}schoolwebsite, local_schoolmanager{{/str}}:</div>
@@ -63,6 +63,9 @@
         <div class="col-md-6 offset-md-3">
             <div class="alert alert-danger mt-4 text-align-center">
                 {{# str }} differenttimezonewarning, block_ned_teacher_tools {{/ str }}
+                {{#synctimezone}}
+                    <div>{{# str }} synctimezonewarning, local_schoolmanager {{/ str }}</div>
+                {{/synctimezone}}
                 {{#isadmin}}
                     <div>
                         <a href="{{edittimezoneurl}}">
