@@ -209,20 +209,49 @@ class school implements \renderable, \templatable {
         }
 
         if ($this->view == SH::VIEW_SCHOOLS) {
+            $config = get_config('local_schoolmanager');
+            if ($config->general_cert_course) {
+                $course = get_course($config->general_cert_course);
+                $completioncertgen = new \completion_info($course);
+            }
+            if ($config->advanced_cert_course) {
+                $course = get_course($config->advanced_cert_course);
+                $completioncertadv = new \completion_info($course);
+            }
             $sh = new SH();
             $schools = $sh->get_schools();
+            $data->totalstudents = 0;
+            $data->totalcts = 0;
+            $data->totalctgc = 0;
+            $data->totalctac = 0;
             foreach ($schools as $school) {
                 $school->persistent = new SM\school($school->id);
                 $school->schoolurl = (new \moodle_url('/local/schoolmanager/view.php', ['view' => SH::VIEW_STUDENTS, 'schoolid' => $school->id]))->out(false);
                 $school->timezone = $school->persistent->get_timezone();
                 $school->schoolyear = $school->persistent->get_schoolyear();
                 $school->numberofstudents = 0;
+                $school->ctgc = 0;
+                $school->ctac = 0;
+                $school->aivreports = 0;
+
                 if ($students = $this->sm->get_school_students($school->id, true, $this->sm::DEF_MEMBER_ROLE, false)) {
                     $school->numberofstudents = count($students);
+                    $data->totalstudents += $school->numberofstudents;
                 }
                 $school->numberofcts = 0;
                 if ($cts = $this->sm->get_school_students($school->id, true, $this->sm::SCHOOL_CT_ROLE, false)) {
                     $school->numberofcts = count($cts);
+                    $data->totalcts += $school->numberofcts;
+                    foreach ($cts as $index => $ct) {
+                        if (isset($completioncertgen) && $completioncertgen->is_course_complete($ct->id)) {
+                            $school->ctgc++;
+                        }
+                        if (isset($completioncertadv) && $completioncertadv->is_course_complete($ct->id)) {
+                            $school->ctac++;
+                        }
+                        $data->totalctgc += $school->ctgc;
+                        $data->totalctac += $school->ctac;
+                    }
                 }
                 $actions = [];
                 $actions[] = array(
@@ -239,6 +268,12 @@ class school implements \renderable, \templatable {
                 $school->actionlinks = \html_writer::span(implode('', $actionshtml), 'class-item-actions item-actions');
             }
             $data->schools = array_values($schools);
+            $data->totalschools = count($schools);
+
+            if ($data->totalcts > 0) {
+                $data->ctgcrate = round((($data->totalctgc / $data->totalcts) * 100), 0);
+                $data->ctacrate = round((($data->totalctac / $data->totalcts) * 100), 0);
+            }
         }
         return $data;
     }

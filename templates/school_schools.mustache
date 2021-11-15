@@ -25,7 +25,7 @@
     * bodyattributes - attributes for the body tag as a string of html attributes
 }}
 <div class="row mt-6">
-    <div class="col-md-12">
+    <div class="col-md-9">
         <table id="school-list" class="generaltable">
             <thead>
             <tr>
@@ -35,6 +35,9 @@
                 <th>{{#str}}timezone, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}students, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}cts, local_schoolmanager{{/str}}</th>
+                <th>CT-GC</th>
+                <th>CT-AC</th>
+                <th>AIV</th>
                 <th>{{#str}}schoolyear, local_schoolmanager{{/str}}</th>
                 <th></th>
             </tr>
@@ -48,12 +51,44 @@
                     <td class="school-timezone">{{timezone}}{{#synctimezone}} <i class="fa fa-users" aria-hidden="true"></i>{{/synctimezone}}</td>
                     <td class="school-students">{{numberofstudents}}</td>
                     <td class="school-cts">{{numberofcts}}</td>
+                    <td class="school-cts">{{ctgc}}/{{numberofcts}}</td>
+                    <td class="school-cts">{{ctac}}/{{numberofcts}}</td>
+                    <td class="school-cts">{{aivreports}}</td>
                     <td class="school-schoolyear">{{schoolyear}}</td>
                     <td class="school-schoolyear">{{{actionlinks}}}</td>
                 </tr>
             {{/schools}}
             </tbody>
         </table>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                {{#str}}summary, local_schoolmanager{{/str}}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-9">{{#str}}totalschools, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{totalschools}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}totalstudents, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{totalstudents}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}totalcts, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{totalcts}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}ctgcrate, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{ctgcrate}}%</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}ctacrate, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{ctacrate}}%</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {{#js}}
