@@ -31,12 +31,12 @@
             <tr>
                 <th>{{#str}}name, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}role, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}classes, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}students, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
                 <th data-toggle="tooltip" title="{{#str}}staffextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
                 <th data-toggle="tooltip" title="{{#str}}staffaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
                 <th data-toggle="tooltip" data-title="{{#str}}staffaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
+                <th>CT-GC</th>
+                <th>CT-AC</th>
             </tr>
             </thead>
             <tbody>
@@ -44,12 +44,12 @@
                 <tr>
                     <td class="username userid-{{{id}}}"><a target="_blank" href="{{{userlink}}}">{{{name}}}</a></td>
                     <td class="role">{{role}}</td>
-                    <td class="classes text-center">{{classes}}</td>
-                    <td class="students text-center">{{students}}</td>
                     <td class="lastaccess">{{lastaccess}}</td>
                     <td class="deadlineextentions text-center">{{deadlineextentions}}</td>
                     <td class="aivreports text-center">{{aivreports}}</td>
                     <td class="aivreports30 text-center">{{aivreports30}}</td>
+                    <td class="school-cts">{{ctgc}}</td>
+                    <td class="school-cts">{{ctac}}</td>
                 </tr>
             {{/staffs}}
             </tbody>

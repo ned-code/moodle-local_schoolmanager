@@ -148,26 +148,30 @@ class school implements \renderable, \templatable {
                     $staff->deadlineextentions = '';
                     $staff->aivreports = '';
                     $staff->aivreports30 = '';
+                    $staff->ctgc = 'N';
+                    $staff->ctac = 'N';
                     if ($staff->profile['default_role'] == 'Classroom Teacher') {
                         $data->classroomteachers++;
                     }
 
                     if (isset($completioncertgen) && $completioncertgen->is_course_complete($staff->id)) {
                         $data->generalcert++;
+                        $staff->ctgc = 'Y';
                     }
                     if (isset($completioncertadv) && $completioncertadv->is_course_complete($staff->id)) {
                         $data->advancedcert++;
+                        $staff->ctac = 'Y';
                     }
 
                     if ($staff->role === 'Classroom Teacher') {
                         $classes = SH::get_classes($staff, $this->schoolid);
-                        $staff->classes = count($classes);
+                        //$staff->classes = count($classes);
                         $staff->students = 0;
                         $staff->deadlineextentions = 0;
                         $staff->aivreports = 0;
                         $staff->aivreports30 = 0;
                         foreach ($classes as $index => $class) {
-                            $staff->students += count($class['users']);
+                            //$staff->students += count($class['users']);
                             $courseid = $class['courseid'];
                             if (!isset($courses[$courseid])) {
                                 $courses[$courseid] = get_course($courseid);
