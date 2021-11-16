@@ -116,15 +116,6 @@ class school implements \renderable, \templatable {
 
         if ($this->view == SH::VIEW_STAFF) {
             $config = get_config('local_schoolmanager');
-            if ($config->general_cert_course) {
-                $course = get_course($config->general_cert_course);
-                $completioncertgen = new \completion_info($course);
-            }
-            if ($config->advanced_cert_course) {
-                $course = get_course($config->advanced_cert_course);
-                $completioncertadv = new \completion_info($course);
-            }
-
 
             $data->staffs = $this->sm->get_school_students($this->schoolid, true, $this->sm::STAFF_ROLES, false);
             $courses = [];
@@ -154,11 +145,11 @@ class school implements \renderable, \templatable {
                         $data->classroomteachers++;
                     }
 
-                    if (isset($completioncertgen) && $completioncertgen->is_course_complete($staff->id)) {
+                    if (SH::has_certificate_badge($staff->id, 'general')) {
                         $data->generalcert++;
                         $staff->ctgc = 'Y';
                     }
-                    if (isset($completioncertadv) && $completioncertadv->is_course_complete($staff->id)) {
+                    if (SH::has_certificate_badge($staff->id, 'advanced')) {
                         $data->advancedcert++;
                         $staff->ctac = 'Y';
                     }
@@ -214,14 +205,7 @@ class school implements \renderable, \templatable {
 
         if ($this->view == SH::VIEW_SCHOOLS) {
             $config = get_config('local_schoolmanager');
-            if ($config->general_cert_course) {
-                $course = get_course($config->general_cert_course);
-                $completioncertgen = new \completion_info($course);
-            }
-            if ($config->advanced_cert_course) {
-                $course = get_course($config->advanced_cert_course);
-                $completioncertadv = new \completion_info($course);
-            }
+
             $sh = new SH();
             $schools = $sh->get_schools();
             $data->totalstudents = 0;
@@ -247,10 +231,10 @@ class school implements \renderable, \templatable {
                     $school->numberofcts = count($cts);
                     $data->totalcts += $school->numberofcts;
                     foreach ($cts as $index => $ct) {
-                        if (isset($completioncertgen) && $completioncertgen->is_course_complete($ct->id)) {
+                        if (SH::has_certificate_badge($ct->id, 'general')) {
                             $school->ctgc++;
                         }
-                        if (isset($completioncertadv) && $completioncertadv->is_course_complete($ct->id)) {
+                        if (SH::has_certificate_badge($ct->id, 'advanced')) {
                             $school->ctac++;
                         }
                         $data->totalctgc += $school->ctgc;

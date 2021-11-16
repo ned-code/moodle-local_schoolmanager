@@ -121,3 +121,5 @@ $string['totalstudents'] = 'Total Students';
 $string['ctgcrate'] = 'CT General Certification Rate';
 $string['ctacrate'] = 'CT Advanced Certification Rate';
 $string['totalcts'] = 'Total Classroom Teachers';
+$string['general_cert_badge'] = 'CT General Certification Badge';
+$string['advanced_cert_badge'] = 'CT Advanced Certification Badge';

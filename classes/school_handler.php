@@ -399,4 +399,24 @@ class school_handler {
         }
         return is_null($finalgrade) ? '-' : round($finalgrade, $precision);
     }
+
+    /**
+     * @param $userid
+     * @param $type For example 'general' or 'advanced'
+     * @return bool
+     * @throws \dml_exception
+     */
+    public static function has_certificate_badge($userid, $type) {
+        $config = get_config('local_schoolmanager');
+        $badgeid = $config->{$type."_cert_badge"} ?? 0;
+        if ($badgeid) {
+            $badges = badges_get_user_badges($userid);
+            foreach ($badges as $badge) {
+                if ($badge->id == $config->general_cert_badge) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
