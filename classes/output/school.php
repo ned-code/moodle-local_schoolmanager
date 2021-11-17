@@ -237,9 +237,9 @@ class school implements \renderable, \templatable {
                         if (SH::has_certificate_badge($ct->id, 'advanced')) {
                             $school->ctac++;
                         }
-                        $data->totalctgc += $school->ctgc;
-                        $data->totalctac += $school->ctac;
                     }
+                    $data->totalctgc += $school->ctgc;
+                    $data->totalctac += $school->ctac;
                 }
                 $actions = [];
                 $actions[] = array(
