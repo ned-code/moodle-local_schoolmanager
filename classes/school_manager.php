@@ -567,6 +567,7 @@ class school_manager{
             list($sql_param, $school_params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
             $params = array_merge($params, $school_params);
             $where = ["m.cohortid $sql_param"];
+            $where[] = 'u.suspended = 0';
             $groupby = ['u.id'];
             $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
                     FROM {user} AS u
