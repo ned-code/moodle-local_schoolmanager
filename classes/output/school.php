@@ -81,7 +81,7 @@ class school implements \renderable, \templatable {
                     }
                     $student->name = $ai_flag . fullname($student);
                     $student->lastaccess = SH::get_user_lastaccess($student);
-                    $courses = enrol_get_users_courses($student->id);
+                    $courses = enrol_get_users_courses($student->id, true);
                     $student->deadlineextentions = SH::get_user_number_of_dl_extensions($student, $courses);
                     $deadlineextensions += $student->deadlineextentions;
                     /*$student->gpa = SH::get_user_gpa($student, $courses);

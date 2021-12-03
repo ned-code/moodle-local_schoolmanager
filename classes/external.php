@@ -24,28 +24,14 @@
 
 namespace local_schoolmanager;
 
+use local_schoolmanager\shared_lib as NED;
+
 defined('MOODLE_INTERNAL') || die;
 
+/** @var \stdClass $CFG */
 require_once($CFG->libdir . '/externallib.php');
 require_once($CFG->dirroot . '/cohort/lib.php');
 require_once("{$CFG->libdir}/completionlib.php");
-
-use block_ned_teacher_tools\deadline_manager;
-use external_api;
-use external_function_parameters;
-use external_value;
-use external_format_value;
-use external_single_structure;
-use external_multiple_structure;
-use core_course\external\course_summary_exporter;
-use context_user;
-use context_course;
-use context_helper;
-use external_description;
-use moodle_url;
-use local_kica as KICA;
-use completion_info;
-use core_tag_tag;
 
 /**
  * External functions
@@ -58,13 +44,13 @@ class external extends \external_api {
     /**
      * Returns description of method parameters
      *
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function get_classes_parameters() {
-        return new external_function_parameters(
+        return new \external_function_parameters(
             array(
-                'courseids' => new external_multiple_structure(
-                    new external_value(PARAM_INT, 'user ID'), 'An array of course IDs', VALUE_DEFAULT, array()
+                'courseids' => new \external_multiple_structure(
+                    new \external_value(PARAM_INT, 'user ID'), 'An array of course IDs', VALUE_DEFAULT, array()
                 ),
             )
         );
@@ -190,7 +176,7 @@ class external extends \external_api {
 
         $rs->close();
 
-        $context = context_user::instance($USER->id);
+        $context = \context_user::instance($USER->id);
         self::validate_context($context);
 
 
@@ -200,32 +186,32 @@ class external extends \external_api {
     /**
      * Returns description of method result value
      *
-     * @return external_description
+     * @return \external_description
      */
     public static function get_classes_returns() {
-        return new external_multiple_structure(
-            new external_single_structure([
-                'courseid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                'coursename'  => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'classid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                'classurl'    => new external_value(PARAM_URL, '', VALUE_OPTIONAL),
-                'startdate'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'enddate'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'dmduedate'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'users' => new external_multiple_structure(
-                    new external_single_structure(
+        return new \external_multiple_structure(
+            new \external_single_structure([
+                'courseid'    => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                'coursename'  => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'classid'    => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                'classurl'    => new \external_value(PARAM_URL, '', VALUE_OPTIONAL),
+                'startdate'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'enddate'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'dmduedate'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'users' => new \external_multiple_structure(
+                    new \external_single_structure(
                         array(
-                            'id' => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                            'firstname' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                            'lastname' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                            'coursegrade' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                            'coursegrademax' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                            'roles' => new external_multiple_structure(
-                                new external_single_structure(
+                            'id' => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                            'firstname' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                            'lastname' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                            'coursegrade' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                            'coursegrademax' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                            'roles' => new \external_multiple_structure(
+                                new \external_single_structure(
                                     array(
-                                        'id' => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                                        'name' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                                        'shortname' => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                                        'id' => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                                        'name' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                                        'shortname' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                                     )
                                 )
                             )
@@ -239,14 +225,14 @@ class external extends \external_api {
     /**
      * Returns description of method parameters
      *
-     * @return external_function_parameters
+     * @return \external_function_parameters
      */
     public static function get_student_activities_parameters() {
-        return new external_function_parameters(
+        return new \external_function_parameters(
             [
-                'studentid' => new external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
-                'courseids' => new external_multiple_structure(
-                    new external_value(PARAM_INT, 'Course ID'), 'An array of Course IDs', VALUE_DEFAULT, array()
+                'studentid' => new \external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
+                'courseids' => new \external_multiple_structure(
+                    new \external_value(PARAM_INT, 'Course ID'), 'An array of Course IDs', VALUE_DEFAULT, array()
                 ),
             ]
         );
@@ -261,7 +247,7 @@ class external extends \external_api {
             ['studentid' => $studentid, 'courseids' => $courseids]
         );
 
-        $context = context_user::instance($USER->id);
+        $context = \context_user::instance($USER->id);
         self::validate_context($context);
 
         if (!$params['studentid']) {
@@ -287,11 +273,15 @@ class external extends \external_api {
 
         foreach ($courses as $course) {
             // Retrieve course_module data for all modules in the course
-            $modinfo = get_fast_modinfo($course, $user->id);
-            $activities = $modinfo->get_cms();
+            $kica = NED::get_kica($course->id);
+            $activities = NED::get_important_activities($course, $user->id);
 
-            $deadlinemanager = new deadline_manager($course->id);
-
+            if ($kica && !empty($activities)){
+                NED::kg_get_grades_by_course($courseid, $userid, true, true);
+                $kicaavg = NED::kg_get_course_average($courseid, $userid, NED::FINALGRADE, 5);
+            } else {
+                $kicaavg = null;
+            }
             foreach ($activities as $mod) {
                 $data = [];
                 $data['studentid'] = $user->id;
@@ -307,7 +297,7 @@ class external extends \external_api {
                 $issummative = false;
                 $isformative = false;
 
-                if ($tags = core_tag_tag::get_item_tags_array('core', 'course_modules', $mod->id)) {
+                if ($tags = \core_tag_tag::get_item_tags_array('core', 'course_modules', $mod->id)) {
                     if (in_array('Summative', $tags) || in_array('summative', $tags)) {
                         $issummative = true;
                     }
@@ -317,58 +307,35 @@ class external extends \external_api {
                     }
                 }
 
-                if (!$instance = $DB->get_record($mod->modname, ['id' => $mod->instance])) {
-                    continue;
-                }
+                $duedate = NED::get_deadline_by_cm($mod);
 
-                $duedate =0;
-                if ($deadlinemanager->is_enabled_activity($mod->id)) {
-                    $classname = '\block_ned_teacher_tools\mod\deadline_manager_' . $mod->modname;
-                    if (class_exists($classname)) {
-                        $module = new $classname($mod);
-                        $duedate = $module->get_user_effective_access($user->id);
-                    }
+                if ($kica) {
+                    $kicaitem = NED::ki_get_by_cm($mod);
+                    $kicagrade = NED::kg_get_by_userid_itemid($user, $kicaitem);
+                } else {
+                    $kicaavg = $kicaitem = null;
                 }
-
-                if ($kica = $DB->get_record('local_kica', array('courseid' => $course->id))) {
-                    $kicaavg = \local_kica\helper::get_course_average($user->id, $course->id, 5);
-                }
-                $itemparams = [
-                    'courseid' => $course->id,
-                    'itemtype' => 'mod',
-                    'itemmodule' => $mod->modname,
-                    'iteminstance' => $mod->instance,
-                ];
-                $kicaitem = new KICA\kica_item($itemparams);
                 $finalgrade = '';
                 $activitymaxgrade = '';
-                if ($kica && $kicaitem->id) {
-                    $kicagrade = new KICA\grade($user->id, $kicaitem->id, $kica->pullfromgradebook);
-                    $grade = $kicagrade->get_grade();
+                if ($kica && !empty($kicaitem->id) && !empty($kicagrade->id)){
                     $default[4] = $gradetimecreated = $kicagrade->timecreated;
                     $default[5] = $gradetime = $kicagrade->timemodified;
-                    $finalgrade = (is_null($grade->finalgrade)) ? '' : $grade->finalgrade;
+                    $finalgrade = $kicagrade->get_finalgrade(true);
                     $activitymaxgrade = $kicaitem->get_grademax();
                 } else {
-                    if ($gradeitem = $DB->get_record('grade_items', $itemparams)) {
+                    if ($gradeitem = NED::get_grade_item($mod)) {
                         $activitymaxgrade = $gradeitem->grademax;
-                        if ($grade = $DB->get_record('grade_grades', ['itemid' => $gradeitem->id, 'userid' => $user->id])) {
+                        if ($grade = NED::get_grade_grade($mod, $user, false)) {
                             $finalgrade = $grade->finalgrade ?? '';
                         }
                     }
                 }
 
                 // Completion.
-                $sqlcompletion = "SELECT cmc.* 
-                                    FROM {course_modules_completion} cmc
-                              INNER JOIN {course_modules} cm 
-                                     ON cmc.coursemoduleid = cm.id
-                                   WHERE cmc.coursemoduleid = ? 
-                                     AND cmc.userid = ? 
-                                     AND cm.deletioninprogress = 0";
-                $completion = $DB->get_record_sql($sqlcompletion, [$mod->id, $user->id]);
+                $completion = new \completion_info($course);
+                $cm_completion = $completion->get_data($mod, true, $user->id, NED::get_fast_modinfo($course));
                 $submissionstatus = 'notcompleted';
-                if (!empty($completion) && $completion->completionstate > 1) {
+                if (($cm_completion->completionstate ?? 0) > 1) {
                     $submissionstatus = 'completed';
                 }
 
@@ -400,20 +367,12 @@ class external extends \external_api {
                     }
                 }
 
-                if (empty($duedate)) {
-                    if ($mod->modname == 'assign') {
-                        $duedate = $instance->cutoffdate;
-                    } else if ($mod->modname == 'quiz') {
-                        $duedate = $instance->timeclose;
-                    }
-                }
-
                 $data['courseid'] = $course->id;
                 $data['activityid'] = $mod->id;
                 $data['activityname'] = $mod->get_formatted_name();
-                $data['activiturl'] = (new moodle_url('/mod/' . $mod->modname . '/view.php', ['id' => $mod->id]))->out();
+                $data['activiturl'] = $mod->get_url()->out(false);
                 $data['activitytype'] = $mod->modname;
-                $data['duedate'] = (!empty($duedate)) ? userdate($duedate) : '';
+                $data['duedate'] = NED::ned_date($duedate, '');
                 $data['submissionstatus'] = $submissionstatus;
                 $data['activitygrade'] = $finalgrade;
                 $data['activitymaxgrade'] = $activitymaxgrade;
@@ -428,8 +387,9 @@ class external extends \external_api {
 
                 $return[] = $data;
             }
-        }
 
+            NED::purge_course_depended_caches();
+        }
 
         return $return;
     }
@@ -437,23 +397,23 @@ class external extends \external_api {
     /**
      * Returns description of method result value
      *
-     * @return external_description
+     * @return \external_description
      */
     public static function get_student_activities_returns() {
-        return new external_multiple_structure(
-            new external_single_structure([
-                'studentid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                'courseid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                'activityid'    => new external_value(PARAM_INT, '', VALUE_OPTIONAL),
-                'activityname'    => new external_value(PARAM_RAW, '', VALUE_OPTIONAL),
-                'activiturl'    => new external_value(PARAM_URL, '', VALUE_OPTIONAL),
-                'activitytype'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'duedate'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'submissionstatus'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'activitygrade'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'activitymaxgrade'    => new external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                'tags' => new external_multiple_structure(
-                    new external_value(PARAM_TEXT, 'Tag name'), 'An array of tagname', VALUE_DEFAULT, array()
+        return new \external_multiple_structure(
+            new \external_single_structure([
+                'studentid'    => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                'courseid'    => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                'activityid'    => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
+                'activityname'    => new \external_value(PARAM_RAW, '', VALUE_OPTIONAL),
+                'activiturl'    => new \external_value(PARAM_URL, '', VALUE_OPTIONAL),
+                'activitytype'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'duedate'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'submissionstatus'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'activitygrade'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'activitymaxgrade'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
+                'tags' => new \external_multiple_structure(
+                    new \external_value(PARAM_TEXT, 'Tag name'), 'An array of tagname', VALUE_DEFAULT, array()
                 ),
             ])
         );

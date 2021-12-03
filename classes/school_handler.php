@@ -157,41 +157,59 @@ class school_handler {
         return $lastlogin;
     }
 
-    public static function get_user_number_of_dl_extensions($user, $courses = null) {
-        if (empty($courses)) {
-            $courses = enrol_get_users_courses($user->id);
+    /**
+     * @param numeric|object     $user_or_id
+     * @param array|null         $courses
+     *
+     * @return int|null
+     */
+    public static function get_user_number_of_dl_extensions($user_or_id, $courses=null) {
+        $userid = NED::get_id($user_or_id);
+        if (is_null($courses)) {
+            $courses = enrol_get_users_courses($userid);
+        } elseif (empty($courses)){
+            return null;
+        } else {
+            $courses = NED::val2arr($courses);
         }
 
         $deadlineextentions = 0;
-
-        if ($courses) {
-            foreach ($courses as $course) {
-                $deadlineextentions += DM::get_number_of_extensions_in_course($user->id, $course->id);
-            }
-            return $deadlineextentions;
+        foreach ($courses as $course) {
+            $deadlineextentions += DM::get_number_of_extensions_in_course($userid, $course->id);
         }
-        return null;
+
+        return $deadlineextentions;
     }
 
-    public static function get_user_gpa($user, $courses = null) {
-        if (empty($courses)) {
-            $courses = enrol_get_users_courses($user->id);
+    /**
+     * @param numeric|object     $user_or_id
+     * @param array|null         $courses
+     *
+     * @return float|int|null
+     */
+    public static function get_user_gpa($user_or_id, $courses=null) {
+        $userid = NED::get_id($user_or_id);
+        if (is_null($courses)) {
+            $courses = enrol_get_users_courses($userid);
+        } elseif (empty($courses)){
+            return null;
+        } else {
+            $courses = NED::val2arr($courses);
         }
-        if ($courses) {
-            $courseaverages = [];
-            foreach ($courses as $course) {
-                //$courseaverage = \block_ned_teacher_tools\get_course_grade($course->id, $user->id, 5);
-                $courseaverage = self::get_course_grade($course->id, $user->id, 5);
-                if ($courseaverage != '-') {
-                    $courseaverages[] = $courseaverage;
-                }
-            }
 
-            if ($courseaverages) {
-                return round(array_sum($courseaverages) / count($courseaverages), 2);
+        $courseaverages = [];
+        foreach ($courses as $course) {
+            $courseaverage = NED::get_course_grade($course->id, $userid, false, false, null);
+            if (!is_null($courseaverage)) {
+                $courseaverages[] = $courseaverage;
             }
         }
-        return null;
+
+        if ($courseaverages) {
+            return round(array_sum($courseaverages) / count($courseaverages), 2);
+        }
+
+        return 0;
     }
 
     public static function get_user_ppa($user, $courses = null) {
