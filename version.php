@@ -24,8 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2021112100;
+$plugin->version  = 2021120300;
 $plugin->requires = 2017051500.00;
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->component = 'local_schoolmanager';
 $plugin->release = '0.1.3';
+$plugin->dependencies = array(
+    'local_ned_controller' => 2021120300,
+);
