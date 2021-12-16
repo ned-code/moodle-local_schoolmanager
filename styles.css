@@ -104,3 +104,8 @@ body.pagelayout-schoolmanager .control-panel {
   font-size: 1.5rem;
   font-weight: bold;
 }
+.pagelayout-schoolmanager #school-list th,
+.pagelayout-schoolmanager #school-list td {
+  font-size: 13px;
+  padding: 6px;
+}
