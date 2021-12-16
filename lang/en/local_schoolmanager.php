@@ -50,6 +50,7 @@ $string['aiv30schoolyear'] = 'AIV - Last 30 Days';
 $string['aivreports'] = 'AIV Reports';
 $string['aivreports30'] = 'AIV-30 Days';
 $string['aivschoolyear'] = 'AIV - School Year';
+$string['aivaverage'] = 'AIV Average';
 $string['averagegrade'] = 'Average grade';
 $string['averagepp'] = 'Average PP';
 $string['city'] = 'City';

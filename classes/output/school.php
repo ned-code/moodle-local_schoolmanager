@@ -111,6 +111,9 @@ class school implements \renderable, \templatable {
                 $data->aiv30schoolyear = $aiv30schoolyear;
                 $data->misseddeadlines = '---';
                 $data->deadlineextensions = $deadlineextensions;
+                if ($data->activestudents) {
+                    $data->aivaverage = round(($aivschoolyear / $data->activestudents), 1);
+                }
             }
         }
 
@@ -221,11 +224,17 @@ class school implements \renderable, \templatable {
                 $school->ctgc = 0;
                 $school->ctac = 0;
                 $school->aivreports = 0;
-
+                $aivschoolyear = 0;
                 if ($students = $this->sm->get_school_students($school->id, true, $this->sm::DEF_MEMBER_ROLE, false)) {
                     $school->numberofstudents = count($students);
                     $data->totalstudents += $school->numberofstudents;
+                    foreach ($students as $student) {
+                        $aiv = SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'));
+                        $aivschoolyear += $aiv;
+                    }
+                    $school->aivaverage = round(($aivschoolyear /  $school->numberofstudents), 1);
                 }
+
                 $school->numberofcts = 0;
                 if ($cts = $this->sm->get_school_students($school->id, true, $this->sm::SCHOOL_CT_ROLE, false)) {
                     $school->numberofcts = count($cts);
