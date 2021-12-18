@@ -31,6 +31,8 @@ defined('MOODLE_INTERNAL') || die();
 
 NED::require_file('~/lib.php');
 NED::require_lib('enrollib.php');
+NED::require_lib('grouplib.php');
+NED::require_lib('accesslib.php');
 
 /**
  * Class sync_course_admins
