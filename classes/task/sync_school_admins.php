@@ -29,6 +29,7 @@ use local_schoolmanager\school_manager;
 
 defined('MOODLE_INTERNAL') || die();
 NED::require_file('~/lib.php');
+NED::require_file('/cohort/lib.php');
 
 /**
  * Class sync_school_admins
