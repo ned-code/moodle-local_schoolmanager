@@ -8,6 +8,7 @@
  */
 
 namespace local_schoolmanager;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -46,7 +47,7 @@ class school_manager{
     const FIELD_ROLE = 'default_role';
     const DEF_MEMBER_ROLE = 'Student';
     const STAFF_ROLES = ['Classroom Teacher', 'School Administrator', 'Classroom Assistant', 'Guidance Counsellor', 'Online Teacher', 'District Administrator'];
-    const SCHOOL_ADMINISTRTOR_ROLE = 'School Administrator';
+    const SCHOOL_ADMINISTRATOR_ROLE = 'School Administrator';
     const SCHOOL_CT_ROLE = 'Classroom Teacher';
 
     static protected $_school_managers = [];
@@ -362,7 +363,7 @@ class school_manager{
             foreach ($cohorts as $id => $cohort){
                 $code = trim($cohort->idnumber ?? '');
                 // Schools have 4-digits code
-                if (strlen($code) == 4){
+                if (strlen($code) == NED::SCHOOL_CODE_LENGTH){
                     $potential_schools[$id] = $cohort;
                 }
             }

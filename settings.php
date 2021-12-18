@@ -23,6 +23,8 @@
  */
 
 use local_schoolmanager as SM;
+use local_schoolmanager\shared_lib as NED;
+
 defined('MOODLE_INTERNAL') || die();
 
 if (empty($hassiteconfig)){
@@ -93,7 +95,8 @@ $settings = new admin_settingpage(SM\PLUGIN_NAME.'_settings', SM\str('pluginname
 $ADMIN->add('localplugins', $settings);
 
 // settings
-$settings->add($configlink('view_schoolmanager',SM\PLUGIN_URL, true));
+$settings->add($configlink('view_schoolmanager', NED::url('~/'), true));
+$settings->add($configlink('schoolmanager_tasks', NED::url('~/schoolmanager_tasks.php'), true));
 $settings->add($configheading('general'));
 //$settings->add($configyesno('disabled', 0));
 $settings->add($configtextarea('academic_program','','',"1 Year",PARAM_TEXT, 10, 3));
@@ -108,3 +111,27 @@ $badgeoptions = [0 => get_string('choose')] + $badgeoptions;
 
 $settings->add($configselect('general_cert_badge', '', '', 0, $badgeoptions));
 $settings->add($configselect('advanced_cert_badge', '', '', 0, $badgeoptions));
+
+$find_school_sync_fields = function($type='menu', $find_default=false, $fullname=false){
+    $choices = [
+        0 => get_string('none')
+    ];
+    $default = 0;
+    $profile_fields = profile_get_custom_fields();
+    foreach ($profile_fields as $field){
+        if ($field->datatype == $type){
+            if ($find_default && !$default && $find_default == $field->shortname){
+                $default = $field->id;
+            }
+            $choices[$field->id] = $fullname ? "$field->name {{$field->shortname}}" : $field->name;
+        }
+    }
+
+    return [$choices, $default];
+};
+
+list($choices, $default) = $find_school_sync_fields('menu', 'partner_school');
+$settings->add($configselect('school_field_to_sync', '', '', $default, $choices));
+
+list($choices, $default) = $find_school_sync_fields('multiselect', 'district_admin');
+$settings->add($configselect('schools_field_to_sync', '', '', $default, $choices));
