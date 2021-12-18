@@ -82,7 +82,7 @@ class school_header implements \renderable, \templatable {
 
 
         $data->schoolyear = $this->school->get_schoolyear();
-        if ($administrator = $this->sm->get_school_students($this->schoolid, true, $this->sm::SCHOOL_ADMINISTRTOR_ROLE, false)) {
+        if ($administrator = $this->sm->get_school_students($this->schoolid, true, $this->sm::SCHOOL_ADMINISTRATOR_ROLE, false)) {
             $administrator = reset($administrator);
             $data->administrator = fullname($administrator);
         }

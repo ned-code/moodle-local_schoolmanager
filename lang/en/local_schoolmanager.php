@@ -37,6 +37,12 @@ $string['disabled'] = 'Disabled';
 $string['view_schoolmanager'] = 'View School Manager';
 $string['academic_program'] = 'Academic Program options';
 $string['academic_program_desc'] = 'Values for "Academic Program" selector (one per line)';
+$string['school_field_to_sync'] = 'Field to sync by school';
+$string['schools_field_to_sync'] = 'Field to sync by schools';
+
+// Tasks
+$string['sync_school_admins'] = 'Sync School and District Admins to school cohorts';
+$string['sync_course_admins'] = 'Auto enroll School and District Admins to courses';
 
 // Other
 $string['academicintegrity'] = 'Academic Integrity';
@@ -135,3 +141,5 @@ $string['users'] = 'Users';
 $string['totalaiv'] = 'Total AIV';
 $string['totalaiv30'] = 'Total AIV-30';
 $string['showschoolswithnostudents'] = 'Show schools with no students';
+$string['schoolmanager_tasks'] = 'School Manager tasks';
+$string['notasks'] = 'There are no School Manager tasks';
