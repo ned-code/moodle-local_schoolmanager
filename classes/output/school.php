@@ -208,14 +208,18 @@ class school implements \renderable, \templatable {
 
         if ($this->view == SH::VIEW_SCHOOLS) {
             $config = get_config('local_schoolmanager');
+            $showall = optional_param('showall', false, PARAM_BOOL);
 
             $sh = new SH();
             $schools = $sh->get_schools();
+            $data->showall = $showall;
             $data->totalstudents = 0;
             $data->totalcts = 0;
             $data->totalctgc = 0;
             $data->totalctac = 0;
-            foreach ($schools as $school) {
+            $data->totalaiv = 0;
+            $data->totalaiv30 = 0;
+            foreach ($schools as $index => $school) {
                 $school->persistent = new SM\school($school->id);
                 $school->schoolurl = (new \moodle_url('/local/schoolmanager/view.php', ['view' => SH::VIEW_STUDENTS, 'schoolid' => $school->id]))->out(false);
                 $school->timezone = $school->persistent->get_timezone();
@@ -229,10 +233,18 @@ class school implements \renderable, \templatable {
                     $school->numberofstudents = count($students);
                     $data->totalstudents += $school->numberofstudents;
                     foreach ($students as $student) {
-                        $aiv = SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'));
-                        $aivschoolyear += $aiv;
+                        $school->aiv = SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'));
+                        $school->aiv30 = SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'), 30);
+                        $aivschoolyear += $school->aiv;
+                        $data->totalaiv += $school->aiv;
+                        $data->totalaiv30 += $school->aiv30;
                     }
                     $school->aivaverage = round(($aivschoolyear /  $school->numberofstudents), 1);
+                } else {
+                    if (!$showall) {
+                        unset($schools[$index]);
+                        continue;
+                    }
                 }
 
                 $school->numberofcts = 0;

@@ -109,3 +109,27 @@ body.pagelayout-schoolmanager .control-panel {
   font-size: 13px;
   padding: 6px;
 }
+.pagelayout-schoolmanager #school-list th {
+  background-color: #ECEEEF;
+}
+.pagelayout-schoolmanager #school-list th.border-left,
+.pagelayout-schoolmanager #school-list td.border-left {
+  border-left-width: 2px;
+}
+.pagelayout-schoolmanager .school-page .card {
+  font-size: 13px;
+}
+.pagelayout-schoolmanager .school-page .card .card-header {
+  padding: 6px;
+  background-color: #ECEEEF;
+}
+.pagelayout-schoolmanager .school-page .card .card-body {
+  padding: 6px;
+}
+.pagelayout-schoolmanager .school-page .card .card-body .col-md-3
+.pagelayout-schoolmanager .school-page .card .card-body .col-md-9 {
+  padding: 0 6px;
+}
+.pagelayout-schoolmanager .school-page .form-check-label {
+  font-size: 13px;
+}
