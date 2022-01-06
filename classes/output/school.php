@@ -228,18 +228,18 @@ class school implements \renderable, \templatable {
                 $school->ctgc = 0;
                 $school->ctac = 0;
                 $school->aivreports = 0;
-                $aivschoolyear = 0;
+                $school->aiv = 0;
+                $school->aiv30 = 0;
                 if ($students = $this->sm->get_school_students($school->id, true, $this->sm::DEF_MEMBER_ROLE, false)) {
                     $school->numberofstudents = count($students);
                     $data->totalstudents += $school->numberofstudents;
                     foreach ($students as $student) {
-                        $school->aiv = SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'));
-                        $school->aiv30 = SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'), 30);
-                        $aivschoolyear += $school->aiv;
-                        $data->totalaiv += $school->aiv;
-                        $data->totalaiv30 += $school->aiv30;
+                        $school->aiv += SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'));
+                        $school->aiv30 += SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'), 30);
                     }
-                    $school->aivaverage = round(($aivschoolyear /  $school->numberofstudents), 1);
+                    $data->totalaiv += $school->aiv;
+                    $data->totalaiv30 += $school->aiv30;
+                    $school->aivaverage = round(($school->aiv /  $school->numberofstudents), 1);
                 } else {
                     if (!$showall) {
                         unset($schools[$index]);
