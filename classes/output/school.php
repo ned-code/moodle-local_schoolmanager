@@ -158,20 +158,23 @@ class school implements \renderable, \templatable {
                     }
 
                     if ($staff->role === 'Classroom Teacher') {
+                        $staffstudents = [];
                         $classes = SH::get_classes($staff, $this->schoolid);
-                        //$staff->classes = count($classes);
                         $staff->students = 0;
                         $staff->deadlineextentions = 0;
                         $staff->aivreports = 0;
                         $staff->aivreports30 = 0;
                         foreach ($classes as $index => $class) {
-                            //$staff->students += count($class['users']);
                             $courseid = $class['courseid'];
                             if (!isset($courses[$courseid])) {
                                 $courses[$courseid] = get_course($courseid);
                             }
                             foreach ($class['users'] as $user) {
                                 $activestudents[$user['id']] = $user['id'];
+                                if (isset($staffstudents[$user['id']])) {
+                                    continue;
+                                }
+                                $staffstudents[$user['id']] = $user['id'];
                                 $staff->deadlineextentions += SH::get_user_number_of_dl_extensions((object)$user, [$courses[$courseid]]);
                                 $staff->aivreports += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'));
                                 $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 30);
