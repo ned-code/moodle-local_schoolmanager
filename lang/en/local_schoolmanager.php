@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'NED School Manager';
+$string['pluginname'] = 'Rosedale School Manager';
 
 // Capabilities
 $string['schoolmanager:viewownschooldashboard'] = 'View own school manager';
@@ -49,9 +49,9 @@ $string['academicintegrity'] = 'Academic Integrity';
 $string['academicprogram'] = 'Academic Program';
 $string['activestudents'] = 'Active Students';
 $string['admissiondate'] = 'Admission Date';
-$string['advanced_cert_badge'] = 'CT Advanced Certification Badge';
-$string['advanced_cert_course'] = 'CT Advanced Certification Course';
-$string['advancedcert'] = 'CT Advanced Certification';
+$string['advanced_cert_badge'] = 'CT Advanced Qualification Badge';
+$string['advanced_cert_course'] = 'CT Advanced Qualification Course';
+$string['advancedcert'] = 'CT Advanced Qualification';
 $string['aiv'] = 'AIV';
 $string['aiv30'] = 'AIV-30';
 $string['aiv30schoolyear'] = 'AIV - Last 30 Days';
@@ -108,7 +108,7 @@ $string['nousersatschool'] = 'There are no users in this school.';
 $string['ppa'] = 'PPA';
 $string['resettimezoneforall'] = 'Click here to reset timezone for all school members now';
 $string['role'] = 'Role';
-$string['rosedalecode'] = 'Rosadale Code';
+$string['rosedalecode'] = 'School Code';
 $string['school'] = 'School';
 $string['schooldeletedsuccessfully'] = 'School deleted successfully';
 $string['schoolid'] = 'School ID';
