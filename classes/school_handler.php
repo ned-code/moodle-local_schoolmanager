@@ -314,10 +314,14 @@ class school_handler {
                     ON g.courseid = c.id
             INNER JOIN {user} u 
                     ON gm.userid = u.id
+            INNER JOIN (SELECT gm2.id, gm2.groupid FROM {groups_members} gm2
+                          JOIN {groups} g2 ON gm2.groupid = g2.id
+                         WHERE gm2.userid = :staffid) sg ON g.id = sg.groupid            
                  WHERE $filtersql 
                    AND u.deleted = 0 
                    AND gm.userid IN (SELECT cm.userid FROM {cohort_members} cm WHERE cm.cohortid = :cohortid)";
 
+        $courseparams['staffid'] = $user->id;
         $courseparams['cohortid'] = $school->id;
 
         $rs = $DB->get_recordset_sql($sql, $courseparams);
