@@ -231,13 +231,18 @@ class school_handler {
         return null;
     }
 
-    public static function get_user_aiv($user, $startdate, $enddate, $lastdays = 0) {
+    public static function get_user_aiv($user, $startdate, $enddate, $lastdays = 0, $courseid = 0) {
         global $DB;
 
         $dayfilter = '';
+        $coursefilter = '';
         $params['student'] = $user->id;
         $params['startdate'] = $startdate;
         $params['enddate'] = $enddate;
+        if ($courseid) {
+            $coursefilter = 'AND aiv.courseid = :courseid';
+            $params['courseid'] = $courseid;
+        }
 
         if ($lastdays) {
             $dayfilter = 'AND aiv.infractiondate >= :lastdays';
@@ -250,6 +255,7 @@ class school_handler {
                    AND aiv.approved = 1 
                    AND aiv.infractiondate >= :startdate
                    AND aiv.infractiondate < :enddate
+                       $coursefilter
                        $dayfilter";
         return $DB->count_records_sql($sql, $params);
     }
@@ -314,9 +320,10 @@ class school_handler {
                     ON g.courseid = c.id
             INNER JOIN {user} u 
                     ON gm.userid = u.id
-            INNER JOIN (SELECT gm2.id, gm2.groupid FROM {groups_members} gm2
+            INNER JOIN (SELECT gm2.id, gm2.groupid, g2.courseid FROM {groups_members} gm2
                           JOIN {groups} g2 ON gm2.groupid = g2.id
-                         WHERE gm2.userid = :staffid) sg ON g.id = sg.groupid            
+                         WHERE gm2.userid = :staffid) sg
+                    ON g.id = sg.groupid AND g.courseid = sg.courseid             
                  WHERE $filtersql 
                    AND u.deleted = 0 
                    AND gm.userid IN (SELECT cm.userid FROM {cohort_members} cm WHERE cm.cohortid = :cohortid)";
