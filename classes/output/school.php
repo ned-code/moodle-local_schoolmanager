@@ -172,11 +172,10 @@ class school implements \renderable, \templatable {
                             }
                             foreach ($class['users'] as $user) {
                                 $activestudents[$user['id']] = $user['id'];
-                                if (isset($staffstudents[$user['id']])) {
+                                if (isset($staffstudents[$courseid][$user['id']])) {
                                     continue;
                                 }
-                                $staffstudents[$user['id']] = $user['id'];
-
+                                $staffstudents[$courseid][$user['id']] = $user['id'];
                                 $staff->deadlineextentions += SH::get_user_number_of_dl_extensions((object)$user, [$courses[$courseid]]);
                                 $staff->aivreports += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 0, $courseid);
                                 $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 30, $courseid);
