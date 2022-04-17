@@ -61,6 +61,9 @@ class school extends persistent implements cacheable_object  {
             'logo' => array(
                 'type' => PARAM_INT,
             ),
+            'compact_logo' => array(
+                'type' => PARAM_INT,
+            ),
             'startdate' => array(
                 'type' => PARAM_INT,
             ),

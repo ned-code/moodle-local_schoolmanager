@@ -9,6 +9,7 @@
 
 namespace local_schoolmanager\forms;
 use local_schoolmanager as SM;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -80,9 +81,13 @@ class edit_school_form extends \moodleform {
         // Logo
         if ($this->_can_manage){
             $mform->addElement('filemanager', 'logo_filemanager', SM\str('logo'), null,
-                ['accepted_types' => ['.png','.jpg'], 'maxfiles' => 1]);
+                array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
+            //Compact Logo
+            $mform->addElement('filemanager', 'compact_logo_filemanager', NED::$C::str('compactlogo'), null,
+                array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
         } else {
             $mform->addElement('static', 'currentpicture', SM\str('logo'));
+            $mform->addElement('static', 'currentpicture_compact', NED::$C::str('compactlogo'));
         }
 
         $mform->addElement('date_selector', 'startdate', SM\str('schoolyearstartdate'));
@@ -133,6 +138,15 @@ class edit_school_form extends \moodleform {
             } else {
                 $imageelement->setValue(get_string('none'));
             }
+
+            // set static compact logo image
+            $imageelement = $mform->getElement('currentpicture_compact');
+            $logourl = SM\school_manager::get_compact_logo_url($this->_schoolid);
+            if ($logourl){
+                $imageelement->setValue(\html_writer::img($logourl, 'compact_logo'));
+            } else {
+                $imageelement->setValue(get_string('none'));
+            }
         } else {
             $mform->hardFreeze('name');
             $mform->hardFreeze('code');
@@ -158,7 +172,9 @@ class edit_school_form extends \moodleform {
         $default_values->note = ['text' => $default_values->note ?? '', 'format' => 1];
         if ($default_values->schoolid && $this->_can_manage){
             file_prepare_standard_filemanager($default_values, 'logo', ['subdirs' => 0],
-                \context_system::instance(), SM\PLUGIN_NAME, 'logo', $default_values->schoolid);
+                NED::ctx(), NED::$PLUGIN_NAME, 'logo', $default_values->schoolid);
+            file_prepare_standard_filemanager($default_values, 'compact_logo', ['subdirs' => 0],
+                NED::ctx(), NED::$PLUGIN_NAME, 'logo', $default_values->schoolid);
         }
         parent::set_data($default_values);
     }

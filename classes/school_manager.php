@@ -726,14 +726,20 @@ class school_manager{
         $up_data->city = $data->city ?? '';
         $up_data->country = $data->country ?? $this->_user->country ?? '';
         $up_data->logo = $data->logo ?? 0;
+        $up_data->compact_logo = $data->compact_logo ?? 0;
         $up_data->startdate = $data->startdate ?? time();
         $up_data->enddate = $data->enddate ?? (time() + 365*24*3600);
         $up_data->note = $data->note ?? '';
         $up_data->synctimezone = $data->synctimezone ?? 0;
         // save logo
         $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
-            PLUGIN_NAME, 'logo', $up_data->id);
+            NED::$PLUGIN_NAME, 'logo', $up_data->id);
         $up_data->logo = !empty($data->logo) ? $data->logo_filemanager : 0;
+
+        // save compact logo
+        $data = file_postupdate_standard_filemanager($data, 'compact_logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
+            NED::$PLUGIN_NAME, 'compact_logo', $up_data->id);
+        $up_data->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
 
         if ($new){
             self::$_schools_data[$school->id] = $up_data;
@@ -921,6 +927,8 @@ class school_manager{
     }
 
     /**
+     * Get logo of the school by its id
+     *
      * @param $schoolid
      *
      * @return \moodle_url|false
@@ -933,19 +941,42 @@ class school_manager{
 
         if (!isset($_data[$schoolid])){
             $fs = get_file_storage();
-            $files = $fs->get_area_files(\context_system::instance()->id, PLUGIN_NAME, 'logo', $schoolid,
+            $files = $fs->get_area_files(NED::ctx()->id, NED::$PLUGIN_NAME, 'logo', $schoolid,
                 "itemid, filepath, filename", false);
             $logourl = false;
 
             foreach ($files as $file) {
-                $logourl = \moodle_url::make_pluginfile_url(
-                    $file->get_contextid(),
-                    $file->get_component(),
-                    $file->get_filearea(),
-                    $file->get_itemid(),
-                    $file->get_filepath(),
-                    $file->get_filename()
-                );
+                $logourl = NED::file_get_pluginfile_url($file);
+                break;
+            }
+
+            $_data[$schoolid] = $logourl;
+        }
+
+        return $_data[$schoolid];
+    }
+
+    /**
+     * Get compact logo of the school by its id
+     *
+     * @param $schoolid
+     *
+     * @return \moodle_url|false
+     */
+    static public function get_compact_logo_url($schoolid){
+        static $_data = [];
+        if (!$schoolid){
+            return false;
+        }
+
+        if (!isset($_data[$schoolid])){
+            $fs = get_file_storage();
+            $files = $fs->get_area_files(NED::ctx()->id, NED::$PLUGIN_NAME, 'compact_logo', $schoolid,
+                "itemid, filepath, filename", false);
+            $logourl = false;
+
+            foreach ($files as $file) {
+                $logourl = NED::file_get_pluginfile_url($file);
                 break;
             }
 
