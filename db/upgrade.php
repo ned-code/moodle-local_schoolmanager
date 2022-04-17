@@ -132,5 +132,19 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021110800, 'local', 'schoolmanager');
     }
 
+    if($oldversion < 2022041700){
+        // Define field compact_logo to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('compact_logo', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'logo');
+
+        // Conditionally launch add field compact_logo.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2022041700, 'local', 'schoolmanager');
+    }
+
     return true;
 }
