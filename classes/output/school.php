@@ -8,12 +8,10 @@
  */
 
 namespace local_schoolmanager\output;
-use block_ned_teacher_tools\deadline_manager as DM;
+
 use local_schoolmanager as SM;
 use local_schoolmanager\school_handler as SH;
-use Matrix\Exception;
-use theme_ned_boost\shared_lib as NED;
-use tool_brickfield\local\areas\core_course\fullname;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -28,26 +26,37 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
  * @property-read bool $act;
  */
 class school implements \renderable, \templatable {
-    protected int $schoolid;
-    protected SM\school $persistent;
-    protected $cohort;
-    private $view;
-    private $sm;
-    private \moodle_url $url;
+    /** the same keys, as object properties from {@see \local_ned_controller\ned_grade_controller::get_students_ngc_records_count()}*/
+    const NGC_KEYS = ['wrong_submissions', 'late_submissions', 'missed_deadlines'];
 
+    protected int $_schoolid;
+    protected SM\school $_persistent;
+    protected $_cohort;
+    protected $_view;
+    /**
+     * @var SM\school_manager
+     */
+    protected $_sm;
+    protected \moodle_url $_url;
+
+    /**
+     * school constructor.
+     *
+     * @param $schoolid
+     * @param $view
+     */
     public function __construct($schoolid, $view) {
-        global $DB;
         $this->schoolid = $schoolid;
-        $this->persistent = new SM\school($schoolid);
-        $this->sm = new SM\school_manager();
-        $this->view = $view;
-        $this->url = SH::get_url();
+        $this->_persistent = new SM\school($schoolid);
+        $this->_sm = new SM\school_manager();
+        $this->_view = $view;
+        $this->_url = SH::get_url();
         if (!$this->schoolid) {
             $sh = new SH();
             $schools = $sh->get_schools();
             if (count($schools) == 1) {
-                $this->url->param('schoolid', reset($schools)->id);
-                redirect($this->url);
+                $this->_url->param('schoolid', reset($schools)->id);
+                redirect($this->_url);
             }
         }
     }
@@ -59,71 +68,76 @@ class school implements \renderable, \templatable {
      * @return \stdClass
      */
     public function export_for_template(\renderer_base $output) {
-        global $PAGE, $OUTPUT;
+        global $OUTPUT;
 
-        $contextsystem = \context_system::instance();
-
-        $header = new school_header($this->schoolid, $this->view);
+        $header = new school_header($this->schoolid, $this->_view);
         $data = $header->export_for_template($output);
 
-        if ($this->view == SH::VIEW_STUDENTS) {
-            if ($data->students = $this->sm->get_school_students($this->schoolid, true, $this->sm::DEF_MEMBER_ROLE, false)) {
-                $gpas = [];
-                $ppas = [];
-                $aivschoolyear = 0;
-                $aiv30schoolyear = 0;
-                $deadlineextensions = 0;
-                foreach ($data->students as $student) {
-                    $student->userlink = new \moodle_url('/my/index.php', ['userid' => $student->id]);
-                    $ai_flag = "";
-                    if (class_exists('\local_academic_integrity\ai_flag')) {
-                        $ai_flag = \local_academic_integrity\ai_flag::flag($student->id, $contextsystem);
-                    }
-                    $student->name = $ai_flag . fullname($student);
-                    $student->lastaccess = SH::get_user_lastaccess($student);
-                    $courses = enrol_get_users_courses($student->id, true);
-                    $student->deadlineextentions = SH::get_user_number_of_dl_extensions($student, $courses);
-                    $deadlineextensions += $student->deadlineextentions;
-                    /*$student->gpa = SH::get_user_gpa($student, $courses);
-                    if (!is_null($student->gpa)) {
-                        $gpas[] = $student->gpa;
-                    }*/
-                    /*$participationpower = SH::get_user_ppa($student, $courses); // TODO: It slows down the page loading.
-                    $student->ppa = NED::str(\theme_ned_boost\output\course::get_participation_power_status_by_power($participationpower));
-                    if (!is_null($participationpower)) {
-                        $ppas[] = $participationpower;
-                    }*/
-                    $student->aiv = SH::get_user_aiv($student, $this->persistent->get('startdate'), $this->persistent->get('enddate'));
-                    $aivschoolyear += $student->aiv;
-                    $student->aiv30 = SH::get_user_aiv($student, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 30);
-                    $aiv30schoolyear += $student->aiv30;
-                }
-                $data->students = array_values($data->students);
-                $data->activestudents = count($data->students);
-                /*if ($gpas) {
-                    $data->averagegrade = round(array_sum($gpas) / count($gpas), 0);
+        if ($this->_view == SH::VIEW_STUDENTS) {
+            $data->students = $this->_sm->get_school_students($this->schoolid, true, $this->_sm::DEF_MEMBER_ROLE, false);
+            if (empty($data->students)) return $data;
+
+            $gpas = $ppas = [];
+            $aivschoolyear = $aiv30schoolyear = $deadlineextensions = 0;
+            $ngc_data = array_fill_keys(static::NGC_KEYS, 0);
+            $students_ngc = NED::$ned_grade_controller::get_students_ngc_records_count(array_keys($data->students));
+
+            foreach ($data->students as $sid => $student) {
+                $user_link = NED::link(['/my/index.php', ['userid' => $sid]], fullname($student), 'student');
+                $student->username = NED::get_profile_with_menu_flag($sid, null, $user_link, true);
+                $student->lastaccess = SH::get_user_lastaccess($student);
+                $courses = enrol_get_users_courses($student->id, true);
+                $student->deadlineextentions = SH::get_user_number_of_dl_extensions($student, $courses);
+                $deadlineextensions += $student->deadlineextentions;
+                /*$student->gpa = SH::get_user_gpa($student, $courses);
+                if (!is_null($student->gpa)) {
+                    $gpas[] = $student->gpa;
                 }*/
-                if ($ppas) {
-                    $participationpower = array_sum($ppas) / count($ppas);
-                    $data->averagepp = NED::str(\theme_ned_boost\output\course::get_participation_power_status_by_power($participationpower));
-                }
-                $data->aivschoolyear = $aivschoolyear;
-                $data->aiv30schoolyear = $aiv30schoolyear;
-                $data->misseddeadlines = '---';
-                $data->deadlineextensions = $deadlineextensions;
-                if ($data->activestudents) {
-                    $data->aivaverage = round(($aivschoolyear / $data->activestudents), 1);
+                /*$participationpower = SH::get_user_ppa($student, $courses); // TODO: It slows down the page loading.
+                $student->ppa = NED::str('pp-'.\theme_ned_boost\output\course::get_participation_power_status_by_power($participationpower),null,'local_ned_controller');
+                if (!is_null($participationpower)) {
+                    $ppas[] = $participationpower;
+                }*/
+                $student->aiv = SH::get_user_aiv($student, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'));
+                $aivschoolyear += $student->aiv;
+                $student->aiv30 = SH::get_user_aiv($student, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'), 30);
+                $aiv30schoolyear += $student->aiv30;
+
+                foreach (static::NGC_KEYS as $ngc_key){
+                    if (empty($students_ngc[$sid])){
+                        $val = 0;
+                    } else {
+                        $val = $students_ngc[$sid]->$ngc_key ?? 0;
+                    }
+
+                    $student->$ngc_key = $val;
+                    $ngc_data[$ngc_key] += $val;
                 }
             }
-        }
 
-        if ($this->view == SH::VIEW_STAFF) {
-            $config = get_config('local_schoolmanager');
+            $data->students = array_values($data->students);
+            $data->activestudents = count($data->students);
+            /*if ($gpas) {
+                $data->averagegrade = round(array_sum($gpas) / count($gpas), 0);
+            }*/
+            /*if ($ppas) {
+                $participationpower = array_sum($ppas) / count($ppas);
+                $data->averagepp = NED::str('pp-'.\theme_ned_boost\output\course::get_participation_power_status_by_power($participationpower),null,'local_ned_controller');
+            }*/
+            $data->aivschoolyear = $aivschoolyear;
+            $data->aiv30schoolyear = $aiv30schoolyear;
+            $data->deadlineextensions = $deadlineextensions;
 
-            $data->staffs = $this->sm->get_school_students($this->schoolid, true, $this->sm::STAFF_ROLES, false);
-            $courses = [];
-            $gpas = [];
-            $activestudents = [];
+            foreach (static::NGC_KEYS as $ngc_key){
+                $data->$ngc_key = $ngc_data[$ngc_key];
+            }
+
+            if ($data->activestudents > 0) {
+                $data->aivaverage = round(($aivschoolyear / $data->activestudents), 1);
+            }
+        } elseif ($this->_view == SH::VIEW_STAFF) {
+            $data->staffs = $this->_sm->get_school_students($this->schoolid, true, SM\school_manager::STAFF_ROLES, false);
+            $courses = $gpas = $activestudents = [];
 
             $data->activestudents = 0;
             $data->aivschoolyear = 0;
@@ -136,15 +150,14 @@ class school implements \renderable, \templatable {
             if ($data->staffs) {
                 foreach ($data->staffs as $staff) {
                     profile_load_custom_fields($staff);
-                    $staff->name = fullname($staff);
-                    $staff->userlink = new \moodle_url('/user/profile.php', ['id' => $staff->id]);
+                    $staff->username = NED::q_user_link($staff);
                     $staff->role = $staff->profile['default_role'];
                     $staff->deadlineextentions = '';
                     $staff->aivreports = '';
                     $staff->aivreports30 = '';
                     $staff->ctgc = 'N';
                     $staff->ctac = 'N';
-                    if ($staff->profile['default_role'] == 'Classroom Teacher') {
+                    if ($staff->profile['default_role'] == SM\school_manager::SCHOOL_CT_ROLE) {
                         $data->classroomteachers++;
                     }
 
@@ -157,7 +170,7 @@ class school implements \renderable, \templatable {
                         $staff->ctac = 'Y';
                     }
 
-                    if ($staff->role === 'Classroom Teacher') {
+                    if ($staff->role === SM\school_manager::SCHOOL_CT_ROLE) {
                         $staffstudents = [];
                         $classes = SH::get_classes($staff, $this->schoolid);
                         $staff->students = 0;
@@ -177,8 +190,8 @@ class school implements \renderable, \templatable {
                                 }
                                 $staffstudents[$courseid][$user['id']] = $user['id'];
                                 $staff->deadlineextentions += SH::get_user_number_of_dl_extensions((object)$user, [$courses[$courseid]]);
-                                $staff->aivreports += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 0, $courseid);
-                                $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->persistent->get('startdate'), $this->persistent->get('enddate'), 30, $courseid);
+                                $staff->aivreports += SH::get_user_aiv((object)$user, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'), 0, $courseid);
+                                $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'), 30, $courseid);
                             }
                         }
 
@@ -191,27 +204,19 @@ class school implements \renderable, \templatable {
                 }
                 $data->staffs = array_values($data->staffs);
             }
+        } elseif ($this->_view == SH::VIEW_SCHOOL) {
+            $data->caneditschool = true;
+            $data->editschoolurl = NED::url('~/index.php', ['schoolid' => $this->schoolid]);
+            $data->hasdifferenttimezone = SH::has_different_timezone_users_in_school($this->_persistent->get_cohort());
+            $data->edittimezoneurl = (NED::url('~/view.php', [
+                'view' => $this->_view,
+                'schoolid' => $this->schoolid,
+                'action' => 'resettimezone',
+            ]))->out(false);
+            $data->isadmin = is_siteadmin();
         }
 
-        if ($this->view == SH::VIEW_SCHOOL) {
-            try {
-                $data->caneditschool = true;
-                $data->editschoolurl = new \moodle_url('/local/schoolmanager/index.php', ['schoolid' => $this->schoolid]);
-                $data->hasdifferenttimezone = SH::has_different_timezone_users_in_school($this->persistent->get_cohort());
-                $data->edittimezoneurl = (new \moodle_url('/local/schoolmanager/view.php', [
-                    'view' => $this->view,
-                    'schoolid' => $this->schoolid,
-                    'action' => 'resettimezone'
-                ]))->out(false);
-                $data->isadmin = is_siteadmin();
-                $this->sm->show_error_if_necessary();
-            } catch (Exception $e) {
-               // Do nothing.
-            }
-        }
-
-        if ($this->view == SH::VIEW_SCHOOLS) {
-            $config = get_config('local_schoolmanager');
+        if ($this->_view == SH::VIEW_SCHOOLS) {
             $showall = optional_param('showall', false, PARAM_BOOL);
 
             $sh = new SH();
@@ -225,7 +230,7 @@ class school implements \renderable, \templatable {
             $data->totalaiv30 = 0;
             foreach ($schools as $index => $school) {
                 $school->persistent = new SM\school($school->id);
-                $school->schoolurl = (new \moodle_url('/local/schoolmanager/view.php', ['view' => SH::VIEW_STUDENTS, 'schoolid' => $school->id]))->out(false);
+                $school->schoolurl = (NED::url('~/view.php', ['view' => SH::VIEW_STUDENTS, 'schoolid' => $school->id]))->out(false);
                 $school->timezone = $school->persistent->get_timezone();
                 $school->schoolyear = $school->persistent->get_schoolyear();
                 $school->numberofstudents = 0;
@@ -234,7 +239,7 @@ class school implements \renderable, \templatable {
                 $school->aivreports = 0;
                 $school->aiv = 0;
                 $school->aiv30 = 0;
-                if ($students = $this->sm->get_school_students($school->id, true, $this->sm::DEF_MEMBER_ROLE, false)) {
+                if ($students = $this->_sm->get_school_students($school->id, true, $this->_sm::DEF_MEMBER_ROLE, false)) {
                     $school->numberofstudents = count($students);
                     $data->totalstudents += $school->numberofstudents;
                     foreach ($students as $student) {
@@ -252,10 +257,10 @@ class school implements \renderable, \templatable {
                 }
 
                 $school->numberofcts = 0;
-                if ($cts = $this->sm->get_school_students($school->id, true, $this->sm::SCHOOL_CT_ROLE, false)) {
+                if ($cts = $this->_sm->get_school_students($school->id, true, $this->_sm::SCHOOL_CT_ROLE, false)) {
                     $school->numberofcts = count($cts);
                     $data->totalcts += $school->numberofcts;
-                    foreach ($cts as $index => $ct) {
+                    foreach ($cts as $ct) {
                         if (SH::has_certificate_badge($ct->id, 'general')) {
                             $school->ctgc++;
                         }
@@ -268,7 +273,7 @@ class school implements \renderable, \templatable {
                 }
                 $actions = [];
                 $actions[] = array(
-                    'url' =>  new \moodle_url('/local/schoolmanager/index.php', ['schoolid' => $school->id]),
+                    'url' =>  NED::url('~/index.php', ['schoolid' => $school->id]),
                     'icon' => new \pix_icon('i/edit', get_string('edit')),
                     'attributes' => array('class' => 'action-edit')
                 );
@@ -278,7 +283,7 @@ class school implements \renderable, \templatable {
                     $action['attributes']['role'] = 'button';
                     $actionshtml[] = $OUTPUT->action_icon($action['url'], $action['icon'], null, $action['attributes']);
                 }
-                $school->actionlinks = \html_writer::span(implode('', $actionshtml), 'class-item-actions item-actions');
+                $school->actionlinks = NED::span($actionshtml, 'class-item-actions item-actions');
             }
             $data->schools = array_values($schools);
             $data->totalschools = count($schools);

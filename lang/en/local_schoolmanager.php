@@ -98,6 +98,7 @@ $string['lastaccess'] = 'Last Access';
 $string['location'] = 'Location';
 $string['logo'] = 'Logo';
 $string['misseddeadlines'] = 'Missed Deadlines';
+$string['wrongsubmissions'] = 'Wrong submissions';
 $string['name'] = 'Name';
 $string['newcrewforusers'] = 'Select cohort for chosen users';
 $string['nocrew'] = 'There are no crews.';

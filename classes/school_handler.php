@@ -430,10 +430,10 @@ class school_handler {
     }
 
     /**
-     * @param $userid
-     * @param $type For example 'general' or 'advanced'
+     * @param numeric $userid
+     * @param string $type For example 'general' or 'advanced'
+     *
      * @return bool
-     * @throws \dml_exception
      */
     public static function has_certificate_badge($userid, $type) {
         $config = get_config('local_schoolmanager');

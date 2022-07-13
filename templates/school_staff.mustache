@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_schoolmanager/school_students
+    @template local_schoolmanager/school_staff
 
     school_manager_render layout template.
 
@@ -24,36 +24,38 @@
     * output - The core renderer for the page
     * bodyattributes - attributes for the body tag as a string of html attributes
 }}
-<div class="row">
-    <div class="col-md-9">
-        <table class="generaltable">
-            <thead>
-            <tr>
-                <th>{{#str}}name, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}role, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
-                <th data-toggle="tooltip" title="{{#str}}staffextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
-                <th data-toggle="tooltip" title="{{#str}}staffaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
-                <th data-toggle="tooltip" data-title="{{#str}}staffaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
-                <th>CT-GC</th>
-                <th>CT-AC</th>
-            </tr>
-            </thead>
-            <tbody>
-            {{#staffs}}
+<div class="row staff">
+    <div class="col-md-9 table-wrapper">
+        <div class="table-container">
+            <table class="generaltable">
+                <thead>
                 <tr>
-                    <td class="username userid-{{{id}}}"><a target="_blank" href="{{{userlink}}}">{{{name}}}</a></td>
-                    <td class="role">{{role}}</td>
-                    <td class="lastaccess">{{lastaccess}}</td>
-                    <td class="deadlineextentions text-center">{{deadlineextentions}}</td>
-                    <td class="aivreports text-center">{{aivreports}}</td>
-                    <td class="aivreports30 text-center">{{aivreports30}}</td>
-                    <td class="school-cts">{{ctgc}}</td>
-                    <td class="school-cts">{{ctac}}</td>
+                    <th>{{#str}}name, local_schoolmanager{{/str}}</th>
+                    <th>{{#str}}role, local_schoolmanager{{/str}}</th>
+                    <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
+                    <th data-toggle="tooltip" title="{{#str}}staffextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
+                    <th data-toggle="tooltip" title="{{#str}}staffaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
+                    <th data-toggle="tooltip" data-title="{{#str}}staffaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
+                    <th>CT-GC</th>
+                    <th>CT-AC</th>
                 </tr>
-            {{/staffs}}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                {{#staffs}}
+                    <tr>
+                        <td class="username userid-{{{id}}}">{{{username}}}</td>
+                        <td class="role">{{role}}</td>
+                        <td class="lastaccess">{{lastaccess}}</td>
+                        <td class="deadlineextentions text-center">{{deadlineextentions}}</td>
+                        <td class="aivreports text-center">{{aivreports}}</td>
+                        <td class="aivreports30 text-center">{{aivreports30}}</td>
+                        <td class="school-cts">{{ctgc}}</td>
+                        <td class="school-cts">{{ctac}}</td>
+                    </tr>
+                {{/staffs}}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="col-md-3">
         <div class="card">

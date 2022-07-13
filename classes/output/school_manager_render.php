@@ -8,7 +8,9 @@
  */
 
 namespace local_schoolmanager\output;
+
 use local_schoolmanager as SM;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -293,6 +295,7 @@ class school_manager_render implements \renderable, \templatable{
         $school = $SM->get_school_by_ids($this->_schoolid, true);
         $crews = $SM->get_crews($this->_schoolid);
         $can_manage = $SM->can_manage_members();
+        $user_table = static::user_edit_table($school, $crews, $users, $this->o, $can_manage);
 
         if ($can_manage){
             $form = new SM\forms\edit_users_form($this->get_my_url(), ['schoolid' => $this->_schoolid]);
@@ -302,11 +305,9 @@ class school_manager_render implements \renderable, \templatable{
                         $this->o->notification(SM\str('usersupdatedsuccessfully'), \core\output\notification::NOTIFY_SUCCESS);
                 }
             }
-            $user_table = $this->user_edit_table($school, $crews, $users, $this->o, $can_manage);
             $form->set_prehtml($user_table ? \html_writer::table($user_table) : '');
             $this->c->forms[] = $form->draw();
         } else {
-            $user_table = self:: user_edit_table($school, $crews, $users, $this->o, $can_manage);
             $this->c->tables[] = \html_writer::table($user_table);
         }
     }
@@ -356,15 +357,7 @@ class school_manager_render implements \renderable, \templatable{
                 $cells[] = SM\cell($output->render($checkbox), 'select');
             }
 
-            $ai_flag = "";
-
-            if (class_exists('\local_academic_integrity\ai_flag')) {
-                $ai_flag = \local_academic_integrity\ai_flag::flag($user->id,
-                            \context_system::instance());
-            }
-
-            $cells[] = SM\cell(fullname($user) . $ai_flag, 'username');
-            $cells[] = SM\cell(fullname($user), 'username');
+            $cells[] = SM\cell(NED::q_user_link($user), 'username');
             $crewname = $crews[$user->crewid]->name ?? '';
             if ($PAGE->theme->name == 'ned_boost'){
                 $crewname = SM\link(['/my', ['schoolid' => $school->id]], $crewname);
