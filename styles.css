@@ -133,3 +133,43 @@ body.pagelayout-schoolmanager .control-panel {
 .pagelayout-schoolmanager .school-page .form-check-label {
   font-size: 13px;
 }
+
+@media (max-width: 760px) {
+  #page-local-schoolmanager-view .staff .table-wrapper{
+    margin-bottom: 20px;
+  }
+  #page-local-schoolmanager-view .staff .table-wrapper .table-container{
+    overflow-x: auto;
+  }
+  #page-local-schoolmanager-view .staff .generaltable{
+    margin-bottom: 0;
+  }
+}
+@media (max-width: 1000px) {
+  #page-local-schoolmanager-view .staff{
+    flex-direction: column
+  }
+  #page-local-schoolmanager-view .staff div{
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  #page-local-schoolmanager-view .students .table-wrapper{
+    margin-bottom: 20px;
+  }
+  #page-local-schoolmanager-view .students .table-wrapper .table-container{
+    overflow-x: auto;
+  }
+  #page-local-schoolmanager-view .students .generaltable{
+    margin-bottom: 0;
+  }
+}
+@media (max-width: 1200px) {
+  #page-local-schoolmanager-view .students{
+    flex-direction: column
+  }
+  #page-local-schoolmanager-view .students div{
+    max-width: 100%;
+  }
+}

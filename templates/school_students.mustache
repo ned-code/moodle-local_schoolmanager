@@ -24,35 +24,40 @@
     * output - The core renderer for the page
     * bodyattributes - attributes for the body tag as a string of html attributes
 }}
-<div class="row">
-    <div class="col-md-9">
-        <table class="generaltable">
-            <thead>
-            <tr>
-                <th>{{#str}}studentname, local_schoolmanager{{/str}}</th>
-                <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
-                <th data-toggle="tooltip" title="{{#str}}studentextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
-                <th data-toggle="tooltip" title="{{#str}}studentaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aiv, local_schoolmanager{{/str}}</th>
-                <th  data-toggle="tooltip" title="{{#str}}studentaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aiv30, local_schoolmanager{{/str}}</th>
-            </tr>
-            </thead>
-            <tbody>
-            {{#students}}
+<div class="row students">
+    <div class="col-md-9 table-wrapper">
+        <div class="table-container">
+            <table class="generaltable">
+                <thead>
                 <tr>
-                    <td class="username userid-{{{id}}}">
-                        <a target="_blank" href="{{{userlink}}}">{{{name}}}</a>
-                        {{#academic_integrity}}
-                            <span class="fa fa-circle fa-fw academic-integrity {{{academic_integrity.class}}}" title="{{#str}} local_academic_integrity_title, local_academic_integrity, {{academic_integrity.title}} {{/str}}"></span>
-                        {{/academic_integrity}}
-                    </td>
-                    <td class="lastaceess">{{lastaccess}}</td>
-                    <td class="deadlineextentions text-center">{{deadlineextentions}}</td>
-                    <td class="aiv text-center">{{aiv}}</td>
-                    <td class="aiv30 text-center">{{aiv30}}</td>
+                    <th>{{#str}}studentname, local_schoolmanager{{/str}}</th>
+                    <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
+                    <th data-toggle="tooltip" title="{{#str}}studentextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
+                    <th data-toggle="tooltip" title="{{#str}}studentaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aiv, local_schoolmanager{{/str}}</th>
+                    <th data-toggle="tooltip" title="{{#str}}studentaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aiv30, local_schoolmanager{{/str}}</th>
+                    <th class="text-center">{{#str}}wrongsubmissions, local_schoolmanager{{/str}}</th>
+                    <th class="text-center">{{#str}}latesubmissions, mod_assign{{/str}}</th>
+                    <th class="text-center">{{#str}}misseddeadlines, local_schoolmanager{{/str}}</th>
                 </tr>
-            {{/students}}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                {{#students}}
+                    <tr>
+                        <td class="username userid-{{{id}}}">
+                            {{{username}}}
+                        </td>
+                        <td class="lastaceess">{{lastaccess}}</td>
+                        <td class="deadlineextentions text-center">{{deadlineextentions}}</td>
+                        <td class="aiv text-center">{{aiv}}</td>
+                        <td class="aiv30 text-center">{{aiv30}}</td>
+                        <td class="wrong_submission text-center">{{wrong_submissions}}</td>
+                        <td class="late_submission text-center">{{late_submissions}}</td>
+                        <td class="missed_deadline text-center">{{missed_deadlines}}</td>
+                    </tr>
+                {{/students}}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="col-md-3">
         <div class="card">
@@ -84,6 +89,18 @@
                     <div class="col-md-9">{{#str}}aivaverage, local_schoolmanager{{/str}}</div>
                     <div class="col-md-3">{{aivaverage}}</div>
                 </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}wrongsubmissions, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{wrong_submissions}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}latesubmissions, mod_assign{{/str}}</div>
+                    <div class="col-md-3">{{late_submissions}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}misseddeadlines, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{missed_deadlines}}</div>
+                </div>
             </div>
         </div>
     </div>
@@ -101,7 +118,7 @@
                     textAttribute: 'data-sort-value',
                     emptyTo: 'bottom',
                     sortStable: true,
-                        widgetOptions: {
+                    widgetOptions: {
                         headerTitle_useAria  : true,
                         headerTitle_tooltip  : 'tooltip',
                         headerTitle_callback : updateTooltips
