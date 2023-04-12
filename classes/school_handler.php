@@ -231,33 +231,21 @@ class school_handler {
         return null;
     }
 
-    public static function get_user_aiv($user, $startdate, $enddate, $lastdays = 0, $courseid = 0) {
-        global $DB;
-
-        $dayfilter = '';
-        $coursefilter = '';
-        $params['student'] = $user->id;
-        $params['startdate'] = $startdate;
-        $params['enddate'] = $enddate;
-        if ($courseid) {
-            $coursefilter = 'AND aiv.courseid = :courseid';
-            $params['courseid'] = $courseid;
-        }
-
-        if ($lastdays) {
-            $dayfilter = 'AND aiv.infractiondate >= :lastdays';
-            $params['lastdays'] = time() - $lastdays * DAYSECS;
-        }
-
-        $sql = "SELECT COUNT(1)
-                  FROM {local_academic_integrity_inf} aiv 
-                 WHERE aiv.student = :student
-                   AND aiv.approved = 1 
-                   AND aiv.infractiondate >= :startdate
-                   AND aiv.infractiondate < :enddate
-                       $coursefilter
-                       $dayfilter";
-        return $DB->count_records_sql($sql, $params);
+    /**
+     * Get count of student AIVs
+     * Alias {@see \local_academic_integrity\infraction::get_user_aiv_count()}
+     *
+     * @param object|numeric      $user         - student
+     * @param numeric|null        $startdate    - count only after some date (UNIX time)
+     * @param numeric|null        $enddate      - count only before some date (UNIX time)
+     * @param numeric|null        $lastdays     - count only for some last days (num of days)
+     * @param object|numeric|null $courseid     - filter by some course (otherwise count for all site)
+     * @param bool                $count_hidden - if true, count all AIVs, otherwise count only shown AIVs
+     *
+     * @return int|null - count of the AIVs, or null, if AI plugin doesn't exist
+     */
+    public static function get_user_aiv($user, $startdate, $enddate, $lastdays=0, $courseid=0, $count_hidden=false) {
+        return NED::ai_get_user_aiv_count($user, $courseid, $startdate, $enddate, $lastdays, $count_hidden);
     }
 
     public static function get_classes($user, $schoolid, $courses = null) {
