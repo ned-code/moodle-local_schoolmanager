@@ -427,10 +427,11 @@ class school_handler {
         $config = get_config('local_schoolmanager');
         $badgeid = $config->{$type."_cert_badge"} ?? 0;
         if ($badgeid) {
-            $badges = badges_get_user_badges($userid);
-            foreach ($badges as $badge) {
-                if ($badge->id == $config->general_cert_badge) {
-                    return true;
+            if ($badges = badges_get_user_badges($userid)) {
+                foreach ($badges as $badge) {
+                    if ($badge->id == $badgeid) {
+                        return true;
+                    }
                 }
             }
         }
