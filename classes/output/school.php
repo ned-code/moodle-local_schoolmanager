@@ -157,9 +157,8 @@ class school implements \renderable, \templatable {
                     $staff->aivreports30 = '';
                     $staff->ctgc = 'N';
                     $staff->ctac = 'N';
-                    if ($staff->profile['default_role'] == SM\school_manager::SCHOOL_CT_ROLE) {
-                        $data->classroomteachers++;
-                    }
+
+                    $data->classroomteachers++;
 
                     if (SH::has_certificate_badge($staff->id, 'general')) {
                         $data->generalcert++;
@@ -257,7 +256,7 @@ class school implements \renderable, \templatable {
                 }
 
                 $school->numberofcts = 0;
-                if ($cts = $this->_sm->get_school_students($school->id, true, $this->_sm::SCHOOL_CT_ROLE, false)) {
+                if ($cts = $this->_sm->get_school_students($school->id, true, SM\school_manager::STAFF_ROLES, false)) {
                     $school->numberofcts = count($cts);
                     $data->totalcts += $school->numberofcts;
                     foreach ($cts as $ct) {
