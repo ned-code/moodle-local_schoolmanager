@@ -144,3 +144,7 @@ $string['totalaiv30'] = 'Total AIV-30';
 $string['showschoolswithnostudents'] = 'Show schools with no students';
 $string['schoolmanager_tasks'] = 'School Manager tasks';
 $string['notasks'] = 'There are no School Manager tasks';
+$string['ct'] = 'CT';
+$string['sa'] = 'SA';
+$string['extmanager'] = 'Extension manager';
+$string['extmanager_help'] = 'When set to SA, only users with SA extension capability can create extensions in any course that belongs to their schools';

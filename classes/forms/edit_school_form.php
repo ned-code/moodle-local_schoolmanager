@@ -1,14 +1,17 @@
 <?php
+
 /**
  * @package    local_schoolmanager
- * @subpackage NED
+ * @subpackage forms
  * @copyright  2020 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_schoolmanager\forms;
-use local_schoolmanager as SM;
+
+use local_schoolmanager\school;
+use local_schoolmanager\school_manager as SM;
 use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
@@ -17,24 +20,26 @@ require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 
 
+/**
+ * edit_school_form
+ */
 class edit_school_form extends \moodleform {
     protected $_new = false;
     protected $_can_manage = false;
     protected $_schoolid;
     protected $_school;
 
-
-    public function definition()
-    {
+    public function definition(){
         global $CFG;
         $mform = $this->_form;
         $cancel_link = $this->_customdata['cancel'] ?? false;
         $this->_schoolid = $this->_customdata['schoolid'] ?? 0;
-        $SM = SM\school_manager::get_school_manager();
+        $SM = SM::get_school_manager();
         $user = $SM->user;
 
         if ($school = $SM->get_school_by_ids($this->_schoolid, true)){
             $this->_new = false;
+            $school = $school->to_record();
         } elseif ($school = ($SM->get_potential_schools($this->_schoolid) ?? false)){
             $this->_new = true;
         } else {
@@ -49,12 +54,12 @@ class edit_school_form extends \moodleform {
         $mform->addElement('hidden', 'new', (int)$this->_new);
         $mform->setType('new', PARAM_INT);
 
-        $mform->addElement('text', 'name', SM\str('schoolname'), []);
+        $mform->addElement('text', 'name', NED::str('schoolname'), []);
         $mform->setType('name', PARAM_TEXT);
-        $mform->addElement('text', 'code', SM\str('schoolid'), []);
+        $mform->addElement('text', 'code', NED::str('schoolid'), []);
         $mform->setType('code', PARAM_TEXT);
 
-        $mform->addElement('text', 'url', SM\str('schoolwebsite'), []);
+        $mform->addElement('text', 'url', NED::str('schoolwebsite'), []);
         $mform->setType('url', PARAM_URL);
         $mform->addElement('text', 'city', get_string('city'), []);
         $mform->setType('city', PARAM_TEXT);
@@ -65,7 +70,7 @@ class edit_school_form extends \moodleform {
         $mform->addElement('select', 'country', get_string('selectacountry'), $choices, $purpose);
         if ($school->country ?? false){
             $mform->setDefault('country', $school->country);
-        } elseif (!empty($CFG->country)) {
+        } elseif (!empty($CFG->country)){
             $mform->setDefault('country', $SM->user->country);
         }
 
@@ -75,29 +80,38 @@ class edit_school_form extends \moodleform {
         $mform->setDefault('timezone', $CFG->timezone);
 
         // Sync timezone
-        $mform->addElement('selectyesno', 'synctimezone', get_string('synctimezone', 'local_schoolmanager'));
+        $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
         $mform->setDefault('synctimezone', 0);
+
+        if (is_siteadmin()){
+            $mform->addElement('select', 'extmanager', NED::str('extmanager'), NED::strings2menu(school::EXTENSION_MANAGER));
+            $mform->addHelpButton('extmanager', 'extmanager', NED::$PLUGIN_NAME);
+            $mform->setDefault('extmanager', school::EXT_MANAGE_CT);
+        } else {
+            $mform->addElement('hidden', 'extmanager', school::EXT_MANAGE_CT);
+            $mform->setType('extmanager', PARAM_INT);
+        }
 
         // Logo
         if ($this->_can_manage){
-            $mform->addElement('filemanager', 'logo_filemanager', SM\str('logo'), null,
+            $mform->addElement('filemanager', 'logo_filemanager', NED::str('logo'), null,
                 array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
             //Compact Logo
             $mform->addElement('filemanager', 'compact_logo_filemanager', NED::$C::str('compactlogo'), null,
                 array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
         } else {
-            $mform->addElement('static', 'currentpicture', SM\str('logo'));
+            $mform->addElement('static', 'currentpicture', NED::str('logo'));
             $mform->addElement('static', 'currentpicture_compact', NED::$C::str('compactlogo'));
         }
 
-        $mform->addElement('date_selector', 'startdate', SM\str('schoolyearstartdate'));
+        $mform->addElement('date_selector', 'startdate', NED::str('schoolyearstartdate'));
         $mform->setType('startdate', PARAM_INT);
         $mform->setDefault('startdate', time());
-        $mform->addElement('date_selector', 'enddate', SM\str('schoolyearenddate'));
+        $mform->addElement('date_selector', 'enddate', NED::str('schoolyearenddate'));
         $mform->setType('enddate', PARAM_INT);
-        $mform->setDefault('enddate', time() + 365*24*3600);
+        $mform->setDefault('enddate', time() + YEARSECS);
 
-        $mform->addElement('editor', 'note', SM\str('note'));
+        $mform->addElement('editor', 'note', NED::str('note'));
         $mform->setType('note', PARAM_RAW);
 
         $buttonarray = [];
@@ -108,18 +122,18 @@ class edit_school_form extends \moodleform {
         }
         if ($cancel_link){
             $buttonarray[] = $mform->createElement('html',
-                SM\link([$cancel_link], get_string('cancel'), 'btn btn-default'));
+                NED::link([$cancel_link], get_string('cancel'), 'btn btn-default'));
         } else {
             $buttonarray[] = $mform->createElement('cancel');
         }
-        //$mform->createElement('cancel');
+
         $mform->addGroup($buttonarray, 'buttonar', '', ' ', false);
     }
 
     /**
      * Extend the form definition after the data has been parsed.
      */
-    public function definition_after_data() {
+    public function definition_after_data(){
         $mform = $this->_form;
 
         if (!$this->_can_manage){
@@ -132,7 +146,7 @@ class edit_school_form extends \moodleform {
             }
             // set static logo image
             $imageelement = $mform->getElement('currentpicture');
-            $logourl = SM\school_manager::get_logo_url($this->_schoolid);
+            $logourl = SM::get_logo_url($this->_schoolid);
             if ($logourl){
                 $imageelement->setValue(\html_writer::img($logourl, 'logo'));
             } else {
@@ -141,7 +155,7 @@ class edit_school_form extends \moodleform {
 
             // set static compact logo image
             $imageelement = $mform->getElement('currentpicture_compact');
-            $logourl = SM\school_manager::get_compact_logo_url($this->_schoolid);
+            $logourl = SM::get_compact_logo_url($this->_schoolid);
             if ($logourl){
                 $imageelement->setValue(\html_writer::img($logourl, 'compact_logo'));
             } else {
@@ -212,9 +226,9 @@ class edit_school_form extends \moodleform {
      * @param null $def_data
      * @return string
      */
-    public function draw($def_data=null) {
+    public function draw($def_data=null){
         //finalize the form definition if not yet done
-        if (!$this->_definition_finalized) {
+        if (!$this->_definition_finalized){
             $this->_definition_finalized = true;
             $this->definition_after_data();
         }

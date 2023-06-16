@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Settings
+ *
  * @package    local_schoolmanager
  * @subpackage NED
  * @copyright  2020 NED {@link http://ned.ca}
@@ -22,7 +24,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_schoolmanager as SM;
 use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
@@ -36,15 +37,15 @@ require_once(__DIR__.'/lib.php');
 // useful functions
 $help_str = function($name, $visiblename='', $description='', $defaultsetting=''){
     $visiblename = empty($visiblename) ? $name : $visiblename;
-    $description = empty($description) ? SM\check_str($visiblename . '_desc', '') : SM\check_str($description);
-    $name = SM\PLUGIN_NAME . '/' . $name;
-    return [$name, SM\check_str($visiblename), $description, SM\check_str($defaultsetting)];
+    $description = empty($description) ? NED::str_check($visiblename . '_desc', '') : NED::str_check($description);
+    $name = NED::$PLUGIN_NAME . '/' . $name;
+    return [$name, NED::str_check($visiblename), $description, NED::str_check($defaultsetting)];
 };
 
 $configheading = function($name, $heading='', $information=null){
     $heading = empty($heading) ? $name : $heading;
     $information = is_null($information) ? $heading . '_info' : $information;
-    return new admin_setting_heading(SM\PLUGIN_NAME . '/' . $name, SM\check_str($heading),SM\check_str($information, ''));
+    return new admin_setting_heading(NED::$PLUGIN_NAME . '/' . $name, NED::str_check($heading), NED::str_check($information, ''));
 };
 
 $configselect = function($name, $visiblename='', $description='', $defaultsetting=0, $choices=[]) use ($help_str){
@@ -78,19 +79,19 @@ use ($help_str){
 };
 
 $configlink = function($name, $link, $text=null) use ($help_str) {
-    $setting_name = SM\PLUGIN_NAME . '/' . $name;
-    $title = SM\str($name);
+    $setting_name = NED::$PLUGIN_NAME . '/' . $name;
+    $title = NED::str($name);
     if (is_bool($text) && $text){
         $text = $title;
         $title = '';
     } else {
         $text = $text ?? $link;
     }
-    return new admin_setting_description($setting_name, $title, SM\link([$link], $text, '', ['target' => '_blank']));
+    return new admin_setting_description($setting_name, $title, NED::link([$link], $text, '', ['target' => '_blank']));
 };
 
 // add setting page
-$settings = new admin_settingpage(SM\PLUGIN_NAME.'_settings', SM\str('pluginname'));
+$settings = new admin_settingpage(NED::$PLUGIN_NAME.'_settings', NED::str('pluginname'));
 /** @var \admin_root $ADMIN */
 $ADMIN->add('localplugins', $settings);
 
@@ -100,7 +101,6 @@ $settings->add($configlink('schoolmanager_tasks', NED::url('~/schoolmanager_task
 $settings->add($configheading('general'));
 //$settings->add($configyesno('disabled', 0));
 $settings->add($configtextarea('academic_program','','',"1 Year",PARAM_TEXT, 10, 3));
-$courses = [0 => get_string('choose')] + $DB->get_records_select_menu('course', 'id > 1', null, 'fullname ASC', 'id,fullname');
 $records = badges_get_badges(BADGE_TYPE_SITE, 0, 'name', 'ASC', 0, 0);
 
 $badgeoptions = [];

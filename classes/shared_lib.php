@@ -18,6 +18,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 class shared_lib extends \local_ned_controller\shared\base_class {
     use \local_ned_controller\shared\base_trait;
+
+    /**
+     * @var string|\local_schoolmanager\school_manager
+     */
+    static $SM = '\\local_schoolmanager\\school_manager';
 }
 
 shared_lib::init();

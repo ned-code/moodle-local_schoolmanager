@@ -24,6 +24,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use local_schoolmanager as SM;
+use local_schoolmanager\shared_lib as NED;
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -42,14 +44,15 @@ $PAGE->set_pagelayout('schoolmanager');
 $PAGE->navbar->add($title, $SMR::get_url());
 switch($SMR->page){
     case $SMR::PAGE_CREW:
-        $PAGE->navbar->add(SM\str('crews'), $SMR->get_my_url(null, false));
+        $PAGE->navbar->add(NED::str('crews'), $SMR->get_my_url(null, false));
         break;
     case $SMR::PAGE_USER:
-        $PAGE->navbar->add(SM\str('users'), $SMR->get_my_url());
+        $PAGE->navbar->add(NED::str('users'), $SMR->get_my_url());
         break;
 }
 
+$data = $SMR->render(true);
 echo $OUTPUT->header();
-$SMR->render();
+echo $data;
 echo $OUTPUT->footer();
 
