@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Main plugin page
+ * Main view plugin page
  *
  * @package    local_schoolmanager
  * @subpackage NED
@@ -23,8 +23,9 @@
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use local_schoolmanager as SM;
+
 use local_schoolmanager\school_handler as SH;
+use local_schoolmanager\shared_lib as NED;
 
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
@@ -37,33 +38,25 @@ if (!$schoolid) {
     $view = SH::VIEW_SCHOOLS;
 } else {
     if ($action == 'resettimezone' && is_siteadmin()) {
-        $school = new SM\school($schoolid);
+        $school = new local_schoolmanager\school($schoolid);
         $school->reset_time_zone();
     }
 }
 
 require_login();
 
-$contextsystem = context_system::instance();
-
-if (!has_any_capability([
-    'local/schoolmanager:viewownschooldashboard',
-    'local/schoolmanager:viewallschooldashboards'], $contextsystem)) {
+$ctx = NED::ctx();
+if (!NED::has_any_capability(['viewownschooldashboard', 'viewallschooldashboards'], $ctx)){
     throw new moodle_exception('permission');
 }
 
-$thispageurl = new moodle_url('/local/schoolmanager/view.php');
-$title = get_string('pluginname', 'local_schoolmanager');
-
-$PAGE->set_context($contextsystem);
+$PAGE->set_context($ctx);
 $PAGE->set_pagelayout('schoolmanager');
-$PAGE->set_url($thispageurl);
-$PAGE->set_title($title);
-$PAGE->set_heading($title);
-$PAGE->navbar->add($title, $thispageurl);
-echo $OUTPUT->header();
+NED::page_set_title('pluginname', NED::url('~/view.php'));
 
-$renderer = $PAGE->get_renderer('local_schoolmanager');
-$renderable = new SM\output\school($schoolid, $view);
-echo $renderer->render($renderable);
+$renderable = new local_schoolmanager\output\school($schoolid, $view);
+$data = NED::render($renderable);
+
+echo $OUTPUT->header();
+echo $data;
 echo $OUTPUT->footer();

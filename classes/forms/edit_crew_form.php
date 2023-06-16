@@ -1,14 +1,17 @@
 <?php
+
 /**
  * @package    local_schoolmanager
- * @subpackage NED
+ * @subpackage forms
  * @copyright  2020 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_schoolmanager\forms;
-use local_schoolmanager as SM;
+
+use local_schoolmanager\school_manager as SM;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -16,9 +19,11 @@ require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 
 
+/**
+ * edit_crew_form
+ */
 class edit_crew_form extends \moodleform {
     protected $_can_manage = false;
-    protected $_schoolid;
     protected $_school;
     protected $_crewid;
     protected $_crew;
@@ -30,8 +35,8 @@ class edit_crew_form extends \moodleform {
         $cancel_link = $this->_customdata['cancel'] ?? false;
         $schoolid = $this->_customdata['schoolid'] ?? 0;
         $this->_crewid = $this->_customdata['crewid'] ?? 0;
-        $SM = SM\school_manager::get_school_manager();
-        $config = get_config(SM\PLUGIN_NAME);
+        $SM = SM::get_school_manager();
+        $config = NED::get_config();
 
         $this->_school = $SM->get_school_by_ids($schoolid, true);
         $this->_crew = $this->_crewid ? $SM->get_crew_by_id($this->_crewid, $schoolid) : null;
@@ -46,34 +51,34 @@ class edit_crew_form extends \moodleform {
         $mform->addElement('hidden', 'form_crewid', $this->_crewid);
         $mform->setType('form_crewid', PARAM_INT);
 
-        $mform->addElement('text', 'name', SM\str('crewname'), []);
+        $mform->addElement('text', 'name', NED::str('crewname'), []);
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required');
 
-        $mform->addElement('text', 'code', SM\str('crewcode'), ['size'=>'2']);
+        $mform->addElement('text', 'code', NED::str('crewcode'), ['size'=>'2']);
         $mform->setType('code', PARAM_TEXT);
         $mform->addRule('code', null, 'maxlength', '2');
         $mform->addRule('code', null, 'minlength', '2');
 
         $choices = explode("\n", $config->academic_program ?? '');
-        $mform->addElement('select', 'program', SM\str('academicprogram'), $choices);
+        $mform->addElement('select', 'program', NED::str('academicprogram'), $choices);
 
         $year = time() + 365*24*3600;
-        $mform->addElement('date_selector', 'admissiondate', SM\str('admissiondate'));
+        $mform->addElement('date_selector', 'admissiondate', NED::str('admissiondate'));
         $mform->setType('admissiondate', PARAM_INT);
         $mform->setDefault('admissiondate', $year);
-        $mform->addElement('date_selector', 'graduationdate', SM\str('expectedgraduation'));
+        $mform->addElement('date_selector', 'graduationdate', NED::str('expectedgraduation'));
         $mform->setType('graduationdate', PARAM_INT);
         $mform->setDefault('graduationdate', $year);
 
-        $mform->addElement('text', 'courses', SM\str('coursesperyear'), []);
+        $mform->addElement('text', 'courses', NED::str('coursesperyear'), []);
         $mform->setType('courses', PARAM_TEXT);
         $mform->setDefault('courses', 0);
         $mform->addRule('courses', null, 'required');
         $mform->addRule('courses', null, 'maxlength', 5);
         $mform->addRule('courses', null, 'numeric');
 
-        $mform->addElement('editor', 'note', SM\str('note'));
+        $mform->addElement('editor', 'note', NED::str('note'));
         $mform->setType('note', PARAM_RAW);
 
         $buttonarray = [];
@@ -84,7 +89,7 @@ class edit_crew_form extends \moodleform {
         }
         if ($cancel_link){
             $buttonarray[] = $mform->createElement('html',
-                SM\link([$cancel_link], get_string('cancel'), 'btn btn-default'));
+                NED::link([$cancel_link], get_string('cancel'), 'btn btn-default'));
         } else {
             $buttonarray[] = $mform->createElement('cancel');
         }
@@ -95,7 +100,7 @@ class edit_crew_form extends \moodleform {
     /**
      * Extend the form definition after the data has been parsed.
      */
-    public function definition_after_data() {
+    public function definition_after_data(){
         $mform = $this->_form;
 
         if (!$this->_can_manage){
@@ -159,9 +164,9 @@ class edit_crew_form extends \moodleform {
      * @param null $def_data
      * @return string
      */
-    public function draw($def_data=null) {
+    public function draw($def_data=null){
         //finalize the form definition if not yet done
-        if (!$this->_definition_finalized) {
+        if (!$this->_definition_finalized){
             $this->_definition_finalized = true;
             $this->definition_after_data();
         }

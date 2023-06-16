@@ -1,10 +1,12 @@
 <?php
+
 /**
  * @package    local_schoolmanager
  * @subpackage NED
  * @copyright  2020 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @noinspection PhpUnused
  */
 
 namespace local_schoolmanager;
@@ -31,11 +33,11 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
  * @property-read array $school_users = [];
  * @property-read array $crew_users = [];
  */
-class school_manager{
-    const TABLE_SCHOOL = 'local_schoolmanager_school';
+class school_manager {
+    const TABLE_SCHOOL = school::TABLE;
     const TABLE_CREW = 'local_schoolmanager_crew';
-    const TABLE_COHORT = 'cohort';
-    const TABLE_MEMBERS = 'cohort_members';
+    const TABLE_COHORT = school::TABLE_COHORT;
+    const TABLE_MEMBERS = school::TABLE_COHORT_MEMBERS;
 
     const CAP_CANT_VIEW_SM = 0;
     const CAP_SEE_OWN_SM = 1;
@@ -51,6 +53,7 @@ class school_manager{
     const SCHOOL_CT_ROLE = 'Classroom Teacher';
 
     static protected $_school_managers = [];
+    /**@var school[] */
     static protected $_schools_data = [];
     static protected $_all_schools_data_was_loaded = false;
     static protected $_called_crews = [];
@@ -72,7 +75,7 @@ class school_manager{
 
     /** @var array $_school_names */
     protected $_school_names = null;
-    /** @var array $_schools */
+    /** @var array|school[] $_schools */
     protected $_schools = null;
     /** @var array $_cohorts */
     protected $_potential_schools = null;
@@ -91,31 +94,31 @@ class school_manager{
         global $USER, $DB;
 
         $this->_ctx = \context_system::instance();
-        if (has_capability(PLUGIN_CAPABILITY.'viewallschooldashboards', $this->_ctx)){
-            $this->_view = self::CAP_SEE_ALL_SM;
-        } elseif (has_capability(PLUGIN_CAPABILITY.'viewownschooldashboard', $this->_ctx)){
-            $this->_view = self::CAP_SEE_OWN_SM;
+        if (NED::has_capability('viewallschooldashboards', $this->_ctx)){
+            $this->_view = static::CAP_SEE_ALL_SM;
+        } elseif (NED::has_capability('viewownschooldashboard', $this->_ctx)){
+            $this->_view = static::CAP_SEE_OWN_SM;
         } else {
-            $this->_view = self::CAP_CANT_VIEW_SM;
+            $this->_view = static::CAP_CANT_VIEW_SM;
         }
 
-        if ($this->_view == self::CAP_CANT_VIEW_SM){
+        if ($this->_view == static::CAP_CANT_VIEW_SM){
             return;
         }
 
         foreach (['manage_schools', 'manage_crews', 'manage_members'] as $cap){
-            $this->{'_'.$cap} = (int)has_capability(PLUGIN_CAPABILITY.$cap, $this->_ctx);
+            $this->{'_'.$cap} = (int)NED::has_capability($cap, $this->_ctx);
         }
 
         $this->_user = $USER;
         $this->_userid = $USER->id;
 
-        self::$_school_managers[$this->_userid] = $this;
+        static::$_school_managers[$this->_userid] = $this;
 
-        if (is_null(self::$_default_role_field_id)){
-            $record = $DB->get_record('user_info_field', ['shortname' => self::FIELD_ROLE], 'id, defaultdata');
-            self::$_default_role_field_id = $record->id ?? false;
-            self::$_default_role_default_value = $record->defaultdata ?? '';
+        if (is_null(static::$_default_role_field_id)){
+            $record = $DB->get_record('user_info_field', ['shortname' => static::FIELD_ROLE], 'id, defaultdata');
+            static::$_default_role_field_id = $record->id ?? false;
+            static::$_default_role_default_value = $record->defaultdata ?? '';
         }
     }
 
@@ -126,13 +129,19 @@ class school_manager{
         global $USER;
         $userid = $USER->id;
 
-        if (!isset(self::$_school_managers[$userid])){
-            self::$_school_managers[$userid] = new school_manager();
+        if (!isset(static::$_school_managers[$userid])){
+            static::$_school_managers[$userid] = new school_manager();
         }
 
-        return self::$_school_managers[$userid];
+        return static::$_school_managers[$userid];
     }
 
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     * @noinspection DuplicatedCode
+     */
     public function __get($name){
         $pr_name = '_' . $name;
         $method = 'get_' . $name;
@@ -162,7 +171,7 @@ class school_manager{
      * @param array|int $ids
      * @param bool      $only_one - return \stdClass of one school by first id if true
      *
-     * @return array|\stdClass|false
+     * @return array|school[]|school|object|false
      */
     static protected function _get_school_by_ids($ids, $only_one=false){
         global $DB;
@@ -177,23 +186,18 @@ class school_manager{
         $ids_to_load = [];
         $data = [];
         foreach ($ids as $id){
-            if (isset(self::$_schools_data[$id])){
-                $data[$id] = self::$_schools_data[$id];
+            if (isset(static::$_schools_data[$id])){
+                $data[$id] = static::$_schools_data[$id];
             } else {
                 $ids_to_load[] = $id;
             }
         }
 
-        if (!self::$_all_schools_data_was_loaded && !empty($ids_to_load)){
-            list($sql, $params) = $DB->get_in_or_equal($ids_to_load, SQL_PARAMS_NAMED);
-            $add_data = $DB->get_records_sql("SELECT school.*,
-                                                     coh.timezone
-                                                FROM {".self::TABLE_SCHOOL."} AS school
-                                     LEFT OUTER JOIN {".self::TABLE_COHORT."} AS coh
-                                                  ON school.id = coh.id
-                                               WHERE school.id $sql", $params) ?: [];
+        if (!static::$_all_schools_data_was_loaded && !empty($ids_to_load)){
+            [$sql, $params] = $DB->get_in_or_equal($ids_to_load, SQL_PARAMS_NAMED);
+            $add_data = school::get_records_select("id $sql", $params);
             foreach ($add_data as $id => $add_datum){
-                self::$_schools_data[$id] = $add_datum;
+                static::$_schools_data[$id] = $add_datum;
                 $data[$id] = $add_datum;
             }
         }
@@ -208,7 +212,7 @@ class school_manager{
      * @param array|int $ids
      * @param bool      $only_one - return \stdClass of one school by first id if true
      *
-     * @return array|\stdClass|false
+     * @return array|school|school[]|object|false
      */
     public function get_school_by_ids($ids, $only_one=false){
         $ids = is_array($ids) ? $ids : [$ids];
@@ -220,11 +224,11 @@ class school_manager{
             }
         }
 
-        return self::_get_school_by_ids($check_ids, $only_one);
+        return static::_get_school_by_ids($check_ids, $only_one);
     }
 
     /**
-     * Check capabilities an show error if necessary
+     * Check capabilities and show error if necessary
      *
      * @param array $check_other_capabilities_all - all of this capabilities should be
      * @param array $check_other_capabilities_any - any of this capabilities should be
@@ -236,7 +240,7 @@ class school_manager{
         };
         $ctx = $this->_ctx;
 
-        if (!$ignore_base_capability && $this->_view == self::CAP_CANT_VIEW_SM){
+        if (!$ignore_base_capability && $this->_view == static::CAP_CANT_VIEW_SM){
             $pr_error();
         }
         if (!empty($check_other_capabilities_all) && !has_all_capabilities($check_other_capabilities_all, $ctx)){
@@ -258,23 +262,23 @@ class school_manager{
             }
 
             $this->_school_names = [];
-            if ($this->_view == self::CAP_CANT_VIEW_SM){
+            if ($this->_view == static::CAP_CANT_VIEW_SM){
                 break;
             }
 
-            if ($this->_view == self::CAP_SEE_ALL_SM){
+            if ($this->_view == static::CAP_SEE_ALL_SM){
               if ($this::$_all_schools_data_was_loaded){
                   foreach ($this::$_schools_data as $school){
                       $this->_school_names[$school->id] = $school->name;
                   }
               } else {
-                  $this->_school_names = $DB->get_records_menu(self::TABLE_SCHOOL, [], false, 'id, name');
+                  $this->_school_names = $DB->get_records_menu(static::TABLE_SCHOOL, [], false, 'id, name');
               }
-            } elseif ($this->_view == self::CAP_SEE_OWN_SM){
+            } elseif ($this->_view == static::CAP_SEE_OWN_SM){
                 $this->_school_names = $DB->get_records_sql_menu("
                     SELECT school.id, school.name 
-                    FROM {".self::TABLE_SCHOOL."} AS school
-                    JOIN {".self::TABLE_MEMBERS."} AS members
+                    FROM {".static::TABLE_SCHOOL."} AS school
+                    JOIN {".static::TABLE_MEMBERS."} AS members
                         ON members.cohortid = school.id
                     WHERE members.userid = :userid",
                     ['userid' => $this->userid]);
@@ -290,25 +294,24 @@ class school_manager{
      * @return array
      */
     public function get_schools(){
-        global $DB;
         do{
             if (!is_null($this->_schools)){
                 break;
             }
 
             $this->_schools = [];
-            if ($this->_view == self::CAP_CANT_VIEW_SM){
+            if ($this->_view == static::CAP_CANT_VIEW_SM){
                 break;
             }
 
-            if ($this->_view == self::CAP_SEE_ALL_SM){
+            if ($this->_view == static::CAP_SEE_ALL_SM){
                 if (!$this::$_all_schools_data_was_loaded){
-                    $this::$_schools_data = $DB->get_records(self::TABLE_SCHOOL);
+                    $this::$_schools_data = school::get_records();
                     $this::$_all_schools_data_was_loaded = true;
                 }
                 $this->_schools = $this::$_schools_data;
-            } elseif ($this->_view == self::CAP_SEE_OWN_SM){
-                $this->_schools = self::_get_school_by_ids($this->get_school_names());
+            } elseif ($this->_view == static::CAP_SEE_OWN_SM){
+                $this->_schools = static::_get_school_by_ids($this->get_school_names());
             }
 
             $this->_schools = $this->_schools ?: [];
@@ -320,9 +323,9 @@ class school_manager{
     /**
      * Return moodle cohort, which can become schools
      *
-     * @param null $cohortid
+     * @param int|null $cohortid
      *
-     * @return array
+     * @return array|object - array of cohorts or single object, if id provided
      */
     public function get_potential_schools($cohortid=null){
         global $DB;
@@ -331,20 +334,20 @@ class school_manager{
                 break;
             }
 
-            if ($this->_view == self::CAP_CANT_VIEW_SM || !$this->can_manage_schools()){
+            if ($this->_view == static::CAP_CANT_VIEW_SM || !$this->can_manage_schools()){
                 $this->_potential_schools = [];
                 break;
             }
 
             $sql = ["SELECT cohort.* 
-                    FROM {".self::TABLE_COHORT."} AS cohort
-                    LEFT JOIN {".self::TABLE_SCHOOL."} AS school
+                    FROM {".static::TABLE_COHORT."} AS cohort
+                    LEFT JOIN {".static::TABLE_SCHOOL."} AS school
                         ON school.id = cohort.id"];
             $where = ["school.id IS NULL"];
             $params = [];
 
-            if ($this->_view == self::CAP_SEE_OWN_SM){
-                $sql[] = "JOIN {".self::TABLE_MEMBERS."} AS members
+            if ($this->_view == static::CAP_SEE_OWN_SM){
+                $sql[] = "JOIN {".static::TABLE_MEMBERS."} AS members
                         ON members.cohortid = school.id";
                 $where[] = 'members.userid = :userid';
                 $params['userid'] = $this->_userid;
@@ -409,10 +412,10 @@ class school_manager{
                 break;
             }
 
-            list($sql_param, $params) = $DB->get_in_or_equal($schoolids, SQL_PARAMS_NAMED);
+            [$sql_param, $params] = $DB->get_in_or_equal($schoolids, SQL_PARAMS_NAMED);
             $select = $get_only_names ? "crew.id, crew.name, crew.schoolid" : "crew.*";
             $sql = "SELECT $select
-                    FROM {".self::TABLE_CREW."} AS crew
+                    FROM {".static::TABLE_CREW."} AS crew
                     WHERE crew.schoolid $sql_param";
             $crews = $DB->get_records_sql($sql, $params);
             if (empty($crews)){
@@ -424,7 +427,7 @@ class school_manager{
                 if (!$get_only_names && !isset($this->_crew_names[$crew->schoolid][$crew->id])){
                     $this->_crew_names[$crew->schoolid][$crew->id] = $crew->name;
                 }
-                self::$_called_crew_schoolids[$crew->id] = $crew->schoolid;
+                static::$_called_crew_schoolids[$crew->id] = $crew->schoolid;
             }
 
         } while(false);
@@ -451,7 +454,7 @@ class school_manager{
      * @return array
      */
     public function get_crew_names($schoolid=null){
-        list($this->_crew_names, $res_data) = $this->_get_crew_data($this->_crew_names, $schoolid, true);
+        [$this->_crew_names, $res_data] = $this->_get_crew_data($this->_crew_names, $schoolid, true);
         return $res_data;
     }
 
@@ -461,7 +464,7 @@ class school_manager{
      * @return array
      */
     public function get_crews($schoolid=null){
-        list($this->_crews, $res_data) = $this->_get_crew_data($this->_crews, $schoolid, false);
+        [$this->_crews, $res_data] = $this->_get_crew_data($this->_crews, $schoolid, false);
         return $res_data;
     }
 
@@ -483,25 +486,31 @@ class school_manager{
             }
         }
 
-        $crew = self::$_called_crews[$crewid] ?? $DB->get_record(self::TABLE_CREW, ['id' => $crewid]);
+        $crew = static::$_called_crews[$crewid] ?? $DB->get_record(static::TABLE_CREW, ['id' => $crewid]);
         if ($crew){
             if (isset($this->school_names[$crew->schoolid])){
-                self::$_called_crews[$crewid] = $crew;
-                self::$_called_crew_schoolids[$crewid] = $crew->schoolid;
+                static::$_called_crews[$crewid] = $crew;
+                static::$_called_crew_schoolids[$crewid] = $crew->schoolid;
                 return $crew;
             }
         }
         return null;
     }
 
+    /**
+     * @param array $crewids
+     * @param bool  $return_one
+     *
+     * @return array|false|mixed|null
+     */
     public function get_schoolid_by_crewids($crewids, $return_one=false){
         global $DB;
         $res = [];
         $to_load = [];
         $crewids = is_array($crewids) ? $crewids : [$crewids];
         foreach ($crewids as $crewid){
-            if (isset(self::$_called_crew_schoolids[$crewid])){
-                $schoolid = self::$_called_crew_schoolids[$crewid];
+            if (isset(static::$_called_crew_schoolids[$crewid])){
+                $schoolid = static::$_called_crew_schoolids[$crewid];
                 if (isset($this->school_names[$schoolid])){
                     $res[$crewid] = $schoolid;
                 }
@@ -511,13 +520,13 @@ class school_manager{
         }
 
         if (!empty($to_load) && (!$return_one || empty($res))){
-            list($sql_param, $params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            [$sql_param, $params] = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
             $sql = "SELECT crew.id, crew.schoolid
-                    FROM {".self::TABLE_CREW."} AS crew
+                    FROM {".static::TABLE_CREW."} AS crew
                     WHERE crew.id $sql_param";
             $crews = $DB->get_records_sql($sql, $params);
             foreach ($crews as $crew){
-                self::$_called_crew_schoolids[$crew->id] = $crew->schoolid;
+                static::$_called_crew_schoolids[$crew->id] = $crew->schoolid;
                 if (isset($this->school_names[$crew->schoolid])){
                     $res[$crew->id] = $crew->schoolid;
                 }
@@ -540,7 +549,7 @@ class school_manager{
      */
     public function get_school_students($schoolid=null, $return_one=true, $role_names=self::DEF_MEMBER_ROLE, $use_cache=true){
         global $DB;
-        $def_role = $role_names == self::DEF_MEMBER_ROLE;
+        $def_role = $role_names == static::DEF_MEMBER_ROLE;
         $role_names = empty($role_names) ? [] : (is_array($role_names) ? $role_names : [$role_names]);
         $use_cache = $use_cache && $def_role;
         if (!$schoolid){
@@ -565,26 +574,27 @@ class school_manager{
 
         if (!empty($to_load) && (!$return_one || empty($res))){
             $params = [];
-            list($sql_param, $school_params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            [$sql_param, $school_params] = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
             $params = array_merge($params, $school_params);
             $where = ["m.cohortid $sql_param"];
             $where[] = 'u.suspended = 0';
             $groupby = ['u.id'];
             $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
                     FROM {user} AS u
-                    JOIN {".self::TABLE_MEMBERS."} AS m
+                    JOIN {".static::TABLE_MEMBERS."} AS m
                         ON m.userid = u.id
                     ";
-            if (self::$_default_role_field_id && !empty($role_names)){
-                $field_id = self::$_default_role_field_id;
+            /** @noinspection DuplicatedCode */
+            if (static::$_default_role_field_id && !empty($role_names)){
+                $field_id = static::$_default_role_field_id;
                 $sql .= "LEFT JOIN {user_info_data} uid
                             ON uid.userid = u.id AND uid.fieldid = '$field_id'
                 ";
 
-                list($where_role, $rn_params) = $DB->get_in_or_equal($role_names, SQL_PARAMS_NAMED, 'rolename');
+                [$where_role, $rn_params] = $DB->get_in_or_equal($role_names, SQL_PARAMS_NAMED, 'rolename');
                 $params = array_merge($params, $rn_params);
 
-                if (in_array(self::$_default_role_default_value, $role_names)){
+                if (in_array(static::$_default_role_default_value, $role_names)){
                     $where_role .= ' OR uid.data IS NULL';
                 }
 
@@ -615,7 +625,7 @@ class school_manager{
      */
     public function get_crew_students($crewid=null, $return_one=true, $role_names=self::DEF_MEMBER_ROLE, $use_cache=true){
         global $DB;
-        $def_role = $role_names == self::DEF_MEMBER_ROLE;
+        $def_role = $role_names == static::DEF_MEMBER_ROLE;
         $role_names = empty($role_names) ? [] : (is_array($role_names) ? $role_names : [$role_names]);
         $use_cache = $use_cache && $def_role;
         if (is_null($crewid)){
@@ -637,7 +647,7 @@ class school_manager{
 
         if (!empty($to_load) && (!$return_one || empty($res))){
             $params = [];
-            list($sql_param, $crew_params) = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
+            [$sql_param, $crew_params] = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
             $params = array_merge($params, $crew_params);
             $where = ["m.crewid $sql_param"];
             if (in_array(0, $to_load)){
@@ -645,18 +655,19 @@ class school_manager{
             }
             $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
                     FROM {user} AS u
-                    JOIN {".self::TABLE_MEMBERS."} AS m
+                    JOIN {".static::TABLE_MEMBERS."} AS m
                         ON m.userid = u.id";
-            if (self::$_default_role_field_id && !empty($role_names)){
-                $field_id = self::$_default_role_field_id;
+            /** @noinspection DuplicatedCode */
+            if (static::$_default_role_field_id && !empty($role_names)){
+                $field_id = static::$_default_role_field_id;
                 $sql .= "LEFT JOIN {user_info_data} uid
                             ON uid.userid = u.id AND uid.fieldid = '$field_id'
                 ";
 
-                list($where_role, $rn_params) = $DB->get_in_or_equal($role_names, SQL_PARAMS_NAMED, 'rolename');
+                [$where_role, $rn_params] = $DB->get_in_or_equal($role_names, SQL_PARAMS_NAMED, 'rolename');
                 $params = array_merge($params, $rn_params);
 
-                if (in_array(self::$_default_role_default_value, $role_names)){
+                if (in_array(static::$_default_role_default_value, $role_names)){
                     $where_role .= ' OR uid.data IS NULL';
                 }
 
@@ -679,21 +690,21 @@ class school_manager{
      * @return bool
      */
     public function can_manage_schools(){
-        return $this->_manage_schools == self::CAP_CAN_EDIT;
+        return $this->_manage_schools == static::CAP_CAN_EDIT;
     }
 
     /**
      * @return bool
      */
     public function can_manage_crews(){
-        return $this->_manage_crews == self::CAP_CAN_EDIT;
+        return $this->_manage_crews == static::CAP_CAN_EDIT;
     }
 
     /**
      * @return bool
      */
     public function can_manage_members(){
-        return $this->_manage_members == self::CAP_CAN_EDIT;
+        return $this->_manage_members == static::CAP_CAN_EDIT;
     }
 
     /**
@@ -704,54 +715,50 @@ class school_manager{
      * @return bool|int
      */
     public function save_school($data){
-        global $DB;
         $data = (object)$data;
         if (!($data->id ?? false) || !$this->can_manage_schools()){
             return false;
         }
 
-        if ($school = $this->get_school_by_ids($data->id, true)){
-            $new = false;
-        } elseif ($school = $this->get_potential_schools($data->id)){
-            $new = true;
-        } else {
+        $upd_school = school::get_school_by_id($data->id);
+        if (!$upd_school && $school = $this->get_potential_schools($data->id)){
+            $upd_school = school::create_school_from_data();
+            $upd_school->id = $school->id;
+            $upd_school->name = $school->name;
+            $upd_school->code = $school->code ?? $school->idnumber;
+        }
+
+        if (empty($upd_school)){
             return false;
         }
 
-        $up_data = new \stdClass();
-        $up_data->id = $school->id;
-        $up_data->name = $school->name;
-        $up_data->code = $school->code ?? $school->idnumber;
-        $up_data->url = $data->url ?? '';
-        $up_data->city = $data->city ?? '';
-        $up_data->country = $data->country ?? $this->_user->country ?? '';
-        $up_data->logo = $data->logo ?? 0;
-        $up_data->compact_logo = $data->compact_logo ?? 0;
-        $up_data->startdate = $data->startdate ?? time();
-        $up_data->enddate = $data->enddate ?? (time() + 365*24*3600);
-        $up_data->note = $data->note ?? '';
-        $up_data->synctimezone = $data->synctimezone ?? 0;
+        $upd_school->url = $data->url ?? '';
+        $upd_school->city = $data->city ?? '';
+        $upd_school->country = $data->country ?? $this->_user->country ?? '';
+        $upd_school->startdate = $data->startdate ?? time();
+        $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
+        $upd_school->note = $data->note ?? '';
+        $upd_school->synctimezone = $data->synctimezone ?? 0;
+        $upd_school->extmanager = $data->extmanager ?? 0;
+
         // save logo
         $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
-            NED::$PLUGIN_NAME, 'logo', $up_data->id);
-        $up_data->logo = !empty($data->logo) ? $data->logo_filemanager : 0;
+            NED::$PLUGIN_NAME, 'logo', $upd_school->id);
+        $upd_school->logo = !empty($data->logo) ? $data->logo_filemanager : 0;
 
         // save compact logo
         $data = file_postupdate_standard_filemanager($data, 'compact_logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
-            NED::$PLUGIN_NAME, 'compact_logo', $up_data->id);
-        $up_data->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
+            NED::$PLUGIN_NAME, 'compact_logo', $upd_school->id);
+        $upd_school->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
 
-        if ($new){
-            self::$_schools_data[$school->id] = $up_data;
-            $this->_schools[$school->id] = $up_data;
-            $this->_school_names[$school->id] = $school->name;
-            return $DB->insert_record_raw(self::TABLE_SCHOOL, $up_data, false, false, true);
-        } else {
-            self::$_schools_data[$school->id] = $up_data;
-            $this->_schools[$school->id] = $up_data;
-            $DB->execute('UPDATE {'.self::TABLE_COHORT.'} SET timezone = ? WHERE id = ?', [$data->timezone, $data->schoolid]);
-            return $DB->update_record(self::TABLE_SCHOOL, $up_data);
-        }
+        $upd_school->save();
+
+        static::$_schools_data[$upd_school->id] = $upd_school;
+        $this->_schools[$upd_school->id] = $upd_school;
+        $this->_school_names[$upd_school->id] = $upd_school->name;
+        $upd_school->update_cohort_timezone($data->timezone);
+
+        return $upd_school->id;
     }
 
     /**
@@ -759,7 +766,7 @@ class school_manager{
      *
      * @param $id
      *
-     * @return bool|int
+     * @return bool
      */
     public function delete_school($id){
         global $DB;
@@ -767,16 +774,16 @@ class school_manager{
             return false;
         }
 
-        $DB->delete_records(self::TABLE_SCHOOL, ['id' => $id]);
-        $DB->delete_records(self::TABLE_CREW, ['schoolid' => $id]);
-        $DB->set_field(self::TABLE_MEMBERS, 'crewid', null, ['cohortid' => $id]);
+        $DB->delete_records(static::TABLE_SCHOOL, ['id' => $id]);
+        $DB->delete_records(static::TABLE_CREW, ['schoolid' => $id]);
+        $DB->set_field(static::TABLE_MEMBERS, 'crewid', null, ['cohortid' => $id]);
         // remove logo
         $fs = get_file_storage();
-        $fs->delete_area_files($this->ctx->id, PLUGIN_NAME, 'logo', $id);
+        $fs->delete_area_files($this->ctx->id, NED::$PLUGIN_NAME, 'logo', $id);
 
         $school->idnumber = $school->code;
         $this->_potential_schools[$id] = $school;
-        unset(self::$_schools_data[$id]);
+        unset(static::$_schools_data[$id]);
         unset($this->_schools[$id]);
         unset($this->_school_names[$id]);
         unset($this->_crews[$id]);
@@ -814,7 +821,7 @@ class school_manager{
         $up_data->courses = $data->courses ?? 0;
         $up_data->note = $data->note ?? '';
 
-        $school_code = $DB->get_field(self::TABLE_SCHOOL, 'code', ['id' => $data->schoolid]);
+        $school_code = $DB->get_field(static::TABLE_SCHOOL, 'code', ['id' => $data->schoolid]);
         $code = '';
         if (!empty($school_code) && !empty($up_data->code)){
             $code = $school_code . '-' . $up_data->code;
@@ -824,7 +831,7 @@ class school_manager{
         }
 
         if (empty($code)) {
-            $count = $DB->count_records(self::TABLE_CREW, ['schoolid' => $up_data->schoolid]) + 1;
+            $count = $DB->count_records(static::TABLE_CREW, ['schoolid' => $up_data->schoolid]) + 1;
             $count = $count > 9 ? $count : ('0' . $count);
             $code = $school_code . '-' . $count;
         }
@@ -836,24 +843,24 @@ class school_manager{
             'description' => '',
             'descriptionformat' => 1,
             'visible' => 1,
-            'component' => PLUGIN_NAME,
+            'component' => NED::$PLUGIN_NAME,
             'timemodified' => time(),
         ];
 
         if (!$data->id){
             $cohort->timecreated = $cohort->timemodified;
-            if ($new_id = $DB->insert_record(self::TABLE_COHORT, $cohort, true)){
+            if ($new_id = $DB->insert_record(static::TABLE_COHORT, $cohort, true)){
                 $up_data->id = $new_id;
             }
-            $DB->insert_record_raw(self::TABLE_CREW, $up_data,  false, false, true);
+            $DB->insert_record_raw(static::TABLE_CREW, $up_data,  false, false, true);
             if (isset($this->_crews[$data->schoolid])){
                 $this->_crews[$data->schoolid][$up_data->id] = $up_data;
             }
             return $up_data->id;
         } else {
             $cohort->id = $data->id;
-            $DB->update_record(self::TABLE_COHORT, $cohort);
-            return $DB->update_record(self::TABLE_CREW, $up_data);
+            $DB->update_record(static::TABLE_COHORT, $cohort);
+            return $DB->update_record(static::TABLE_CREW, $up_data);
         }
     }
 
@@ -863,7 +870,7 @@ class school_manager{
      * @param      $id
      * @param null $schoolid
      *
-     * @return bool|int
+     * @return bool
      */
     public function delete_crew($id, $schoolid=null){
         global $DB;
@@ -871,9 +878,9 @@ class school_manager{
             return false;
         }
 
-        $DB->delete_records(self::TABLE_CREW, ['id' => $id]);
-        $DB->delete_records(self::TABLE_COHORT, ['id' => $id]);
-        $DB->set_field(self::TABLE_MEMBERS, 'crewid', null, ['crewid' => $id]);
+        $DB->delete_records(static::TABLE_CREW, ['id' => $id]);
+        $DB->delete_records(static::TABLE_COHORT, ['id' => $id]);
+        $DB->set_field(static::TABLE_MEMBERS, 'crewid', null, ['crewid' => $id]);
 
         unset($this->_crews[$crew->schoolid][$id]);
         unset($this->_crew_names[$crew->schoolid][$id]);
@@ -904,13 +911,13 @@ class school_manager{
             $crewid = null;
         }
 
-        list($sql_param, $params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        [$sql_param, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $params['schoolid'] = $schoolid;
         $sql = "cohortid = :schoolid AND userid $sql_param";
 
-        if ($DB->set_field_select(self::TABLE_MEMBERS, 'crewid', $crewid, $sql, $params)){
+        if ($DB->set_field_select(static::TABLE_MEMBERS, 'crewid', $crewid, $sql, $params)){
             if (isset($this->_school_users[$schoolid])){
-                foreach ($this->_school_users[$schoolid] as $userid => &$user){
+                foreach ($this->_school_users[$schoolid] as $userid => $user){
                     if (in_array($userid, $userids)){
                         $old_crewid = $user->crewid;
                         unset($this->_crew_users[$old_crewid][$userid]);

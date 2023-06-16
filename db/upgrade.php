@@ -146,5 +146,17 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022041700, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2023061500){
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('extmanager', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'synctimezone');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2023061500, 'local', 'schoolmanager');
+    }
+
     return true;
 }

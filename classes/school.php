@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package    local_schoolmanager
  * @subpackage NED
@@ -9,35 +10,98 @@
 
 namespace local_schoolmanager;
 
-use core\persistent;
-use cacheable_object;
-use stdClass;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 
-class school extends persistent implements cacheable_object  {
+/**
+ * School object
+ *
+ * For properties @see school::define_properties()
+ * @property int    id
+ * @property string name
+ * @property string code
+ * @property string url
+ * @property string city
+ * @property string country
+ * @property int    logo
+ * @property int    compact_logo
+ * @property int    startdate
+ * @property int    enddate
+ * @property string note - HTML data
+ * @property bool   synctimezone
+ * @property int    extmanager
+ * @property int    timecreated
+ * @property int    timemodified
+ */
+class school extends \core\persistent implements \cacheable_object  {
 
-    /** Table name for the persistent. */
+    /** Table name for the \core\persistent. */
     const TABLE = 'local_schoolmanager_school';
+    const TABLE_COHORT = 'cohort';
+    const TABLE_COHORT_MEMBERS = 'cohort_members';
+
+    const EXT_MANAGE_CT = 0;
+    const EXT_MANAGE_SA = 1;
+    const EXTENSION_MANAGER = [
+        self::EXT_MANAGE_CT => 'ct',
+        self::EXT_MANAGE_SA => 'sa',
+    ];
 
     /**
-     * @var
+     * @var object|false - do not use directly, {@see get_cohort()}
      */
-    protected $cohort;
+    protected $_cohort;
 
     /**
      * Create an instance of this class.
      *
-     * @param int $id If set, this is the id of an existing record, used to load the data.
-     * @param stdClass $record If set will be passed to {@see self::from_record()}.
+     * @param int            $id     If set, this is the id of an existing record, used to load the data.
+     * @param \stdClass|null $record If set will be passed to {@see self::from_record()}.
      */
-    public function __construct(int $id = 0, stdClass $record = null) {
+    public function __construct(int $id = 0, \stdClass $record = null) {
         parent::__construct($id, $record);
-        $this->set_cohort();
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function __get($name){
+        if (!static::has_property($name)) return null;
+
+        return $this->get($name);
+    }
+
+    /**
+     * @param string $name
+     * @param mixed  $value
+     *
+     * @return mixed
+     */
+    public function __set($name, $value){
+        if (!static::has_property($name)) return null;
+
+        $this->set($name, $value);
+
+        return $value;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function __isset($name){
+        if (!static::has_property($name)) return false;
+
+        return !is_null($this->get($name));
     }
 
     /**
      * Return the definition of the properties of this model.
+     * Properties usermodified, timemodified, timecreated are defined by default, {@see static::properties_definition()}
      *
      * @return array
      */
@@ -76,39 +140,16 @@ class school extends persistent implements cacheable_object  {
             'synctimezone' => array(
                 'type' => PARAM_INT,
             ),
+            'extmanager' => array(
+                'type' => PARAM_INT,
+            ),
         );
-    }
-
-    /**
-     * Get all records from a user's username.
-     *
-     * @param string $username The username.
-     * @return status[]
-     */
-    public static function get_records_by_username($username) {
-        global $DB;
-
-        $sql = 'SELECT s.*
-                  FROM {' . static::TABLE . '} s
-                  JOIN {user} u
-                    ON u.id = s.userid
-                 WHERE u.username = :username';
-
-        $persistents = [];
-
-        $recordset = $DB->get_recordset_sql($sql, ['username' => $username]);
-        foreach ($recordset as $record) {
-            $persistents[] = new static(0, $record);
-        }
-        $recordset->close();
-
-        return $persistents;
     }
 
     /**
      * Prepares the object for caching. Works like the __sleep method.
      *
-     * @return mixed The data to cache, can be anything except a class that implements the cacheable_object... that would
+     * @return object The data to cache, can be anything except a class that implements the \cacheable_object... that would
      *      be dumb.
      */
     public function prepare_to_cache() {
@@ -122,7 +163,7 @@ class school extends persistent implements cacheable_object  {
      * @return object The instance for the given data.
      */
     public static function wake_from_cache($data) {
-        return new self(0, $data);
+        return new static(0, $data);
     }
 
     /**
@@ -131,53 +172,79 @@ class school extends persistent implements cacheable_object  {
      * @return object|false
      */
     public function get_cohort() {
-        return $this->cohort;
+        if (is_null($this->_cohort)){
+            $this->_cohort = NED::db()->get_record('cohort', ['id' => $this->id]);
+        }
+
+        return $this->_cohort;
     }
 
     /**
      * @return mixed
      */
     public function get_timezone() {
-        return $this->cohort->timezone;
+        return $this->get_cohort()->timezone ?? 99;
     }
 
     /**
      * @return string
      */
     public function get_localtime() {
-        return userdate(time(), '%I:%M %p', $this->cohort->timezone);
+        return NED::ned_date(time(), '-', null, NED::DT_FORMAT_TIME12, $this->get_timezone());
     }
 
     /**
      * @return string
-     * @throws \coding_exception
      */
     public function get_schoolyear() {
-        return date('j M Y', $this->get('startdate')) . ' - ' .  date('j M Y', $this->get('enddate'));
+        return NED::ned_date($this->startdate, '', null, NED::DT_FORMAT_DATE).
+            ' – '.
+            NED::ned_date($this->enddate, '', null, NED::DT_FORMAT_DATE);
     }
 
     /**
-     * Sets the cohort to use in get_cohort()
+     * Update timezone in moodle cohort
+     *
+     * @param int|string $timezone
+     *
+     * @return void
      */
-    public function set_cohort() {
-        global $DB;
-        $this->cohort = $DB->get_record('cohort', ['id' => $this->get('id')]);
+    public function update_cohort_timezone($timezone=99){
+        NED::db()->set_field(static::TABLE_COHORT, 'timezone', $timezone, ['id' => $this->id]);
     }
 
     /**
      * @throws \dml_exception
      */
     public function reset_time_zone() {
-        global $DB;
         $sql = "SELECT u.id, u.timezone
-                  FROM {cohort_members} cm
+                  FROM {".static::TABLE_COHORT_MEMBERS."} cm
                   JOIN {user} u ON cm.userid = u.id
                  WHERE cm.cohortid = ?";
-        if ($users = $DB->get_records_sql($sql, [$this->cohort->id])) {
+        if ($users = NED::db()->get_records_sql($sql, [$this->id])) {
             foreach ($users as $user) {
-                $user->timezone = $this->cohort->timezone;
-                $DB->update_record('user', $user);
+                $user->timezone = $this->get_timezone();
+                NED::db()->update_record('user', $user);
             }
         }
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return static|false
+     */
+    static public function get_school_by_id($id){
+        if (!static::record_exists($id)) return false;
+        return new static($id);
+    }
+
+    /**
+     * @param object|null $data
+     *
+     * @return static
+     */
+    static public function create_school_from_data($data=null){
+        return new static(0, $data);
     }
 }

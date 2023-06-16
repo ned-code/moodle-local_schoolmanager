@@ -1,15 +1,18 @@
 <?php
+
 /**
  * @package    local_schoolmanager
- * @subpackage NED
+ * @subpackage forms
  * @copyright  2020 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_schoolmanager\forms;
-use local_schoolmanager as SM;
+
+use local_schoolmanager\school_manager as SM;
 use local_schoolmanager\output\school_manager_render as SMR;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -17,15 +20,15 @@ require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 
 
+/**
+ * edit_users_form
+ */
 class edit_users_form extends \moodleform {
-    protected $_schoolid;
-
-    public function definition()
-    {
+    public function definition(){
         $mform = $this->_form;
         $schoolid = $this->_customdata['schoolid'] ?? 0;
         $add_html = $this->_customdata['html'] ?? '';
-        $SM = SM\school_manager::get_school_manager();
+        $SM = SM::get_school_manager();
 
         $mform->addElement('html', $add_html);
 
@@ -36,7 +39,7 @@ class edit_users_form extends \moodleform {
 
         $crew_names = $SM->get_crew_names($schoolid);
         $choices = [0 => get_string('none')] + $crew_names;
-        $mform->addElement('select', 'crewid', SM\str('newcrewforusers'), $choices);
+        $mform->addElement('select', 'crewid', NED::str('newcrewforusers'), $choices);
 
         $buttonarray = [];
         $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('save'));
@@ -60,6 +63,11 @@ class edit_users_form extends \moodleform {
         return $data;
     }
 
+    /**
+     * @param string $text
+     *
+     * @return void
+     */
     function set_prehtml($text){
         $mform = $this->_form;
 
@@ -80,9 +88,9 @@ class edit_users_form extends \moodleform {
      * @param null $def_data
      * @return string
      */
-    public function draw($def_data=null) {
+    public function draw($def_data=null){
         //finalize the form definition if not yet done
-        if (!$this->_definition_finalized) {
+        if (!$this->_definition_finalized){
             $this->_definition_finalized = true;
             $this->definition_after_data();
         }

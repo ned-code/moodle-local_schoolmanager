@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    local_schoolmanager
- * @subpackage NED
+ * @subpackage output
  * @copyright  2020 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -9,7 +9,7 @@
 
 namespace local_schoolmanager\output;
 
-use local_schoolmanager as SM;
+use local_schoolmanager\forms as sm_forms;
 use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
@@ -18,15 +18,16 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 
 /**
  * @property-read \core_renderer $o;
- * @property-read SM\school_manager $SM;
+ * @property-read \local_schoolmanager\school_manager $SM;
  * @property-read int $schoolid;
  * @property-read int $crewid;
  * @property-read int $page;
  * @property-read bool $act;
  */
 class school_manager_render implements \renderable, \templatable{
+    use \local_ned_controller\base_empty_class;
 
-    const URL = SM\PLUGIN_URL.'/index.php';
+    const URL = '~/index.php';
     const PAR_SCHOOL = 'schoolid';
     const PAR_CREW = 'crewid';
     const PAR_PAGE = 'page';
@@ -41,43 +42,31 @@ class school_manager_render implements \renderable, \templatable{
 
     /** @var \core_renderer $_o */
     protected $_o;
-    /** @var SM\school_manager $_SM */
+    /** @var \local_schoolmanager\school_manager $_SM */
     protected $_SM;
     protected $_schoolid;
     protected $_crewid;
     protected $_page;
     protected $_act;
 
-    /** @var school_manager_content $c */
+    /** @var \local_schoolmanager\support\school_manager_content $c */
     public $c;
 
+    /**
+     * @construct school_manager_render
+     *
+     * @param bool $load_page_data
+     */
     public function __construct($load_page_data=true){
         global $OUTPUT;
         $this->_o = $OUTPUT;
-        $this->_SM = SM\school_manager::get_school_manager();
-        $this->_act = $this->_SM->view != SM\school_manager::CAP_CANT_VIEW_SM;
-        $this->c = new school_manager_content();
+        $this->_SM = NED::$SM::get_school_manager();
+        $this->_act = $this->_SM->view != NED::$SM::CAP_CANT_VIEW_SM;
+        $this->c = new \local_schoolmanager\support\school_manager_content();
 
         if ($this->_act && $load_page_data){
             $this->load_page_data();
         }
-    }
-
-    public function __get($name){
-        $pr_name = '_' . $name;
-        $res = null;
-
-        if (property_exists($this, $pr_name)){
-            $res = ($this::${$pr_name} ?? $this->$pr_name) ?? null;
-        } elseif(property_exists($this, $name)){
-            $res = ($this::${$name} ?? $this->$name) ?? null;
-        }
-
-        if (is_object($res)){
-            $res = clone($res);
-        }
-
-        return $res;
     }
 
     protected function _check_params(){
@@ -93,7 +82,7 @@ class school_manager_render implements \renderable, \templatable{
 
         if ($this->_schoolid){
             if (!isset($school_names[$this->_schoolid])){
-                // may be save new school
+                // check is it a new school
                 if (!$SM->get_potential_schools($this->_schoolid)){
                     // some data error
                     $this->_schoolid = null;
@@ -113,7 +102,7 @@ class school_manager_render implements \renderable, \templatable{
             $this->_crewid = null;
             $this->_page = self::PAGE_SCHOOL;
         } else {
-            $this->_page = SM\isset_in_list(self::PAGES, $this->_page, self::PAGE_SCHOOL);
+            $this->_page = NED::isset_in_list(self::PAGES, $this->_page, self::PAGE_SCHOOL);
         }
 
         if ($this->_crewid){
@@ -130,6 +119,26 @@ class school_manager_render implements \renderable, \templatable{
         $this->_check_params();
     }
 
+    /**
+     * Add a notification (that is, a status message about something that has just happened).
+     *
+     * @param string $message_or_key The message to print out, can be key to string translate
+     * @param string $type    The type of notification. See constants as NED::NOTIFY_*.
+     *
+     * @return void
+     */
+    public function add_notification($message_or_key='', $type=NED::NOTIFY_INFO){
+        $this->c->messages[] = NED::notification($message_or_key, $type);
+    }
+
+    /**
+     * @param int $schoolid
+     * @param int $crewid
+     * @param int $page - one of the {@see static::PAGES}
+     *
+     * @return void
+     * @noinspection PhpUnused
+     */
     public function set_params($schoolid=null, $crewid=null, $page=null){
         $this->_schoolid = $schoolid;
         $this->_crewid = $crewid;
@@ -160,37 +169,37 @@ class school_manager_render implements \renderable, \templatable{
      *
      * @return \moodle_url
      */
-    static public function get_url($schoolid=null, $crewid=null, $page=null){
+    static public function get_url($schoolid=null, $crewid=null, $page=null, $params=[]){
         $args = [self::PAR_SCHOOL => $schoolid, self::PAR_CREW => $crewid, self::PAR_PAGE => $page];
-        $params = [];
+        $params = $params ?: [];
         foreach ($args as $key => $arg){
             if (!is_null($arg) && $arg !== false){
                 $params[$key] = $arg;
             }
         }
-        return new \moodle_url(self::URL, $params);
+        return NED::url(static::URL, $params);
     }
 
     /**
      * @return string
      */
     static public function get_title(){
-        return SM\str('pluginname');
+        return NED::str('pluginname');
     }
 
     protected function _page_main(){
         $SM = $this->_SM;
         $school_names = $SM->school_names;
         if (empty($school_names)){
-            if ($SM->view == $SM::CAP_SEE_ALL_SM){
-                $text = SM\str('noschools');
+            if ($SM->view == NED::$SM::CAP_SEE_ALL_SM){
+                $text = NED::str('noschools');
             } else {
-                $text = SM\str('nomyschools');
+                $text = NED::str('nomyschools');
             }
-            $this->c->messages[] = $this->o->notification($text, \core\output\notification::NOTIFY_INFO);
+            $this->add_notification($text, NED::NOTIFY_INFO);
         } else {
             foreach ($school_names as $id => $school_name){
-                $this->c->schools[] = ['link' => self::get_url($id), 'name' => $school_name];
+                $this->c->schools[] = ['link' => static::get_url($id), 'name' => $school_name];
             }
         }
 
@@ -203,14 +212,14 @@ class school_manager_render implements \renderable, \templatable{
 
     protected function _page_choose_new_school(){
         $SM = $this->_SM;
-        $form = new SM\forms\choose_potential_school_form($this->get_my_url(), ['cancel' => self::get_url()]);
+        $form = new sm_forms\choose_potential_school_form($this->get_my_url(), ['cancel' => self::get_url()]);
         if ($data = $form->get_data()){
             $cohortid = $data->cohortid ?? null;
             $ps = $SM->potential_schools;
             if (isset($ps[$cohortid])){
                 $this->_schoolid = $cohortid;
                 $this->_page_edit_create_school();
-                return;
+                //@return;
             }
         } else {
             $this->c->forms[] = $form->draw();
@@ -220,21 +229,20 @@ class school_manager_render implements \renderable, \templatable{
     protected function _page_edit_create_school(){
         $SM = $this->_SM;
         if ($this->_schoolid){
-            $form = new SM\forms\edit_school_form($this->get_my_url(), ['cancel' => self::get_url(), 'schoolid' => $this->_schoolid]);
+            $form = new sm_forms\edit_school_form($this->get_my_url(), ['cancel' => self::get_url(), 'schoolid' => $this->_schoolid]);
             if ($data = $form->get_data()){
                 if ($data->deletebutton ?? false){
-                    if($SM->delete_school($data->id)){
-                        $this->c->messages[] =
-                            $this->o->notification(SM\str('schooldeletedsuccessfully'), \core\output\notification::NOTIFY_SUCCESS);
+                    if ($SM->delete_school($data->id)){
+                        $this->add_notification('schooldeletedsuccessfully', NED::NOTIFY_SUCCESS);
                     }
                     $this->_schoolid = null;
                     $this->_page_main();
                     return;
                 } elseif ($data->submitbutton ?? false){
-                    if($SM->save_school($data)){
-                        $this->c->messages[] =
-                            $this->o->notification(SM\str('schoolsavedsuccessfully'), \core\output\notification::NOTIFY_SUCCESS);
-                        $form->set_new_status(false);
+                    if ($SM->save_school($data)){
+                        NED::redirect(NED::url('~/view.php', ['schoolid' => $this->_schoolid, 'view' => 'school']),
+                            NED::str('schoolsavedsuccessfully'), null, NED::NOTIFY_SUCCESS);
+                        return;
                     }
                 }
             }
@@ -248,7 +256,7 @@ class school_manager_render implements \renderable, \templatable{
         if(is_null($this->_crewid)){
             $crew_names = $SM->get_crew_names($this->_schoolid);
             if (empty($crew_names)){
-                $this->c->messages[] = $this->o->notification(SM\str('nocrew'), \core\output\notification::NOTIFY_INFO);
+                $this->add_notification('nocrew', NED::NOTIFY_INFO);
             } else {
                 foreach ($crew_names as $id => $crew_name){
                     $this->c->crews[] = ['link' => $this->get_my_url(null, $id), 'name' => $crew_name];
@@ -260,22 +268,20 @@ class school_manager_render implements \renderable, \templatable{
                     ['link' => $this->get_my_url(null, 0), 'name' => get_string('add'), 'primary' => true];
             }
         } else {
-            $form = new SM\forms\edit_crew_form($this->get_my_url(),
+            $form = new sm_forms\edit_crew_form($this->get_my_url(),
                 ['cancel' => $this->get_my_url(null, false, self::PAGE_CREW),
                     'schoolid' => $this->_schoolid, 'crewid' => $this->_crewid]);
             if ($data = $form->get_data()){
                 if ($data->deletebutton ?? false){
-                    if($SM->delete_crew($data->id, $this->_schoolid)){
-                        $this->c->messages[] =
-                            $this->o->notification(SM\str('crewdeletedsuccessfully'), \core\output\notification::NOTIFY_SUCCESS);
+                    if ($SM->delete_crew($data->id, $this->_schoolid)){
+                        $this->add_notification('crewdeletedsuccessfully', NED::NOTIFY_SUCCESS);
                     }
                     $this->_crewid = null;
                     $this->_page_edit_create_crew();
                     return;
                 } elseif ($data->submitbutton ?? false){
-                    if($this->_crewid = $SM->save_crew($data)){
-                        $this->c->messages[] =
-                            $this->o->notification(SM\str('crewsavedsuccessfully'), \core\output\notification::NOTIFY_SUCCESS);
+                    if ($this->_crewid = $SM->save_crew($data)){
+                        $this->add_notification('crewsavedsuccessfully', NED::NOTIFY_SUCCESS);
                         $form->set_crewid($this->_crewid);
                     }
                 }
@@ -288,7 +294,7 @@ class school_manager_render implements \renderable, \templatable{
         $SM = $this->_SM;
         $users = $SM->get_school_students($this->_schoolid, true);
         if (empty($users)){
-            $this->c->messages[] = $this->o->notification(SM\str('nousersatschool'), \core\output\notification::NOTIFY_INFO);
+            $this->add_notification('nousersatschool', NED::NOTIFY_INFO);
             return;
         }
 
@@ -298,17 +304,17 @@ class school_manager_render implements \renderable, \templatable{
         $user_table = static::user_edit_table($school, $crews, $users, $this->o, $can_manage);
 
         if ($can_manage){
-            $form = new SM\forms\edit_users_form($this->get_my_url(), ['schoolid' => $this->_schoolid]);
+            $form = new sm_forms\edit_users_form($this->get_my_url(), ['schoolid' => $this->_schoolid]);
             if($data = $form->get_data()){
                 if ($SM->change_users_crew($this->_schoolid, $data->{self::FORM_USERS_TO_CHANGE}, $data->crewid)){
-                    $this->c->messages[] =
-                        $this->o->notification(SM\str('usersupdatedsuccessfully'), \core\output\notification::NOTIFY_SUCCESS);
+                    $this->add_notification('usersupdatedsuccessfully', NED::NOTIFY_SUCCESS);
                 }
             }
-            $form->set_prehtml($user_table ? \html_writer::table($user_table) : '');
+
+            $form->set_prehtml($user_table ? NED::render_table($user_table) : '');
             $this->c->forms[] = $form->draw();
         } else {
-            $this->c->tables[] = \html_writer::table($user_table);
+            $this->c->tables[] = NED::render_table($user_table);
         }
     }
 
@@ -325,8 +331,7 @@ class school_manager_render implements \renderable, \templatable{
      */
     static public function user_edit_table($school, $crews, $users, $output, $can_manage=false){
         global $PAGE;
-        $table = new \html_table();
-        $table->head = [];
+        $table = NED::html_table();
         $schoolcode = $school->code ?? '';
         $togglegroup = self::FORM_USERS_TO_CHANGE;
 
@@ -342,7 +347,7 @@ class school_manager_render implements \renderable, \templatable{
             ]);
             $table->head[] = $output->render($mastercheckbox);
         }
-        array_push($table->head, get_string('username'), SM\str('crewname'), SM\str('crewcode'));
+        array_push($table->head, get_string('username'), NED::str('crewname'), NED::str('crewcode'));
 
         foreach ($users as $user){
             $cells = [];
@@ -354,23 +359,23 @@ class school_manager_render implements \renderable, \templatable{
                     'value' => $user->id,
                     'label' => '',
                 ]);
-                $cells[] = SM\cell($output->render($checkbox), 'select');
+                $cells[] = NED::cell($output->render($checkbox), 'select');
             }
 
-            $cells[] = SM\cell(NED::q_user_link($user), 'username');
+            $cells[] = NED::cell(NED::q_user_link($user), 'username');
             $crewname = $crews[$user->crewid]->name ?? '';
             if ($PAGE->theme->name == 'ned_boost'){
-                $crewname = SM\link(['/my', ['schoolid' => $school->id]], $crewname);
+                $crewname = NED::link(['/my', ['schoolid' => $school->id]], $crewname);
             }
-            $cells[] = SM\cell($crewname, 'crewname');
+            $cells[] = NED::cell($crewname, 'crewname');
             $crewcode = $crews[$user->crewid]->code ?? '';
             if ($schoolcode && $crewcode){
                 $code = $schoolcode.'-'.$crewcode;
             } else {
-                $code = $schoolcode or $crewcode;
+                $code = $schoolcode || $crewcode;
             }
-            $cells[] = SM\cell($code, 'crewcode');
-            $row = SM\row($cells, 'userid-'.$user->id);
+            $cells[] = NED::cell($code, 'crewcode');
+            $row = NED::row($cells, 'userid-'.$user->id);
             $table->data[] = $row;
         }
 
@@ -385,7 +390,7 @@ class school_manager_render implements \renderable, \templatable{
      *
      * @param \renderer_base $output Used to do a final render of any components that need to be rendered for export.
      *
-     * @return \stdClass|array
+     * @return \stdClass
      */
     public function export_for_template(\renderer_base $output){
         global $PAGE;
@@ -403,7 +408,7 @@ class school_manager_render implements \renderable, \templatable{
             if ($this->_schoolid){
                 if ($PAGE->theme->name == 'ned_boost'){
                     $this->c->links[] = ['link' => new \moodle_url('/my', ['schoolid' => $this->_schoolid]),
-                        'name' => SM\str('schoolinfo')];
+                        'name' => NED::str('schoolinfo')];
                 }
             }
             if ($this->_page == self::PAGE_SCHOOL){
@@ -416,32 +421,32 @@ class school_manager_render implements \renderable, \templatable{
 
                 if ($SM->school_names[$this->_schoolid] ?? false){
                     $this->c->links[] =
-                        ['link' => $this->get_my_url(null, false, self::PAGE_CREW), 'name' => SM\str('crews')];
+                        ['link' => $this->get_my_url(null, false, self::PAGE_CREW), 'name' => NED::str('crews')];
                     $this->c->links[] =
-                        ['link' => $this->get_my_url(null, false, self::PAGE_USER), 'name' => SM\str('users')];
+                        ['link' => $this->get_my_url(null, false, self::PAGE_USER), 'name' => NED::str('users')];
                 }
             } else {
                 $this->c->school_name = $SM->school_names[$this->schoolid];
-                $this->c->links[] = ['link' => self::get_url(), 'name' => SM\str('schools')];
+                $this->c->links[] = ['link' => self::get_url(), 'name' => NED::str('schools')];
 
                 if ($this->_page == self::PAGE_CREW){
                     $this->_page_edit_create_crew();
                     $this->c->links[] =
-                        ['link' => $this->get_my_url(null, false, self::PAGE_USER), 'name' => SM\str('users')];
+                        ['link' => $this->get_my_url(null, false, self::PAGE_USER), 'name' => NED::str('users')];
                 } elseif($this->_page == self::PAGE_USER){
                     $this->_page_edit_users();
                     $this->c->links[] =
-                        ['link' => $this->get_my_url(null, false, self::PAGE_CREW), 'name' => SM\str('crews')];
+                        ['link' => $this->get_my_url(null, false, self::PAGE_CREW), 'name' => NED::str('crews')];
                 }
             }
 
         }
-        if ($this->SM->get_school_by_ids($this->_schoolid)) {
+        if ($this->SM->get_school_by_ids($this->_schoolid)){
             $header = new school_header($this->_schoolid ?? 0, $this->_page);
             $headerdata = $header->export_for_template($output);
         }
         $data = $this->c->export();
-        if (!empty($headerdata)) {
+        if (!empty($headerdata)){
             foreach ($headerdata as $key => $item){
                 $data->$key = $item;
             }
@@ -457,63 +462,10 @@ class school_manager_render implements \renderable, \templatable{
      * @return string
      */
     public function render($return=false){
-        global $PAGE;
-        $renderer = $PAGE->get_renderer(SM\PLUGIN_NAME);
-        $res = $renderer->render($this);
+        $res = NED::render($this);
         if (!$return){
             echo $res;
         }
-        return $res;
-    }
-
-}
-
-class school_manager_content extends \stdClass{
-    /** @var \renderer_base $output */
-    public $output;
-    public $messages = [];
-    public $schools = [];
-    public $crews = [];
-    public $forms = [];
-    public $links = [];
-    public $manage = false;
-    public $tables = [];
-    public $buttons = [];
-    public $school_name = '';
-
-
-    public function __construct($var=null){
-        if (!is_null($var)){
-            $this->import($var);
-        }
-    }
-
-    public function __get($name){
-        return null;
-    }
-
-    /**
-     * Import $obj data into $this
-     *
-     * @param $obj
-     */
-    public function import($obj){
-        foreach ($obj as $key => $item){
-            $this->$key = $item;
-        }
-    }
-
-    /**
-     * Export $this data as \stdClass object
-     *
-     * @return \stdClass
-     */
-    public function export(){
-        $res = new \stdClass();
-        foreach ($this as $key => $item){
-            $res->$key = $item;
-        }
-
         return $res;
     }
 }
