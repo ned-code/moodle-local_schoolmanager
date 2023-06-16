@@ -17,6 +17,7 @@ use local_schoolmanager\shared_lib as NED;
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
 require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 
 
