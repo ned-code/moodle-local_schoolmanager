@@ -167,6 +167,27 @@ class school extends \core\persistent implements \cacheable_object  {
     }
 
     /**
+     * Like {@see static::create()}, but allow to set custom ID
+     *
+     * @param int|null $save_id - (optional) ID to save, if null - uses id from the object
+     *
+     * @return static
+     * @throws \coding_exception
+     */
+    public function create_with_id($save_id=null){
+        $id = $save_id ?? $this->raw_get('id');
+        if (!$id){
+            throw new \coding_exception('Cannot save an object with ID without ID.');
+        }
+
+        $this->raw_set('id', 0);
+        $this->create();
+        NED::db()->set_field(static::TABLE, 'id', $id, ['id' => $this->raw_get('id')]);
+
+        return $this;
+    }
+
+    /**
      * Get cohort
      *
      * @return object|false
