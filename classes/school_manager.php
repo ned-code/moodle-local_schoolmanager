@@ -720,8 +720,10 @@ class school_manager {
             return false;
         }
 
+        $new_school = false;
         $upd_school = school::get_school_by_id($data->id);
         if (!$upd_school && $school = $this->get_potential_schools($data->id)){
+            $new_school = true;
             $upd_school = school::create_school_from_data();
             $upd_school->id = $school->id;
             $upd_school->name = $school->name;
@@ -751,7 +753,12 @@ class school_manager {
             NED::$PLUGIN_NAME, 'compact_logo', $upd_school->id);
         $upd_school->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
 
-        $upd_school->save();
+        if ($new_school){
+            // don't use create() or save() method here, as it can't create object with ID
+            $upd_school->create_with_id();
+        } else {
+            $upd_school->update();
+        }
 
         static::$_schools_data[$upd_school->id] = $upd_school;
         $this->_schools[$upd_school->id] = $upd_school;
