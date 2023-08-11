@@ -172,9 +172,9 @@ class edit_school_form extends \moodleform {
         }
 
         $SM = SM::get_school_manager();
-        $school = $SM->get_school_by_ids($this->_schoolid, true);
-        $this->_school->timezone = $school->get_cohort()->timezone ?? 99;
-
+        if ($school = $SM->get_school_by_ids($this->_schoolid, true)) {
+            $this->_school->timezone = $school->get_cohort()->timezone ?? 99;
+        }
         $this->set_data($this->_school);
     }
 
