@@ -31,6 +31,9 @@ defined('MOODLE_INTERNAL') || die();
  * @property string note - HTML data
  * @property bool   synctimezone
  * @property int    extmanager
+ * @property int    iptype
+ * @property int    proctormanager
+ * @property int    academicintegritymanager
  * @property int    timecreated
  * @property int    timemodified
  */
@@ -46,6 +49,12 @@ class school extends \core\persistent implements \cacheable_object  {
     const EXTENSION_MANAGER = [
         self::EXT_MANAGE_CT => 'ct',
         self::EXT_MANAGE_SA => 'sa',
+    ];
+    const IP_TYPE_STATIC = 1;
+    const IP_TYPE_DYNAMIC = 2;
+    const IP_TYPES = [
+        self::IP_TYPE_STATIC => 'static',
+        self::IP_TYPE_DYNAMIC => 'dynamic',
     ];
 
     /**
@@ -141,6 +150,15 @@ class school extends \core\persistent implements \cacheable_object  {
                 'type' => PARAM_INT,
             ),
             'extmanager' => array(
+                'type' => PARAM_INT,
+            ),
+            'iptype' => array(
+                'type' => PARAM_INT,
+            ),
+            'proctormanager' => array(
+                'type' => PARAM_INT,
+            ),
+            'academicintegritymanager' => array(
                 'type' => PARAM_INT,
             ),
         );

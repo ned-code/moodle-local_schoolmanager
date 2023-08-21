@@ -158,5 +158,29 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023061500, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2023082001) {
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('iptype', XMLDB_TYPE_INTEGER, '2', null, null, null, null, 'extmanager');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('proctormanager', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'iptype');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('academicintegritymanager', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'proctormanager');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2023082001, 'local', 'schoolmanager');
+    }
+
     return true;
 }

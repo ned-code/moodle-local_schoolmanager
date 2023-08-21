@@ -31,7 +31,8 @@ class edit_school_form extends \moodleform {
     protected $_school;
 
     public function definition(){
-        global $CFG;
+        global $CFG, $USER;
+
         $mform = $this->_form;
         $cancel_link = $this->_customdata['cancel'] ?? false;
         $this->_schoolid = $this->_customdata['schoolid'] ?? 0;
@@ -83,6 +84,43 @@ class edit_school_form extends \moodleform {
         // Sync timezone
         $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
         $mform->setDefault('synctimezone', 0);
+
+        // IP type
+        $mform->addElement('select', 'iptype', NED::str('iptype'), ['' => get_string('choose')] + NED::strings2menu(school::IP_TYPES));
+        $mform->addRule('iptype', null, 'required');
+        $mform->addHelpButton('iptype', 'iptype', NED::$PLUGIN_NAME);
+
+        // Staf options.
+        $staffoptions = [];
+        if ($staffs = $SM->get_school_students($this->_schoolid, true, $SM::STAFF_ROLES, false)) {
+            foreach ($staffs as $staff) {
+                $staffoptions[$staff->id] = fullname($staff);
+            }
+            $staffoptions = ['' => get_string('choose')] + $staffoptions;
+        }
+
+        // School Administrator.
+        if ($administrator = $SM->get_school_students($this->_schoolid, true, $SM::SCHOOL_ADMINISTRATOR_ROLE, false)) {
+            $administrator = reset($administrator);
+        }
+
+        $mform->addElement('select', 'schooladministrator', NED::str('schooladministrator'), $staffoptions, ['disabled']);
+        $mform->setDefault('schooladministrator', $administrator->id ?? 0);
+
+        if (is_siteadmin() || ($administrator && $administrator->id == $USER->id)) {
+            // Proctor Manager for tests/Exams.
+            $mform->addElement('select', 'proctormanager', NED::str('proctormanager'), $staffoptions);
+            // Academic Integrity Manager.
+            $mform->addElement('select', 'academicintegritymanager', NED::str('academicintegritymanager'), $staffoptions);
+        } else {
+            $mform->addElement('hidden', 'proctormanager');
+            $mform->setType('proctormanager', PARAM_INT);
+
+            $mform->addElement('hidden', 'academicintegritymanager');
+            $mform->setType('academicintegritymanager', PARAM_INT);
+        }
+        $mform->setDefault('proctormanager', $administrator->id ?? 0);
+        $mform->setDefault('academicintegritymanager', $administrator->id ?? 0);
 
         if (is_siteadmin()){
             $mform->addElement('select', 'extmanager', NED::str('extmanager'), NED::strings2menu(school::EXTENSION_MANAGER));
@@ -175,6 +213,10 @@ class edit_school_form extends \moodleform {
         if ($school = $SM->get_school_by_ids($this->_schoolid, true)) {
             $this->_school->timezone = $school->get_cohort()->timezone ?? 99;
         }
+        
+        $this->_school->proctormanager = ($this->_school->proctormanager) ?: null;
+        $this->_school->academicintegritymanager = ($this->_school->academicintegritymanager) ?: null;
+
         $this->set_data($this->_school);
     }
 

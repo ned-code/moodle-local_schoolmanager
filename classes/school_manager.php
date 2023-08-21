@@ -742,6 +742,9 @@ class school_manager {
         $upd_school->note = $data->note ?? '';
         $upd_school->synctimezone = $data->synctimezone ?? 0;
         $upd_school->extmanager = $data->extmanager ?? 0;
+        $upd_school->iptype = $data->iptype ?? null;
+        $upd_school->proctormanager = $data->proctormanager ?? 0;
+        $upd_school->academicintegritymanager = $data->academicintegritymanager ?? 0;
 
         // save logo
         $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
