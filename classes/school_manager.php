@@ -741,6 +741,7 @@ class school_manager {
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
         $upd_school->note = $data->note ?? '';
         $upd_school->synctimezone = $data->synctimezone ?? 0;
+        $upd_school->enabletem = $data->enabletem ?? 0;
         $upd_school->extmanager = $data->extmanager ?? 0;
         $upd_school->iptype = $data->iptype ?? null;
         $upd_school->proctormanager = $data->proctormanager ?? 0;

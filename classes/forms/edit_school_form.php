@@ -85,6 +85,10 @@ class edit_school_form extends \moodleform {
         $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
         $mform->setDefault('synctimezone', 0);
 
+        // Enable TEM
+        $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
+        $mform->setDefault('enabletem', 0);
+
         // IP type
         $mform->addElement('select', 'iptype', NED::str('iptype'), ['' => get_string('choose')] + NED::strings2menu(school::IP_TYPES));
         $mform->addRule('iptype', null, 'required');
