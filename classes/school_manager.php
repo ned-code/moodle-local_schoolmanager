@@ -740,12 +740,14 @@ class school_manager {
         $upd_school->startdate = $data->startdate ?? time();
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
         $upd_school->note = $data->note ?? '';
-        $upd_school->synctimezone = $data->synctimezone ?? 0;
-        $upd_school->enabletem = $data->enabletem ?? 0;
-        $upd_school->extmanager = $data->extmanager ?? 0;
         $upd_school->iptype = $data->iptype ?? null;
-        $upd_school->proctormanager = $data->proctormanager ?? 0;
-        $upd_school->academicintegritymanager = $data->academicintegritymanager ?? 0;
+        if (is_siteadmin()) {
+            $upd_school->synctimezone = $data->synctimezone ?? 0;
+            $upd_school->enabletem = $data->enabletem ?? 0;
+            $upd_school->proctormanager = $data->proctormanager ?? 0;
+            $upd_school->academicintegritymanager = $data->academicintegritymanager ?? 0;
+            $upd_school->extmanager = $data->extmanager ?? 0;
+        }
 
         // save logo
         $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,

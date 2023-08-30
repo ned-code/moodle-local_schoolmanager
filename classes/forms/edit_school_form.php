@@ -81,13 +81,21 @@ class edit_school_form extends \moodleform {
         $mform->addElement('select', 'timezone', get_string('timezone'), $choices);
         $mform->setDefault('timezone', $CFG->timezone);
 
-        // Sync timezone
-        $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
-        $mform->setDefault('synctimezone', 0);
+        if (is_siteadmin()) {
+            // Sync timezone
+            $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
+            $mform->setDefault('synctimezone', 0);
 
-        // Enable TEM
-        $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
-        $mform->setDefault('enabletem', 0);
+            // Enable TEM
+            $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
+            $mform->setDefault('enabletem', 0);
+        } else {
+            $mform->addElement('hidden', 'synctimezone');
+            $mform->setType('synctimezone', PARAM_INT);
+
+            $mform->addElement('hidden', 'enabletem');
+            $mform->setType('enabletem', PARAM_INT);
+        }
 
         // IP type
         $mform->addElement('select', 'iptype', NED::str('iptype'), ['' => get_string('choose')] + NED::strings2menu(school::IP_TYPES));
