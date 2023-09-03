@@ -105,13 +105,15 @@ class school_handler {
      *
      * @return string
      */
-    public function get_control_form($schoolid = 0) {
+    public function get_control_form($schoolid = 0, $url = null) {
         if (empty($this->schools) || $this->capability <= static::CAP_SEE_OWN_SCHOOL) {
             return '';
         }
 
         $form = [];
-        $url = static::get_url();
+        if (!$url) {
+            $url = static::get_url();
+        }
 
         // choose school
         $school_opts = [];
