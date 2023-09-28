@@ -20,6 +20,7 @@
  * @copyright  2021 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @noinspection PhpUnnecessaryCurlyVarSyntaxInspection
  */
 
 namespace local_schoolmanager\task;
@@ -37,6 +38,11 @@ NED::require_lib('accesslib.php');
 /**
  * Class sync_course_admins
  *
+ * Auto enroll School Admins and District Admins to courses
+ * - If user role = S-SA or S-DA
+ * - And user belongs to any school
+ * - Then enroll user in any course and course group that has matching school code
+ *
  * @package local_schoolmanager\task
  */
 class sync_course_admins extends \core\task\scheduled_task {
@@ -48,11 +54,9 @@ class sync_course_admins extends \core\task\scheduled_task {
      * @param array|object|static|null $task_or_data
      *
      * @return void
-     * @noinspection PhpUnusedParameterInspection
      */
     static public function do_job($task_or_data=[]) {
-        $log = true;
-        $users = static::get_users_to_update($log);
+        $users = static::get_users_to_update(true);
         if (empty($users)){
             if (is_null($users)){
                 static::print('There are no fields to sync users, pass');
@@ -64,7 +68,7 @@ class sync_course_admins extends \core\task\scheduled_task {
 
         $c = count($users);
         static::print("There are $c users-courses to process...");
-        list($add_enrol, $rem_enrol, $add_group, $rem_group) = static::process_users($users, $log);
+        list($add_enrol, $rem_enrol, $add_group, $rem_group) = static::process_users($users, true);
         if ($add_enrol){
             static::print("There are $add_enrol users-courses have been enrolled");
         }
