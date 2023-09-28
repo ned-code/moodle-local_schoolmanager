@@ -20,6 +20,7 @@
  * @copyright  2021 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @noinspection PhpUnnecessaryCurlyVarSyntaxInspection
  */
 
 namespace local_schoolmanager\task;
@@ -34,6 +35,16 @@ NED::require_file('/cohort/lib.php');
 /**
  * Class sync_school_admins
  *
+ * For users with roles {@see NED::ROLE_SSA}, {@see NED::ROLE_SDA}
+ *
+ * Task A1: Sync School Admins to schools
+ *  - If user profile field “School” has selected school
+ *  - Then add user to site cohort with matching name
+ *
+ * Task A2: Sync District Admins to school
+ * - If user profile field “District Administration” has selected schools
+ * - Then add user to all site cohorts with matching name
+ *
  * @package local_schoolmanager\task
  */
 class sync_school_admins extends \core\task\scheduled_task {
@@ -45,11 +56,9 @@ class sync_school_admins extends \core\task\scheduled_task {
      * @param array|object|static|null $task_or_data
      *
      * @return void
-     * @noinspection PhpUnusedParameterInspection
      */
     static public function do_job($task_or_data=[]) {
-        $log = true;
-        $users = static::get_users_to_update($log);
+        $users = static::get_users_to_update(true);
         if (empty($users)){
             if (is_null($users)){
                 static::print('There are no fields to sync users, pass');
@@ -61,7 +70,7 @@ class sync_school_admins extends \core\task\scheduled_task {
 
         $c = count($users);
         static::print("There are $c users-schools to process...");
-        list($add, $rem) = static::process_users($users, $log);
+        [$add, $rem] = static::process_users($users, true);
         if ($add){
             static::print("There are $add users-schools have been added");
         }
@@ -92,7 +101,13 @@ class sync_school_admins extends \core\task\scheduled_task {
         }
         if ($schools_multi_field && is_numeric($schools_multi_field)){
             $school_check_fields[] = $schools_multi_field;
-            $school_add_join[] = "uid.fieldid = $schools_multi_field AND uid.data REGEXP BINARY CONCAT('(^|\\n)', school.code, '[[.space.]].*')";
+            /**
+             * Don't use "[[.space.]]" here, as it doesn't work in the new MariaDB versions
+             * Don't use "[[:space:]]" here, as it is identified by Moodle as parameter placeholders
+             * @var $space
+             */
+            $space = ' ';
+            $school_add_join[] = "uid.fieldid = $schools_multi_field AND uid.data REGEXP BINARY CONCAT('(^|\\n)', school.code, '$space.*')";
         }
 
         if (empty($school_check_fields)){
@@ -120,11 +135,11 @@ class sync_school_admins extends \core\task\scheduled_task {
         $t_member = school_manager::TABLE_MEMBERS;
         $school_add_join = NED::sql_where($school_add_join, "OR", true);
 
-        list($rolename_where, $rolename_params) = NED::db()->get_in_or_equal([NED::ROLE_SSA, NED::ROLE_SDA], SQL_PARAMS_NAMED);
+        [$rolename_where, $rolename_params] = NED::db()->get_in_or_equal([NED::ROLE_SSA, NED::ROLE_SDA], SQL_PARAMS_NAMED);
         $all_params[] = $rolename_params;
-        list($school_field_where, $school_field_params) = NED::db()->get_in_or_equal($school_check_fields, SQL_PARAMS_NAMED);
+        [$school_field_where, $school_field_params] = NED::db()->get_in_or_equal($school_check_fields, SQL_PARAMS_NAMED);
         $all_params[] = $school_field_params;
-        list($school_none_where, $school_none_params) = NED::db()->get_in_or_equal(NED::SCHOOL_EMPTY_LIST, SQL_PARAMS_NAMED, 'param', false);
+        [$school_none_where, $school_none_params] = NED::db()->get_in_or_equal(NED::SCHOOL_EMPTY_LIST, SQL_PARAMS_NAMED, 'param', false);
         $all_params[] = $school_none_params;
 
         $from = ["
@@ -182,14 +197,23 @@ class sync_school_admins extends \core\task\scheduled_task {
         };
 
         foreach ($users as $user){
-            if ($user->add_school ?? false){
-                cohort_add_member($user->schoolid, $user->userid);
-                $p("+ User {$user->username} ($user->userid) have been added to school {$user->school_code} ($user->schoolid)");
-                $add++;
-            } elseif ($user->rem_school ?? false){
-                cohort_remove_member($user->schoolid, $user->userid);
-                $p("- User {$user->username} ($user->userid) have been removed from school {$user->school_code} ($user->schoolid)");
-                $rem++;
+            try {
+                if ($user->add_school ?? false){
+                    cohort_add_member($user->schoolid, $user->userid);
+                    $p("+ User {$user->username} ($user->userid) have been added to school {$user->school_code} ($user->schoolid)");
+                    $add++;
+                } elseif ($user->rem_school ?? false){
+                    cohort_remove_member($user->schoolid, $user->userid);
+                    $p("- User {$user->username} ($user->userid) have been removed from school {$user->school_code} ($user->schoolid)");
+                    $rem++;
+                }
+            } catch (\Exception $e){
+                $e_info = get_exception_info($e);
+                $logerrmsg = "!!! Error !!!" .
+                    "\nException handler: ".$e_info->message.
+                    "\nDebug: ".$e_info->debuginfo."\n".format_backtrace($e_info->backtrace, true);
+                static::print($logerrmsg, true);
+                continue;
             }
         }
 
