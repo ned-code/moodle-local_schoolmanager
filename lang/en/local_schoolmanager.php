@@ -156,3 +156,4 @@ $string['schooladministrator'] = 'School Administrator';
 $string['proctormanager'] = 'Proctor Manager for Tests/Exams';
 $string['academicintegritymanager'] = 'Academic Integrity Manager';
 $string['enabletem'] = 'Enable TEM';
+$string['englishproficiency'] = 'English Proficiency';

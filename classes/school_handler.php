@@ -105,7 +105,7 @@ class school_handler {
      *
      * @return string
      */
-    public function get_control_form($schoolid = 0, $url = null) {
+    public function get_control_form($schoolid = 0, $url = null, $hidetemdisabled = false) {
         if (empty($this->schools) || $this->capability <= static::CAP_SEE_OWN_SCHOOL) {
             return '';
         }
@@ -126,6 +126,9 @@ class school_handler {
             $attr['disabled'] = 'disabled';
         }
         foreach ($this->schools as $school){
+            if ($hidetemdisabled && !$school->enabletem) {
+                continue;
+            }
             $school_opts[$school->id] = $school->name;
         }
         $form[] = NED::single_autocomplete($url, 'schoolid', $school_opts, $schoolid, NED::fa('fa-university'), '', $attr);

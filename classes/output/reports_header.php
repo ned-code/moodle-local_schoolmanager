@@ -55,6 +55,13 @@ class reports_header implements \renderable, \templatable {
             }
         }
 
+        if (has_any_capability(['report/ghs:viewenglishproficiencyallschools', 'report/ghs:viewenglishproficiencyownschool'], $contextsystem)) {
+            $data->btn_englishproficiency_url = new \moodle_url('/report/ghs/ghs_english_proficiency.php');
+            if ($PAGE->url->get_path() == $data->btn_englishproficiency_url->get_path()) {
+                $data->show_englishproficiency = true;
+            }
+        }
+
         return $data;
     }
 }
