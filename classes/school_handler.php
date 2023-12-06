@@ -16,6 +16,7 @@ use theme_ned_boost\output\course;
 use theme_ned_boost\output\dashboard_content;
 use theme_ned_boost\shared_lib as NED;
 use local_kica as KICA;
+use local_schoolmanager as SM;
 use function block_ned_teacher_tools\is_kica_exists;
 
 defined('MOODLE_INTERNAL') || die();
@@ -105,7 +106,7 @@ class school_handler {
      *
      * @return string
      */
-    public function get_control_form($schoolid = 0, $url = null, $hidetemdisabled = false) {
+    public function get_control_form($schoolid = 0, $url = null, $hidetemdisabled = false, $hideschoolswithoutstudent = false) {
         if (empty($this->schools) || $this->capability <= static::CAP_SEE_OWN_SCHOOL) {
             return '';
         }
@@ -125,8 +126,16 @@ class school_handler {
         if ($count <= 1){
             $attr['disabled'] = 'disabled';
         }
+
+        if ($hideschoolswithoutstudent) {
+            $SM = new SM\school_manager();
+        }
+
         foreach ($this->schools as $school){
             if ($hidetemdisabled && !$school->enabletem) {
+                continue;
+            }
+            if ($hideschoolswithoutstudent && !$students = $SM->get_school_students($school->id, true, $SM::DEF_MEMBER_ROLE, false)) {
                 continue;
             }
             $school_opts[$school->id] = $school->name;
