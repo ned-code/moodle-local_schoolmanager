@@ -86,6 +86,11 @@ class edit_school_form extends \moodleform {
             $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
             $mform->setDefault('synctimezone', 0);
 
+            // Force proxy submission window
+            $mform->addElement('select', 'forceproxysubmissionwindow', NED::str('forceproxysubmissionwindow'),
+                ['' => get_string('default')] + NED::strings2menu(school::PROXY_SUBMISSION_WINDOWS));
+            $mform->setDefault('forceproxysubmissionwindow', 0);
+
             // Enable TEM
             $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
             $mform->setDefault('enabletem', 0);
@@ -95,6 +100,9 @@ class edit_school_form extends \moodleform {
 
             $mform->addElement('hidden', 'enabletem');
             $mform->setType('enabletem', PARAM_INT);
+
+            $mform->addElement('hidden', 'forceproxysubmissionwindow');
+            $mform->setType('forceproxysubmissionwindow', PARAM_INT);
         }
 
         // IP type

@@ -35,6 +35,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property int    iptype
  * @property int    proctormanager
  * @property int    academicintegritymanager
+ * @property int    forceproxysubmissionwindow
  * @property int    timecreated
  * @property int    timemodified
  */
@@ -57,7 +58,12 @@ class school extends \core\persistent implements \cacheable_object  {
         self::IP_TYPE_STATIC => 'static',
         self::IP_TYPE_DYNAMIC => 'dynamic',
     ];
-
+    const PROXY_SUBMISSION_WINDOW_12HOURS = 43200;
+    const PROXY_SUBMISSION_WINDOW_24HOURS = 86400;
+    const PROXY_SUBMISSION_WINDOWS = [
+        self::PROXY_SUBMISSION_WINDOW_12HOURS => 'twelvehours',
+        self::PROXY_SUBMISSION_WINDOW_24HOURS => 'twentyfourhours',
+    ];
     /**
      * @var object|false - do not use directly, {@see get_cohort()}
      */
@@ -163,6 +169,9 @@ class school extends \core\persistent implements \cacheable_object  {
                 'type' => PARAM_INT,
             ),
             'academicintegritymanager' => array(
+                'type' => PARAM_INT,
+            ),
+            'forceproxysubmissionwindow' => array(
                 'type' => PARAM_INT,
             ),
         );

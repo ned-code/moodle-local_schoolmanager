@@ -197,6 +197,20 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023082900, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2023121100) {
+
+        // Define field forceproxysubmissionwindow to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('forceproxysubmissionwindow', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'enabletem');
+
+        // Conditionally launch add field forceproxysubmissionwindow.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2023121100, 'local', 'schoolmanager');
+    }
 
     return true;
 }

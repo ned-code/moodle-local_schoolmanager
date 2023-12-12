@@ -157,3 +157,6 @@ $string['proctormanager'] = 'Proctor Manager for Tests/Exams';
 $string['academicintegritymanager'] = 'Academic Integrity Manager';
 $string['enabletem'] = 'Enable TEM';
 $string['englishproficiency'] = 'English Proficiency';
+$string['forceproxysubmissionwindow'] = 'Force proxy submission window';
+$string['twelvehours'] = '12 Hours';
+$string['twentyfourhours'] = '24 Hours';

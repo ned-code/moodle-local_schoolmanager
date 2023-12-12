@@ -744,6 +744,7 @@ class school_manager {
         if (is_siteadmin()) {
             $upd_school->synctimezone = $data->synctimezone ?? 0;
             $upd_school->enabletem = $data->enabletem ?? 0;
+            $upd_school->forceproxysubmissionwindow = $data->forceproxysubmissionwindow ?? 0;
             $upd_school->proctormanager = $data->proctormanager ?? 0;
             $upd_school->academicintegritymanager = $data->academicintegritymanager ?? 0;
             $upd_school->extmanager = $data->extmanager ?? 0;
