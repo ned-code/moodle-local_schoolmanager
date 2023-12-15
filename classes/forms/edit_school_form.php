@@ -88,7 +88,7 @@ class edit_school_form extends \moodleform {
 
             // Force proxy submission window
             $mform->addElement('select', 'forceproxysubmissionwindow', NED::str('forceproxysubmissionwindow'),
-                ['' => get_string('default')] + NED::strings2menu(school::PROXY_SUBMISSION_WINDOWS));
+                [0 => get_string('default')] + NED::strings2menu(school::PROXY_SUBMISSION_WINDOWS));
             $mform->setDefault('forceproxysubmissionwindow', 0);
 
             // Enable TEM
