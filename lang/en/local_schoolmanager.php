@@ -160,3 +160,4 @@ $string['englishproficiency'] = 'English Proficiency';
 $string['forceproxysubmissionwindow'] = 'Force proxy submission window';
 $string['twelvehours'] = '12 Hours';
 $string['twentyfourhours'] = '24 Hours';
+$string['badges'] = 'Badges';

@@ -16,6 +16,7 @@ use local_schoolmanager\shared_lib as NED;
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
 require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
+require_once($CFG->dirroot . '/badges/renderer.php');
 
 /**
  * @property-read \core_renderer $o;
@@ -68,7 +69,7 @@ class school implements \renderable, \templatable {
      * @return \stdClass
      */
     public function export_for_template(\renderer_base $output) {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
 
         $header = new school_header($this->schoolid, $this->_view);
         $data = $header->export_for_template($output);
@@ -81,6 +82,8 @@ class school implements \renderable, \templatable {
             $aivschoolyear = $aiv30schoolyear = $deadlineextensions = 0;
             $ngc_data = array_fill_keys(static::NGC_KEYS, 0);
             $students_ngc = NED::$ned_grade_controller::get_students_ngc_records_count(array_keys($data->students));
+
+            $badgerenderer = new \core_badges_renderer($PAGE, '');
 
             foreach ($data->students as $sid => $student) {
                 $user_link = NED::link(['/my/index.php', ['userid' => $sid]], fullname($student), 'student');
@@ -102,6 +105,10 @@ class school implements \renderable, \templatable {
                 $aivschoolyear += $student->aiv;
                 $student->aiv30 = SH::get_user_aiv($student, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'), 30);
                 $aiv30schoolyear += $student->aiv30;
+
+                if ($records = badges_get_user_badges($sid, 0, null, null, null, true)) {
+                    $student->badges = $badgerenderer->print_badges_list($records, $sid, true);
+                }
 
                 foreach (static::NGC_KEYS as $ngc_key){
                     if (empty($students_ngc[$sid])){
@@ -147,6 +154,8 @@ class school implements \renderable, \templatable {
             $data->generalcert = 0;
             $data->advancedcert = 0;
 
+            $badgerenderer = new \core_badges_renderer($PAGE, '');
+
             if ($data->staffs) {
                 foreach ($data->staffs as $staff) {
                     profile_load_custom_fields($staff);
@@ -157,6 +166,10 @@ class school implements \renderable, \templatable {
                     $staff->aivreports30 = '';
                     $staff->ctgc = 'N';
                     $staff->ctac = 'N';
+
+                    if ($records = badges_get_user_badges($staff->id, 0, null, null, null, true)) {
+                        $staff->badges = $badgerenderer->print_badges_list($records, $staff->id, true);
+                    }
 
                     $data->classroomteachers++;
 

@@ -31,6 +31,7 @@
                 <thead>
                 <tr>
                     <th>{{#str}}name, local_schoolmanager{{/str}}</th>
+                    <th>{{#str}}badges, local_schoolmanager{{/str}}</th>
                     <th>{{#str}}role, local_schoolmanager{{/str}}</th>
                     <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
                     <th data-toggle="tooltip" title="{{#str}}staffextentionstooltip, local_schoolmanager{{/str}}">{{#str}}extentions, local_schoolmanager{{/str}}</th>
@@ -44,6 +45,7 @@
                 {{#staffs}}
                     <tr>
                         <td class="username userid-{{{id}}}">{{{username}}}</td>
+                        <td class="badges">{{{badges}}}</td>
                         <td class="role">{{role}}</td>
                         <td class="lastaccess">{{lastaccess}}</td>
                         <td class="deadlineextentions text-center">{{deadlineextentions}}</td>

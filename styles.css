@@ -173,3 +173,17 @@ body.pagelayout-schoolmanager .control-panel {
     max-width: 100%;
   }
 }
+#page-local-schoolmanager-view .badges li .badge-image {
+  width: 25px;
+  height: 25px;
+}
+#page-local-schoolmanager-view .badges li .badge-actions,
+#page-local-schoolmanager-view .badges li .badge-name {
+  display: none;
+}
+#page-local-schoolmanager-view .badges li {
+  display: inline;
+}
+#page-local-schoolmanager-view .badges ul.badges {
+  padding: 0;
+}
