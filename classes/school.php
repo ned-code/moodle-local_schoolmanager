@@ -58,9 +58,11 @@ class school extends \core\persistent implements \cacheable_object  {
         self::IP_TYPE_STATIC => 'static',
         self::IP_TYPE_DYNAMIC => 'dynamic',
     ];
+    const PROXY_SUBMISSION_WINDOW_5HOURS = 18000;
     const PROXY_SUBMISSION_WINDOW_12HOURS = 43200;
     const PROXY_SUBMISSION_WINDOW_24HOURS = 86400;
     const PROXY_SUBMISSION_WINDOWS = [
+        self::PROXY_SUBMISSION_WINDOW_5HOURS => 'fivehours',
         self::PROXY_SUBMISSION_WINDOW_12HOURS => 'twelvehours',
         self::PROXY_SUBMISSION_WINDOW_24HOURS => 'twentyfourhours',
     ];
