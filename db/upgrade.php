@@ -212,5 +212,20 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023121100, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2024031300) {
+
+        // Define index code (not unique) to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $index = new xmldb_index('code', XMLDB_INDEX_NOTUNIQUE, ['code']);
+
+        // Conditionally launch add index code.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2024031300, 'local', 'schoolmanager');
+    }
+
     return true;
 }

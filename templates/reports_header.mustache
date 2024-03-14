@@ -59,6 +59,14 @@
                 </a>
             {{/btn_classdateextensions_url}}
 
+            {{#btn_classdeadlines_url}}
+                <a class="btn {{#show_classdeadlines}}btn-primary{{/show_classdeadlines}}{{^show_classdeadlines}}btn-secondary{{/show_classdeadlines}}"
+                   href="{{btn_classdeadlines_url}}"
+                >
+                    {{#str}}classdeadlines, local_schoolmanager{{/str}}
+                </a>
+            {{/btn_classdeadlines_url}}
+
             {{#btn_englishproficiency_url}}
                 <a class="btn {{#show_englishproficiency}}btn-primary{{/show_englishproficiency}}{{^show_englishproficiency}}btn-secondary{{/show_englishproficiency}}"
                    href="{{btn_englishproficiency_url}}"

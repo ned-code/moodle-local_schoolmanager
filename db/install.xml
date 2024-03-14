@@ -33,6 +33,9 @@
         <KEY NAME="parentid" TYPE="foreign" FIELDS="id" REFTABLE="cohort" REFFIELDS="id"/>
         <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="code" UNIQUE="false" FIELDS="code"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="local_schoolmanager_crew" COMMENT="Each record represents one subcohort as a subgroup of the school">
       <FIELDS>
