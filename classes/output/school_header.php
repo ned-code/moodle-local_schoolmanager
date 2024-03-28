@@ -102,6 +102,10 @@ class school_header implements \renderable, \templatable {
         $data->btn_school_url->param('view', SH::VIEW_SCHOOL);
         $data->btn_school_url = $data->btn_school_url->out(false);
 
+        $reportheader = (new \local_schoolmanager\output\reports_header($this->schoolid))->export_for_template($output);
+        unset($reportheader->showheader);
+        $data = (object)array_merge((array) $data, (array) $reportheader);
+
         return $data;
     }
 }

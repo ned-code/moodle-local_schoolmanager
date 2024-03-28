@@ -27,53 +27,7 @@
 {{#showheader}}
     <div class="row school-body p-4">
         <div class="col-md-12">
-            {{#btn_academicintegrity_url}}
-                <a class="btn {{#show_academicintegrity}}btn-primary{{/show_academicintegrity}}{{^show_academicintegrity}}btn-secondary{{/show_academicintegrity}}"
-                   href="{{btn_academicintegrity_url}}"
-                >
-                    {{#str}}academicintegrity, local_schoolmanager{{/str}}
-                </a>
-            {{/btn_academicintegrity_url}}
-
-            {{#btn_deadlinenotifications_url}}
-                <a class="btn {{#show_deadlinenotifications}}btn-primary{{/show_deadlinenotifications}}{{^show_deadlinenotifications}}btn-secondary{{/show_deadlinenotifications}}"
-                   href="{{btn_deadlinenotifications_url}}"
-                >
-                    {{#str}}deadlinenotifications, local_schoolmanager{{/str}}
-                </a>
-            {{/btn_deadlinenotifications_url}}
-
-            {{#btn_deadlineextensions_url}}
-                <a class="btn {{#show_deadlineextensions}}btn-primary{{/show_deadlineextensions}}{{^show_deadlineextensions}}btn-secondary{{/show_deadlineextensions}}"
-                   href="{{btn_deadlineextensions_url}}"
-                >
-                    {{#str}}deadlineextensions, local_schoolmanager{{/str}}
-                </a>
-            {{/btn_deadlineextensions_url}}
-
-            {{#btn_classdateextensions_url}}
-                <a class="btn {{#show_classdateextensions}}btn-primary{{/show_classdateextensions}}{{^show_classdateextensions}}btn-secondary{{/show_classdateextensions}}"
-                   href="{{btn_classdateextensions_url}}"
-                >
-                    {{#str}}classdateextensions, local_schoolmanager{{/str}}
-                </a>
-            {{/btn_classdateextensions_url}}
-
-            {{#btn_classdeadlines_url}}
-                <a class="btn {{#show_classdeadlines}}btn-primary{{/show_classdeadlines}}{{^show_classdeadlines}}btn-secondary{{/show_classdeadlines}}"
-                   href="{{btn_classdeadlines_url}}"
-                >
-                    {{#str}}classdeadlines, local_schoolmanager{{/str}}
-                </a>
-            {{/btn_classdeadlines_url}}
-
-            {{#btn_englishproficiency_url}}
-                <a class="btn {{#show_englishproficiency}}btn-primary{{/show_englishproficiency}}{{^show_englishproficiency}}btn-secondary{{/show_englishproficiency}}"
-                   href="{{btn_englishproficiency_url}}"
-                >
-                    {{#str}}englishproficiency, local_schoolmanager{{/str}}
-                </a>
-            {{/btn_englishproficiency_url}}
+            {{> local_schoolmanager/reports_header_buttons }}
         </div>
     </div>
 {{/showheader}}
