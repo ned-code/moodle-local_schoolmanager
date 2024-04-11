@@ -69,7 +69,7 @@ class school implements \renderable, \templatable {
      * @return \stdClass
      */
     public function export_for_template(\renderer_base $output) {
-        global $OUTPUT, $PAGE;
+        global $OUTPUT, $PAGE, $CFG;
 
         $header = new school_header($this->schoolid, $this->_view);
         $data = $header->export_for_template($output);
@@ -226,6 +226,10 @@ class school implements \renderable, \templatable {
                 'action' => 'resettimezone',
             ]))->out(false);
             $data->isadmin = is_siteadmin();
+        } if ($this->_view == SH::VIEW_CLASSES) {
+            $data->show_output = true;
+            include_once($CFG->dirroot. '/local/schoolmanager/class_report.php');
+            $data->class_report = $html;
         }
 
         if ($this->_view == SH::VIEW_SCHOOLS) {

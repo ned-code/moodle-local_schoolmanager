@@ -10,6 +10,7 @@
  */
 
 namespace local_schoolmanager;
+use block_ned_teacher_tools\deadline_manager;
 use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
@@ -1005,5 +1006,31 @@ class school_manager {
         }
 
         return $_data[$schoolid];
+    }
+
+    /**
+     * @param $schoolid
+     * @return array
+     * @throws \dml_exception
+     */
+    public static function get_school_classes($schoolid) {
+        global $DB;
+
+        $school = school::get_school_by_id($schoolid);
+
+        $codefilter = $DB->sql_like('g.name', ':code', false, false);
+        $params['code'] = $DB->sql_like_escape($school->code).'%';
+        $params['schedule'] = deadline_manager::SCHEDULE_FULL;
+        $params['enddate'] = time();
+
+
+        $sql = "SELECT g.id, g.courseid, g.name
+                  FROM {groups} g
+                 WHERE {$codefilter}
+                   AND g.schedule = :schedule
+                   AND g.enddate > :enddate
+              ORDER BY g.name";
+
+        return $DB->get_records_sql($sql, $params);
     }
 }

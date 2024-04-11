@@ -187,3 +187,9 @@ body.pagelayout-schoolmanager .control-panel {
 #page-local-schoolmanager-view .badges ul.badges {
   padding: 0;
 }
+#page-local-schoolmanager-view .classes-menu-bar {
+  background-color: orange;
+}
+#page-local-schoolmanager-view .classes-menu-bar a.active {
+  background-color: yellow;
+}

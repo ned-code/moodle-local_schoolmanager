@@ -34,6 +34,7 @@ class school_handler {
     const VIEW_STAFF = 'staff';
     const VIEW_SCHOOL = 'school';
     const VIEW_SCHOOLS = 'schools';
+    const VIEW_CLASSES = 'classes';
 
     protected $user;
     protected $ctx;
