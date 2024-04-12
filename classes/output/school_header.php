@@ -109,28 +109,6 @@ class school_header implements \renderable, \templatable {
         $reportheader = (new \local_schoolmanager\output\reports_header($this->schoolid))->export_for_template($output);
         unset($reportheader->showheader);
 
-        if ($this->view == SH::VIEW_CLASSES) {
-            $classid = optional_param('classid', 0, PARAM_INT);
-
-            $data->showclassesbar = true;
-            $data->classes = [];
-            $data->classes[] = [
-                'name' => get_string('allclasses', 'block_ned_teacher_tools'),
-                'url' => (new \moodle_url($this->url))->out(false),
-                'active' => empty($classid)
-            ];
-
-            if ($classes = \local_schoolmanager\school_manager::get_school_classes($this->school->id)) {
-                foreach ($classes as $class) {
-                    $data->classes[] = [
-                        'name' => $class->name,
-                        'url' => (new \moodle_url($this->url, ['classid' => $class->id, 'courseid' => $class->courseid]))->out(false),
-                        'active' => $classid == $class->id
-                    ];
-                }
-            }
-        }
-
         $data = (object)array_merge((array) $data, (array) $reportheader);
 
         return $data;
