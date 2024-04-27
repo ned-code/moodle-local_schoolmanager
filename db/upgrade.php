@@ -227,5 +227,20 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024031300, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2024042600) {
+
+        // Define field esl to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('esl', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'enabletem');
+
+        // Conditionally launch add field esl.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2024042600, 'local', 'schoolmanager');
+    }
+
     return true;
 }

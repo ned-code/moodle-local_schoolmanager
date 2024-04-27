@@ -165,3 +165,4 @@ $string['badges'] = 'Badges';
 $string['activitysetting'] = 'Activity Setting';
 $string['classdeadlines'] = 'Class Deadlines';
 $string['syncgroups'] = 'Sync groups';
+$string['esl'] = 'ESL';

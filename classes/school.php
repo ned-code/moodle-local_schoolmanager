@@ -31,6 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property string note - HTML data
  * @property bool   synctimezone
  * @property bool   enabletem
+ * @property bool   esl
  * @property int    extmanager
  * @property int    iptype
  * @property int    proctormanager
@@ -168,6 +169,9 @@ class school extends \core\persistent implements \cacheable_object  {
                 'type' => PARAM_INT,
             ),
             'enabletem' => array(
+                'type' => PARAM_INT,
+            ),
+            'esl' => array(
                 'type' => PARAM_INT,
             ),
             'academicintegritymanager' => array(

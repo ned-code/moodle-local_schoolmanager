@@ -750,6 +750,7 @@ class school_manager {
             $upd_school->academicintegritymanager = $data->academicintegritymanager ?? 0;
             $upd_school->extmanager = $data->extmanager ?? 0;
         }
+        $upd_school->esl = $data->esl;
 
         // save logo
         $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,

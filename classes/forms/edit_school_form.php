@@ -151,6 +151,10 @@ class edit_school_form extends \moodleform {
             $mform->setType('extmanager', PARAM_INT);
         }
 
+        // ESL.
+        $mform->addElement('selectyesno', 'esl', NED::str('esl'));
+        $mform->setDefault('esl', 0);
+
         // Logo
         if ($this->_can_manage){
             $mform->addElement('filemanager', 'logo_filemanager', NED::str('logo'), null,
