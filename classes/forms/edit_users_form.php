@@ -75,7 +75,7 @@ class edit_users_form extends \moodleform {
         foreach ($mform->_elements as &$elem){
             $type = $elem->getType();
             $t = $elem->toHtml();
-            if ($type == 'html' && $elem->toHtml() == ''){
+            if ($type == 'html' && $elem->toHtml() === ''){
                 $elem->setText($text);
                 break;
             }

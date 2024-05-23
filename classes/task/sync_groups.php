@@ -33,6 +33,7 @@ use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
 require_once($CFG->dirroot . '/lib/gdlib.php');
 
 class sync_groups extends \core\task\scheduled_task {
@@ -109,11 +110,10 @@ class sync_groups extends \core\task\scheduled_task {
                 if ($schollogo) {
                     $fs->delete_area_files($contextcourse->id, 'group', 'icon', $group->id);
                     $newpicture = 0;
-                    if ($rev = process_new_icon($contextcourse, 'group', 'icon', $group->id, $tempfile)) {
+                    if (!empty($tempfile) && $rev = process_new_icon($contextcourse, 'group', 'icon', $group->id, $tempfile)){
                         $newpicture = $rev;
                     } else {
                         $fs->delete_area_files($contextcourse->id, 'group', 'icon', $group->id);
-                        $newpicture = 0;
                     }
 
                     if ($newpicture != $group->picture) {
@@ -122,7 +122,9 @@ class sync_groups extends \core\task\scheduled_task {
                 }
             }
 
-            @unlink($tempfile);
+            if (!empty($tempfile)){
+                @unlink($tempfile);
+            }
         }
         $rs->close();
 

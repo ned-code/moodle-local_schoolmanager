@@ -318,8 +318,6 @@ class external extends \external_api {
                 $finalgrade = '';
                 $activitymaxgrade = '';
                 if ($kica && !empty($kicaitem->id) && !empty($kicagrade->id)){
-                    $default[4] = $gradetimecreated = $kicagrade->timecreated;
-                    $default[5] = $gradetime = $kicagrade->timemodified;
                     $finalgrade = $kicagrade->get_finalgrade(true);
                     $activitymaxgrade = $kicaitem->get_grademax();
                 } else {
