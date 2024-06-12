@@ -35,6 +35,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/lib/gdlib.php');
+require_once($CFG->dirroot . '/group/lib.php');
 
 class sync_groups extends \core\task\scheduled_task {
 
@@ -96,16 +97,37 @@ class sync_groups extends \core\task\scheduled_task {
 
                 $contextcourse = context_course::instance($group->courseid);
 
-                \core_message\api::create_conversation(
-                    \core_message\api::MESSAGE_CONVERSATION_TYPE_GROUP,
-                    [],
-                    $group->name,
-                    \core_message\api::MESSAGE_CONVERSATION_ENABLED,
-                    'core_group',
-                    'groups',
-                    $group->id,
-                    $contextcourse->id
-                );
+                $conversation = $DB->get_record('message_conversations', [
+                    'component' => 'core_group', 'itemtype' => 'groups', 'itemid' => $group->id
+                ]);
+
+                if ($conversation) {
+                    if ($conversation->enabled == 0) {
+                        \core_message\api::enable_conversation($group->conversationid);
+                    }
+                } else {
+                    $conversation = \core_message\api::create_conversation(
+                        \core_message\api::MESSAGE_CONVERSATION_TYPE_GROUP,
+                        [],
+                        $group->name,
+                        \core_message\api::MESSAGE_CONVERSATION_ENABLED,
+                        'core_group',
+                        'groups',
+                        $group->id,
+                        $contextcourse->id
+                    );
+
+                    // Add members to conversation if they exists in the group.
+                    if ($groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id')) {
+                        $users = [];
+                        foreach ($groupmemberroles as $roleid => $roledata) {
+                            foreach ($roledata->users as $member) {
+                                $users[] = $member->id;
+                            }
+                        }
+                        \core_message\api::add_members_to_conversation($users, $conversation->id);
+                    }
+                }
 
                 if ($schollogo) {
                     $fs->delete_area_files($contextcourse->id, 'group', 'icon', $group->id);
