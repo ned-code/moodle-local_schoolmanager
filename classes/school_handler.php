@@ -175,10 +175,10 @@ class school_handler {
     /**
      * @param numeric|object     $user_or_id
      * @param array|null         $courses
-     *
+     * @param numeric|null       $lastdays - count only for some last days (num of days)
      * @return int|null
      */
-    public static function get_user_number_of_dl_extensions($user_or_id, $courses=null) {
+    public static function get_user_number_of_dl_extensions($user_or_id, $courses=null, $lastdays=0) {
         $userid = NED::get_id($user_or_id);
         if (is_null($courses)) {
             $courses = enrol_get_users_courses($userid);
@@ -190,7 +190,7 @@ class school_handler {
 
         $deadlineextentions = 0;
         foreach ($courses as $course) {
-            $deadlineextentions += DM::get_number_of_extensions_in_course($userid, $course->id);
+            $deadlineextentions += DM::get_number_of_extensions_in_course($userid, $course->id, false, $lastdays);
         }
 
         return $deadlineextentions;

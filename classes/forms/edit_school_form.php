@@ -110,7 +110,7 @@ class edit_school_form extends \moodleform {
         $mform->addRule('iptype', null, 'required');
         $mform->addHelpButton('iptype', 'iptype', NED::$PLUGIN_NAME);
 
-        // Staf options.
+        // Staff options.
         $staffoptions = [];
         if ($staffs = $SM->get_school_students($this->_schoolid, true, $SM::STAFF_ROLES, false)) {
             foreach ($staffs as $staff) {
@@ -167,12 +167,20 @@ class edit_school_form extends \moodleform {
             $mform->addElement('static', 'currentpicture_compact', NED::$C::str('compactlogo'));
         }
 
+        // School year.
+        $schoolyearoptions = [NED::str('custom'), NED::str('resedaledefault')];
+        $mform->addElement('select', 'schoolyeartype', NED::str('schoolyear'), $schoolyearoptions);
+        $mform->setDefault('schoolyeartype', 0);
+
         $mform->addElement('date_selector', 'startdate', NED::str('schoolyearstartdate'));
         $mform->setType('startdate', PARAM_INT);
         $mform->setDefault('startdate', time());
+        $mform->hideIf('startdate', 'schoolyeartype', 'eq', 1);
+
         $mform->addElement('date_selector', 'enddate', NED::str('schoolyearenddate'));
         $mform->setType('enddate', PARAM_INT);
         $mform->setDefault('enddate', time() + YEARSECS);
+        $mform->hideIf('enddate', 'schoolyeartype', 'eq', 1);
 
         $mform->addElement('editor', 'note', NED::str('note'));
         $mform->setType('note', PARAM_RAW);

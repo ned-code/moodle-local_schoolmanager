@@ -111,6 +111,7 @@ $badgeoptions = [0 => get_string('choose')] + $badgeoptions;
 
 $settings->add($configselect('general_cert_badge', '', '', 0, $badgeoptions));
 $settings->add($configselect('advanced_cert_badge', '', '', 0, $badgeoptions));
+$settings->add($configselect('proctor_cert_badge', '', '', 0, $badgeoptions));
 
 $find_school_sync_fields = function($type='menu', $find_default=false, $fullname=false){
     $choices = [
@@ -135,3 +136,6 @@ $settings->add($configselect('school_field_to_sync', '', '', $default, $choices)
 
 list($choices, $default) = $find_school_sync_fields('multiselect', 'district_admin');
 $settings->add($configselect('schools_field_to_sync', '', '', $default, $choices));
+
+$settings->add($configtext('defaultschoolyearstart', '', 'YYYY-MM-DD', '', PARAM_TEXT));
+$settings->add($configtext('defaultschoolyearend', '', 'YYYY-MM-DD', '', PARAM_TEXT));

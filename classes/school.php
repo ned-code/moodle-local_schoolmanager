@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property string country
  * @property int    logo
  * @property int    compact_logo
+ * @property int    schoolyeartype
  * @property int    startdate
  * @property int    enddate
  * @property string note - HTML data
@@ -147,6 +148,9 @@ class school extends \core\persistent implements \cacheable_object  {
             'compact_logo' => array(
                 'type' => PARAM_INT,
             ),
+            'schoolyeartype' => array(
+                'type' => PARAM_INT,
+            ),
             'startdate' => array(
                 'type' => PARAM_INT,
             ),
@@ -254,10 +258,32 @@ class school extends \core\persistent implements \cacheable_object  {
     /**
      * @return string
      */
+    public function _get_startdate() {
+        if ($this->schoolyeartype) {
+            return strtotime(get_config('local_schoolmanager', 'defaultschoolyearstart'));
+        } else {
+            return $this->get('startdate') ?? 0;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function _get_enddate() {
+        if ($this->schoolyeartype) {
+            return strtotime(get_config('local_schoolmanager', 'defaultschoolyearend'));
+        } else {
+            return $this->get('enddate') ?? 0;
+        }
+    }
+
+    /**
+     * @return string
+     */
     public function get_schoolyear() {
-        return NED::ned_date($this->startdate, '', null, NED::DT_FORMAT_DATE).
+        return NED::ned_date($this->_get_startdate(), '', null, NED::DT_FORMAT_DATE).
             ' – '.
-            NED::ned_date($this->enddate, '', null, NED::DT_FORMAT_DATE);
+            NED::ned_date($this->_get_enddate(), '', null, NED::DT_FORMAT_DATE);
     }
 
     /**

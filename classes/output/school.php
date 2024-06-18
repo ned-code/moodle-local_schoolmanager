@@ -9,9 +9,12 @@
 
 namespace local_schoolmanager\output;
 
+use local_academic_integrity\infraction;
 use local_schoolmanager as SM;
 use local_schoolmanager\school_handler as SH;
 use local_schoolmanager\shared_lib as NED;
+use local_tem\helper as TEM;
+use report_ghs\helper as GHS;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -101,9 +104,9 @@ class school implements \renderable, \templatable {
                 if (!is_null($participationpower)) {
                     $ppas[] = $participationpower;
                 }*/
-                $student->aiv = SH::get_user_aiv($student, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'));
+                $student->aiv = SH::get_user_aiv($student, $this->_persistent->_get_startdate(), $this->_persistent->_get_enddate());
                 $aivschoolyear += $student->aiv;
-                $student->aiv30 = SH::get_user_aiv($student, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'), 30);
+                $student->aiv30 = SH::get_user_aiv($student, $this->_persistent->_get_startdate(), $this->_persistent->_get_enddate(), 30);
                 $aiv30schoolyear += $student->aiv30;
 
                 if ($records = badges_get_user_badges($sid, 0, null, null, null, true)) {
@@ -202,8 +205,8 @@ class school implements \renderable, \templatable {
                                 }
                                 $staffstudents[$courseid][$user['id']] = $user['id'];
                                 $staff->deadlineextentions += SH::get_user_number_of_dl_extensions((object)$user, [$courses[$courseid]]);
-                                $staff->aivreports += SH::get_user_aiv((object)$user, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'), 0, $courseid);
-                                $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->_persistent->get('startdate'), $this->_persistent->get('enddate'), 30, $courseid);
+                                $staff->aivreports += SH::get_user_aiv((object)$user, $this->_persistent->_get_startdate(), $this->_persistent->_get_enddate(), 0, $courseid);
+                                $staff->aivreports30 += SH::get_user_aiv((object)$user, $this->_persistent->_get_startdate(), $this->_persistent->_get_enddate(), 30, $courseid);
                             }
                         }
 
@@ -217,6 +220,92 @@ class school implements \renderable, \templatable {
                 $data->staffs = array_values($data->staffs);
             }
         } elseif ($this->_view == SH::VIEW_SCHOOL) {
+            $staffs = $this->_sm->get_school_students($this->schoolid, true, SM\school_manager::STAFF_ROLES, false);
+            $data->students = $this->_sm->get_school_students($this->schoolid, true, $this->_sm::DEF_MEMBER_ROLE, false);
+            $data->classroomteachers = count($this->_sm->get_school_students($this->schoolid, true, ['Classroom Teacher'], false) ?? []);
+            $data->classroomassistants = count($this->_sm->get_school_students($this->schoolid, true, ['Classroom Assistant'], false) ?? []);
+            $data->guidancecounsellors = count($this->_sm->get_school_students($this->schoolid, true, ['Guidance Counsellor'], false) ?? []);
+
+            $data->activestudents = count($data->students);
+            $data->classroomassistants = 0;
+            $data->generalcert = 0;
+            $data->advancedcert = 0;
+            $data->certifiedproctors = 0;
+            $data->staffs = 0;
+            $aivschoolyear = $aiv30schoolyear = $deadlineextensions = $deadlineextensions20 = $deadlineextensions30 = 0;
+            $ngc_data = array_fill_keys(static::NGC_KEYS, 0);
+            $students_ngc = NED::$ned_grade_controller::get_students_ngc_records_count(array_keys($data->students));
+
+            if ($administrator = $this->_sm->get_school_students($this->schoolid, true, $this->_sm::SCHOOL_ADMINISTRATOR_ROLE, false)) {
+                $administrator = reset($administrator);
+                $data->schooladministrator = fullname($administrator);
+
+                $proctormanager = $this->_persistent->get('proctormanager');
+                $data->proctormanager = ($proctormanager) ? fullname($staffs[$proctormanager]) : fullname($administrator);
+
+                $academicintegritymanager = $this->_persistent->get('academicintegritymanager');
+                $data->academicintegritymanager = ($academicintegritymanager) ? fullname($staffs[$academicintegritymanager]) : fullname($administrator);
+            }
+
+            $startdate = $this->_persistent->_get_startdate();
+            $enddate = $this->_persistent->_get_enddate();
+
+            foreach ($data->students as $sid => $student) {
+                $student->aiv = SH::get_user_aiv($student, $startdate, $enddate);
+                $aivschoolyear += $student->aiv;
+                $student->aiv30 = SH::get_user_aiv($student, $startdate, $enddate, 30);
+                $aiv30schoolyear += $student->aiv30;
+                $courses = enrol_get_users_courses($student->id, true);
+                $student->deadlineextentions = SH::get_user_number_of_dl_extensions($student, $courses);
+                $student->deadlineextentions30 = SH::get_user_number_of_dl_extensions($student, $courses, 30);
+
+                $deadlineextensions += $student->deadlineextentions;
+                $deadlineextensions30 += $student->deadlineextentions30;
+
+                if ($student->deadlineextentions > 20) {
+                    $deadlineextensions20 += $student->deadlineextentions;
+                }
+
+                foreach (static::NGC_KEYS as $ngc_key) {
+                    if (empty($students_ngc[$sid])) {
+                        $val = 0;
+                    } else {
+                        $val = $students_ngc[$sid]->$ngc_key ?? 0;
+                    }
+
+                    $student->$ngc_key = $val;
+                    $ngc_data[$ngc_key] += $val;
+                }
+            }
+
+
+
+            if ($staffs) {
+                $data->staffs = count($staffs);
+                foreach ($staffs as $staff) {
+                    if (SH::has_certificate_badge($staff->id, 'general')) {
+                        $data->generalcert++;
+                    }
+                    if (SH::has_certificate_badge($staff->id, 'advanced')) {
+                        $data->advancedcert++;
+                    }
+                    if (SH::has_certificate_badge($staff->id, 'proctor')) {
+                        $data->certifiedproctors++;
+                    }
+                }
+            }
+
+            $data->aivschoolyear = $aivschoolyear;
+            $data->aiv30schoolyear = $aiv30schoolyear;
+            $data->deadlineextensions = $deadlineextensions;
+            if ($data->activestudents > 0) {
+                $data->aivaverage = round(($aivschoolyear / $data->activestudents), 1);
+            }
+
+            foreach (static::NGC_KEYS as $ngc_key){
+                $data->$ngc_key = $ngc_data[$ngc_key];
+            }
+
             $data->caneditschool = true;
             $data->editschoolurl = NED::url('~/index.php', ['schoolid' => $this->schoolid]);
             $data->hasdifferenttimezone = SH::has_different_timezone_users_in_school($this->_persistent->get_cohort());
@@ -226,6 +315,130 @@ class school implements \renderable, \templatable {
                 'action' => 'resettimezone',
             ]))->out(false);
             $data->isadmin = is_siteadmin();
+
+            // Academic Integrity Violations.
+            $data->aivschoolyear = $aivschoolyear;
+            $data->aivstartdate = NED::ned_date($startdate, '', null, NED::DT_FORMAT_DATE);
+            $data->aivicon = $this->get_icon($aivschoolyear, 'A');
+
+            $majorplagiarism = infraction::get_user_aiv_count(
+                array_keys($data->students), null, $startdate,
+                $enddate, null, false,
+                infraction::PLAGIARISM_REASONS
+            );
+            $data->majorplagiarism = $this->percentage_format($majorplagiarism, $aivschoolyear);
+            $data->majorplagiarismicon = $this->get_icon($majorplagiarism, 'A');
+
+            $cheating = infraction::get_user_aiv_count(
+                array_keys($data->students), null, $startdate,
+                $enddate, null, false,
+                infraction::CHEATING_REASONS
+            );
+            $data->cheating = $this->percentage_format($cheating, $aivschoolyear);
+            $data->cheatingicon = $this->get_icon($cheating, 'A');
+
+            $data->aiv30schoolyear = $aiv30schoolyear;
+            $data->aivstartdate = NED::ned_date($startdate, '', null, NED::DT_FORMAT_DATE);
+            $data->aiv30schoolyearicon = $this->get_icon($aiv30schoolyear, 'A');
+
+            // Activity Deadlines.
+            $data->missed_deadlinesicon = $this->get_icon($data->missed_deadlines, 'A');
+
+            $data->deadlineextensionsaverage = 0;
+            if ($data->activestudents > 0) {
+                $data->deadlineextensionsaverage = round(($data->deadlineextensions / $data->activestudents), 1);
+            }
+            $data->deadlineextensionsicon = $this->get_icon($data->deadlineextensions, 'A');
+
+            $data->deadlineextensions20 = $deadlineextensions20;
+            $data->deadlineextensions20icon = $this->get_icon($deadlineextensions20, 'D');
+
+            $data->deadlineextensions30 = $deadlineextensions30;
+            $data->deadlineextensions30icon = $this->get_icon($deadlineextensions30, 'A');
+
+            // Test Proctoring.
+            $data->proctoringsubmitted = TEM::count_school_submitted_reports($this->schoolid);
+            $data->proctoringsubmittedicon = $this->get_icon($data->proctoringsubmitted, 'B');
+
+            $data->proctoringmissing = TEM::count_school_missing_reports($this->schoolid);
+            $data->proctoringmissingicon = $this->get_icon($data->proctoringmissing, 'A');
+
+            $data->proctorinwriting1 = TEM::count_school_writing_sessions($this->schoolid, 1);
+            $data->proctorinwriting1icon = $this->get_icon($data->proctorinwriting1, 'B');
+
+            $data->proctorinwriting2 = TEM::count_school_writing_sessions($this->schoolid, 2);
+            $data->proctorinwriting2icon = $this->get_icon($data->proctorinwriting2, 'A');
+
+            $data->proctorinwriting3 = TEM::count_school_writing_sessions($this->schoolid, 3);
+            $data->proctorinwriting3icon = $this->get_icon($data->proctorinwriting3, 'D');
+
+            // OSSLT Scores for Current School Year.
+            $wroteosslt = GHS::count_osslt($this->_persistent->get('code'), ['Fail', 'Pass']);
+            $data->wroteosslticon = $this->get_icon($wroteosslt, 'A');
+            $data->wroteosslt = $this->percentage_format($wroteosslt, $data->activestudents);
+
+            $notwroteosslt = $data->activestudents - $wroteosslt;
+            $data->notwroteosslticon = $this->get_icon($notwroteosslt, 'A');
+            $data->notwroteosslt = $this->percentage_format($notwroteosslt, $data->activestudents);
+
+            $passedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Pass');
+            $data->passedosslticon = $this->get_icon($passedosslt, 'B');
+            $data->passedosslt = $this->percentage_format($passedosslt, $data->activestudents);
+
+            $failedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Fail');
+            $data->failedosslticon = $this->get_icon($failedosslt, 'A');
+            $data->failedosslt = $this->percentage_format($failedosslt, $data->activestudents);
+
+            $failedossltover75 = GHS::count_osslt_failed_over75($this->_persistent->get('code'));
+            $data->failedossltover75icon = $this->get_icon($failedossltover75, 'D');
+            $data->failedossltover75 = $this->percentage_format($failedossltover75, $data->activestudents);
+
+            // OSSLT Scores for Previous School Year.
+            $prevwroteosslt = GHS::count_osslt($this->_persistent->get('code'), ['Fail', 'Pass'], true);
+            $data->prevwroteosslticon = $this->get_icon($prevwroteosslt, 'A');
+            $data->prevwroteosslt = $this->percentage_format($prevwroteosslt, $data->activestudents);
+
+            $prevnotwroteosslt = $data->activestudents - $prevwroteosslt;
+            $data->prevnotwroteosslticon = $this->get_icon($prevnotwroteosslt, 'A');
+            $data->prevnotwroteosslt = $this->percentage_format($prevnotwroteosslt, $data->activestudents);
+
+            $prevpassedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Pass', true);
+            $data->prevpassedosslticon = $this->get_icon($prevpassedosslt, 'B');
+            $data->prevpassedosslt = $this->percentage_format($prevpassedosslt, $data->activestudents);
+
+            $prevfailedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Fail', true);
+            $data->prevfailedosslticon = $this->get_icon($prevfailedosslt, 'A');
+            $data->prevfailedosslt = $this->percentage_format($prevfailedosslt, $data->activestudents);
+
+            $prevfailedossltover75 = GHS::count_osslt_failed_over75($this->_persistent->get('code'), true);
+            $data->prevfailedossltover75icon = $this->get_icon($prevfailedossltover75, 'D');
+            $data->prevfailedossltover75 = $this->percentage_format($prevfailedossltover75, $data->activestudents);;
+
+            // Logins.
+            $loggedusers3 = NED::count_logged_user(array_keys($data->students), 3);
+            $data->loggedusers3icon = $this->get_icon($loggedusers3, 'B');
+            $data->loggedusers3 = $this->percentage_format($loggedusers3, $data->activestudents);
+
+            $loggedusers7 = NED::count_logged_user(array_keys($data->students), 7);
+            $data->loggedusers7icon = $this->get_icon($loggedusers7, 'A');
+            $data->loggedusers7 = $this->percentage_format($loggedusers7, $data->activestudents);
+
+            $notloggedusers8 = NED::count_not_logged_user(array_keys($data->students), 8);
+            $data->notloggedusers8icon = $this->get_icon($notloggedusers8, 'C');
+            $data->notloggedusers8 = $this->percentage_format($notloggedusers8, $data->activestudents);
+
+            $notloggedstaff10 = NED::count_not_logged_user(array_keys($staffs), 10);
+            $data->notloggedstaff10icon = $this->get_icon($notloggedstaff10, 'C');
+            $data->notloggedstaff10 = $this->percentage_format($notloggedstaff10, count($staffs));
+
+            // Deadline Manager.
+            list($data->dmcomplete, $data->dmincomplete, $data->dmclasses, $data->dmcompleteended, $data->dmincompleteended) = NED::count_dm_scheule($this->_persistent->get('code'));
+            $data->dmcompleteicon = $this->get_icon($data->dmcomplete, 'B');
+            $data->dmincompleteicon = $this->get_icon($data->dmincomplete, 'A');
+            $data->dmcompleteendedicon = $this->get_icon($data->dmcompleteended, 'B');
+            $data->dmincompleteendedicon = $this->get_icon($data->dmincompleteended, 'A');
+
+            unset($data->students);
         } if ($this->_view == SH::VIEW_CLASSES) {
             $data->show_output = true;
             include_once($CFG->dirroot. '/local/schoolmanager/class_report.php');
@@ -259,8 +472,8 @@ class school implements \renderable, \templatable {
                     $school->numberofstudents = count($students);
                     $data->totalstudents += $school->numberofstudents;
                     foreach ($students as $student) {
-                        $school->aiv += SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'));
-                        $school->aiv30 += SH::get_user_aiv($student, $school->persistent->get('startdate'), $school->persistent->get('enddate'), 30);
+                        $school->aiv += SH::get_user_aiv($student, $school->persistent->_get_startdate(), $school->persistent->_get_enddate());
+                        $school->aiv30 += SH::get_user_aiv($student, $school->persistent->_get_startdate(), $school->persistent->_get_enddate(), 30);
                     }
                     $data->totalaiv += $school->aiv;
                     $data->totalaiv30 += $school->aiv30;
@@ -311,4 +524,38 @@ class school implements \renderable, \templatable {
         }
         return $data;
     }
+
+    /**
+     * @param $number
+     * @param $totalnumber
+     * @return string
+     */
+    public function percentage_format($number, $totalnumber) {
+        if (empty($totalnumber)) {
+            return '';
+        }
+
+        $percenage = round((($number / $totalnumber) * 100));
+
+        return "$number/$totalnumber ($percenage%)";
+    }
+
+    /**
+     * @param $count
+     * @param $type
+     * @return false|string|void
+     */
+    public function get_icon($count, $type) {
+        switch ($type) {
+            case 'A':
+                return  ($count) ? 'sad' : 'happy';
+            case 'B':
+                return  ($count) ? 'happy' : 'sad';
+            case 'C':
+                return  ($count) ? 'sad' : false;
+            case 'D':
+                return  ($count) ? 'warning' : false;
+        }
+    }
+
 }

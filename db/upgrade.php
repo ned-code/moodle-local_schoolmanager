@@ -242,5 +242,20 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024042600, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2024061700) {
+
+        // Define field schoolyeartype to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('schoolyeartype', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'compact_logo');
+
+        // Conditionally launch add field schoolyeartype.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2024061700, 'local', 'schoolmanager');
+    }
+
     return true;
 }

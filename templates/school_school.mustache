@@ -25,7 +25,7 @@
     * bodyattributes - attributes for the body tag as a string of html attributes
 }}
 <div class="row">
-    <div class="col-md-6 offset-md-3">
+    <div class="col-md-9 table-wrapper">
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -53,6 +53,278 @@
                 <div class="row">
                     <div class="col-md-4">{{#str}}schoolyear, local_schoolmanager{{/str}}:</div>
                     <div class="col-md-8"><strong>{{schoolyear}}</strong></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="text-success">Academic Integrity</h3>
+                        <ul class="list-unstyled">
+                            <li><a href="https://ghs.rosedaleedu.com/local/academic_integrity/infractions.php">Academic Integrity Violations</a></li>
+                            <ul class="list-unstyled">
+                                <li>
+                                    {{#pix}} {{aivicon}}, local_schoolmanager {{/pix}}
+                                    {{aivschoolyear}} Academic Integrity Violations were given to students since {{aivstartdate}} (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{majorplagiarismicon}}, local_schoolmanager {{/pix}}
+                                    {{majorplagiarism}} Academic Integrity Violations were given for Major plagiarism (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{cheatingicon}}, local_schoolmanager {{/pix}}
+                                    {{cheating}} Academic Integrity Violations were given for Cheating on Test or Exam  (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{aiv30schoolyearicon}}, local_schoolmanager {{/pix}}
+                                    {{aiv30schoolyear}} Academic Integrity Violations were given to students in last 30 days.  (A)
+                                </li>
+                            </ul>
+
+                            <li><a href="https://ghs.rosedaleedu.com/local/ned_controller/grade_controller.php?school=96&reason=3&page=41">Activity Deadlines</a></li>
+                            <ul class="list-unstyled">
+                                <li>
+                                    {{#pix}} {{missed_deadlinesicon}}, local_schoolmanager {{/pix}}
+                                    {{missed_deadlines}} missed deadlines in this school year (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{deadlineextensionsicon}}, local_schoolmanager {{/pix}}
+                                    {{deadlineextensions}} deadline extensions were awarded in this school year. This averages to {{deadlineextensionsaverage}} extensions per student.  (A)
+                                </li>
+                                {{#deadlineextensions20icon}}
+                                    <li>
+                                        {{#pix}} {{deadlineextensions20icon}}, local_schoolmanager {{/pix}}
+                                        {{deadlineextensions20}} students have more than 20 deadline extensions (D)
+                                    </li>
+                                {{/deadlineextensions20icon}}
+                                <li>
+                                    {{#pix}} {{deadlineextensions30icon}}, local_schoolmanager {{/pix}}
+                                    {{deadlineextensions30}} missed deadlines in last 30 days (A)
+                                </li>
+                            </ul>
+
+                            <li><a href="https://ghs.rosedaleedu.com/local/tem/sessions.php">Test Proctoring</a></li>
+                            <ul class="list-unstyled">
+                                <li>
+                                    {{#pix}} {{proctoringsubmittedicon}}, local_schoolmanager {{/pix}}
+                                    {{proctoringsubmitted}} Proctoring reports have been submitted (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{proctoringmissingicon}}, local_schoolmanager {{/pix}}
+                                    {{proctoringmissing}} Proctoring reports are currently missing (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{proctorinwriting1icon}}, local_schoolmanager {{/pix}}
+                                    {{proctorinwriting1}} tests have 1 writing session (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{proctorinwriting2icon}}, local_schoolmanager {{/pix}}
+                                    {{proctorinwriting2}} tests have 2 writing sessions (A)
+                                </li>
+                                {{#proctorinwriting3icon}}
+                                <li>
+                                    {{#pix}} {{proctorinwriting3icon}}, local_schoolmanager {{/pix}}
+                                    {{proctorinwriting3}} tests have 3 writing sessions (D)
+                                </li>
+                                {{/proctorinwriting3icon}}
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="text-success">English Proficiency  </h3>
+                        <ul class="list-unstyled">
+                            <li><a href="https://ghs.rosedaleedu.com/report/ghs/ghs_english_proficiency.php">OSSLT Scores for Current School Year</a></li>
+                            <ul class="list-unstyled">
+                                <li>
+                                    {{#pix}} {{wroteosslticon}}, local_schoolmanager {{/pix}}
+                                    {{wroteosslt}} students wrote the OSSLT (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{notwroteosslticon}}, local_schoolmanager {{/pix}}
+                                    {{notwroteosslt}} students did not write the OSSLT (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{passedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{passedosslt}} students Passed OSSLT (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{failedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{failedosslt}} students Failed OSSLT (A)
+                                </li>
+                                {{#failedossltover75icon}}
+                                    <li>
+                                        {{#pix}} {{failedossltover75icon}}, local_schoolmanager {{/pix}}
+                                        {{failedossltover75}} students Failed OSSLT but have ENG3U or ENG4U grade over 75%  (D)
+                                    </li>
+                                {{/failedossltover75icon}}
+                            </ul>
+
+                            <li><a href="https://ghs.rosedaleedu.com/report/ghs/ghs_english_proficiency.php">OSSLT Scores for Previous School Year</a></li>
+                            <ul class="list-unstyled">
+                                <li>
+                                    {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
+                                    {{prevwroteosslt}} of students wrote the OSSLT (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
+                                    {{prevnotwroteosslt}} students did not write the OSSLT (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{prevpassedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{prevpassedosslt}} students Passed OSSLT (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{prevfailedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{prevfailedosslt}} students Failed OSSLT (A)
+                                </li>
+                                {{#prevfailedossltover75icon}}
+                                    <li>
+                                        {{#pix}} {{prevfailedossltover75icon}}, local_schoolmanager {{/pix}}
+                                        {{prevfailedossltover75}} students Failed OSSLT but have ENG3U or ENG4U grade over 75% (D)
+                                    </li>
+                                {{/prevfailedossltover75icon}}
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="text-success">Other   </h3>
+                        <ul class="list-unstyled">
+                            <li><a href="https://ghs.rosedaleedu.com/local/schoolmanager/view.php?schoolid=96&view=students">Logins</a></li>
+                            <ul class="list-unstyled">
+                                <li>
+                                    {{#pix}} {{loggedusers3icon}}, local_schoolmanager {{/pix}}
+                                    {{loggedusers3}} student have logged in with last 3 days (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{loggedusers7icon}}, local_schoolmanager {{/pix}}
+                                    {{loggedusers7}} students have logged in within last 7 days (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{notloggedusers8icon}}, local_schoolmanager {{/pix}}
+                                    {{notloggedusers8}} students have not logged for more than 8 days (C)
+                                </li>
+                                <li>
+                                    {{#pix}} {{notloggedstaff10icon}}, local_schoolmanager {{/pix}}
+                                    {{notloggedstaff10}} staff have not logged in for more that 10 days (C)
+                                </li>
+                            </ul>
+
+                            <li><a href="https://ghs.rosedaleedu.com/report/ghs/ghs_group_enrollment.php">Deadline Manager</a></li>
+                            <ul class="list-unstyled">
+                                <li>{{#pix}} {{dmcompleteicon}}, local_schoolmanager {{/pix}}
+                                    {{dmcomplete}} active classes have complete Deadline Manager schedules (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{dmincompleteicon}}, local_schoolmanager {{/pix}}
+                                    {{dmincomplete}} active classes do not have complete Deadline Manager schedules (A)
+                                </li>
+                                <li>
+                                    {{#pix}} {{dmcompleteendedicon}}, local_schoolmanager {{/pix}}
+                                    {{dmcompleteended}} classes ended with complete Deadline Manager schedules (B)
+                                </li>
+                                <li>
+                                    {{#pix}} {{dmincompleteendedicon}}, local_schoolmanager {{/pix}}
+                                    {{dmincompleteended}} classes ended with incomplete Deadline Manager schedules (A)
+                                </li>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card mb-3">
+            <div class="card-header">
+                {{#str}}studentsummary, local_schoolmanager{{/str}}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-9">{{#str}}activestudents, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{activestudents}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}aivschoolyear, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{aivschoolyear}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}aiv30schoolyear, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{aiv30schoolyear}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}deadlineextentions, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{deadlineextensions}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}aivaverage, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{aivaverage}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}wrongsubmissions, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{wrong_submissions}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}latesubmissions, mod_assign{{/str}}</div>
+                    <div class="col-md-3">{{late_submissions}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}misseddeadlines, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{missed_deadlines}}</div>
+                </div>
+
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                {{#str}}staffsummary, local_schoolmanager{{/str}}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-9">{{#str}}classroomteachers, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{classroomteachers}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}classroomassistants, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{classroomassistants}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}guidancecounsellors, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{guidancecounsellors}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12"><hr></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}generalcert, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{generalcert}}/{{staffs}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}advancedcert, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{advancedcert}}/{{staffs}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}certifiedproctors, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{certifiedproctors}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12"><hr></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}schooladministrator, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{schooladministrator}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}proctormanager, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{proctormanager}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-9">{{#str}}academicintegritymanager, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-3">{{academicintegritymanager}}</div>
                 </div>
             </div>
         </div>
