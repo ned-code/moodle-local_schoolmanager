@@ -257,5 +257,12 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024061700, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2024061801) {
+        $DB->execute("UPDATE {local_schoolmanager_school} SET schoolyeartype = 1");
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2024061801, 'local', 'schoolmanager');
+    }
+
     return true;
 }

@@ -259,7 +259,7 @@ class school extends \core\persistent implements \cacheable_object  {
      * @return string
      */
     public function _get_startdate() {
-        if ($this->schoolyeartype) {
+        if ($this->get('schoolyeartype')) {
             return strtotime(get_config('local_schoolmanager', 'defaultschoolyearstart'));
         } else {
             return $this->get('startdate') ?? 0;
@@ -270,7 +270,7 @@ class school extends \core\persistent implements \cacheable_object  {
      * @return string
      */
     public function _get_enddate() {
-        if ($this->schoolyeartype) {
+        if ($this->get('schoolyeartype')) {
             return strtotime(get_config('local_schoolmanager', 'defaultschoolyearend'));
         } else {
             return $this->get('enddate') ?? 0;

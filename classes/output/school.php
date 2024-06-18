@@ -263,7 +263,7 @@ class school implements \renderable, \templatable {
                 $deadlineextensions30 += $student->deadlineextentions30;
 
                 if ($student->deadlineextentions > 20) {
-                    $deadlineextensions20 += $student->deadlineextentions;
+                    $deadlineextensions20++;
                 }
 
                 foreach (static::NGC_KEYS as $ngc_key) {
