@@ -295,6 +295,16 @@ class school implements \renderable, \templatable {
                 }
             }
 
+            $data->aivurl = (new \moodle_url('/local/academic_integrity/infractions.php', [
+                'school' => $this->schoolid,
+                'state' => -1
+            ]))->out(false);
+
+            $data->deadlineurl = (new \moodle_url('/local/ned_controller/grade_controller.php', [
+                'school' => $this->schoolid,
+                'reason' => 3
+            ]))->out(false);
+
             $data->aivschoolyear = $aivschoolyear;
             $data->aiv30schoolyear = $aiv30schoolyear;
             $data->deadlineextensions = $deadlineextensions;
@@ -357,6 +367,10 @@ class school implements \renderable, \templatable {
             $data->deadlineextensions30icon = $this->get_icon($deadlineextensions30, 'A');
 
             // Test Proctoring.
+            $data->proctoringurl = (new \moodle_url('/local/tem/sessions.php', [
+                'schoolid' => $this->schoolid
+            ]))->out(false);
+
             $data->proctoringsubmitted = TEM::count_school_submitted_reports($this->schoolid);
             $data->proctoringsubmittedicon = $this->get_icon($data->proctoringsubmitted, 'B');
 
@@ -369,10 +383,15 @@ class school implements \renderable, \templatable {
             $data->proctorinwriting2 = TEM::count_school_writing_sessions($this->schoolid, 2);
             $data->proctorinwriting2icon = $this->get_icon($data->proctorinwriting2, 'A');
 
-            $data->proctorinwriting3 = TEM::count_school_writing_sessions($this->schoolid, 3);
+            $data->proctorinwriting3 = TEM::count_school_writing_sessions($this->schoolid, 3, true);
             $data->proctorinwriting3icon = $this->get_icon($data->proctorinwriting3, 'D');
 
             // OSSLT Scores for Current School Year.
+            $data->osslturl = (new \moodle_url('/report/ghs/ghs_english_proficiency.php', [
+                'schoolid' => $this->schoolid,
+                'ossltyear' => GHS::get_osslt_year(false)
+            ]))->out(false);
+
             $wroteosslt = GHS::count_osslt($this->_persistent->get('code'), ['Fail', 'Pass']);
             $data->wroteosslticon = $this->get_icon($wroteosslt, 'A');
             $data->wroteosslt = $this->percentage_format($wroteosslt, $data->activestudents);
@@ -394,6 +413,11 @@ class school implements \renderable, \templatable {
             $data->failedossltover75 = $this->percentage_format($failedossltover75, $data->activestudents);
 
             // OSSLT Scores for Previous School Year.
+            $data->prevosslturl = (new \moodle_url('/report/ghs/ghs_english_proficiency.php', [
+                'schoolid' => $this->schoolid,
+                'ossltyear' => GHS::get_osslt_year(true)
+            ]))->out(false);
+
             $prevwroteosslt = GHS::count_osslt($this->_persistent->get('code'), ['Fail', 'Pass'], true);
             $data->prevwroteosslticon = $this->get_icon($prevwroteosslt, 'A');
             $data->prevwroteosslt = $this->percentage_format($prevwroteosslt, $data->activestudents);
@@ -415,6 +439,11 @@ class school implements \renderable, \templatable {
             $data->prevfailedossltover75 = $this->percentage_format($prevfailedossltover75, $data->activestudents);;
 
             // Logins.
+            $data->usersurl = (new \moodle_url('/local/schoolmanager/view.php', [
+                'schoolid' => $this->schoolid,
+                'view' => 'students'
+            ]))->out(false);
+
             $loggedusers3 = NED::count_logged_user(array_keys($data->students), 3);
             $data->loggedusers3icon = $this->get_icon($loggedusers3, 'B');
             $data->loggedusers3 = $this->percentage_format($loggedusers3, $data->activestudents);
@@ -432,6 +461,10 @@ class school implements \renderable, \templatable {
             $data->notloggedstaff10 = $this->percentage_format($notloggedstaff10, count($staffs));
 
             // Deadline Manager.
+            $data->dmurl = (new \moodle_url('/report/ghs/ghs_group_enrollment.php', [
+                'filterschool' => $this->schoolid,
+            ]))->out(false);
+
             list($data->dmcomplete, $data->dmincomplete, $data->dmclasses, $data->dmcompleteended, $data->dmincompleteended) = NED::count_dm_scheule($this->_persistent->get('code'));
             $data->dmcompleteicon = $this->get_icon($data->dmcomplete, 'B');
             $data->dmincompleteicon = $this->get_icon($data->dmincomplete, 'A');

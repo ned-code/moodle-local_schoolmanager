@@ -177,3 +177,5 @@ $string['defaultschoolyearend'] = 'Default school year end';
 $string['schoolyear'] = 'School Year';
 $string['resedaledefault'] = 'Rosedale Default';
 $string['custom'] = 'Custom';
+$string['schoolprofile'] = 'School Profile';
+$string['compliancereport'] = 'Compliance Report';
