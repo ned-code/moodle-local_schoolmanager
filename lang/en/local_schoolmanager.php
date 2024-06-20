@@ -30,6 +30,7 @@ $string['schoolmanager:viewallschooldashboards'] = 'View all school manager';
 $string['schoolmanager:manage_schools'] = 'Manage schools';
 $string['schoolmanager:manage_crews'] = 'Manage school cohorts';
 $string['schoolmanager:manage_members'] = 'Manage cohort members';
+$string['schoolmanager:view_ps_compliance_report'] = 'Can view Partner School Compliance report ';
 
 // Config
 $string['general'] = 'General';

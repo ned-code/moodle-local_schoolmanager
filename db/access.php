@@ -50,4 +50,9 @@ $capabilities = array(
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array()
     ),
+    'local/schoolmanager:view_ps_compliance_report' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array()
+    ),
 );

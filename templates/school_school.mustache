@@ -59,192 +59,194 @@
                 </div>
             </div>
         </div>
-        <div class="card">
-            <div class="card-header text-align-center">
-                {{#str}}compliancereport, local_schoolmanager{{/str}}
+        {{#viewpscompliancereport}}
+            <div class="card">
+                <div class="card-header text-align-center">
+                    {{#str}}compliancereport, local_schoolmanager{{/str}}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 class="text-success">Academic Integrity</h3>
+                            <ul class="list-unstyled mb-3">
+                                <li><a href="{{aivurl}}">Academic Integrity Violations</a></li>
+                                <ul class="list-unstyled mb-3">
+                                    <li>
+                                        {{#pix}} {{aivicon}}, local_schoolmanager {{/pix}}
+                                        {{aivschoolyear}} Academic Integrity Violations were given to students since {{aivstartdate}}
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{majorplagiarismicon}}, local_schoolmanager {{/pix}}
+                                        {{majorplagiarism}} Academic Integrity Violations were given for Major plagiarism
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{cheatingicon}}, local_schoolmanager {{/pix}}
+                                        {{cheating}} Academic Integrity Violations were given for Cheating on Test or Exam
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{aiv30schoolyearicon}}, local_schoolmanager {{/pix}}
+                                        {{aiv30schoolyear}} Academic Integrity Violations were given to students in last 30 days.
+                                    </li>
+                                </ul>
+
+                                <li><a href="{{deadlineurl}}">Activity Deadlines</a></li>
+                                <ul class="list-unstyled mb-3">
+                                    <li>
+                                        {{#pix}} {{missed_deadlinesicon}}, local_schoolmanager {{/pix}}
+                                        {{missed_deadlines}} missed deadlines in this school year
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{deadlineextensionsicon}}, local_schoolmanager {{/pix}}
+                                        {{deadlineextensions}} deadline extensions were awarded in this school year. This averages to {{deadlineextensionsaverage}} extensions per student.
+                                    </li>
+                                    {{#deadlineextensions20icon}}
+                                        <li>
+                                            {{#pix}} {{deadlineextensions20icon}}, local_schoolmanager {{/pix}}
+                                            {{deadlineextensions20}} students have more than 20 deadline extensions
+                                        </li>
+                                    {{/deadlineextensions20icon}}
+                                    <li>
+                                        {{#pix}} {{deadlineextensions30icon}}, local_schoolmanager {{/pix}}
+                                        {{deadlineextensions30}} missed deadlines in last 30 days
+                                    </li>
+                                </ul>
+
+                                <li><a href="{{proctoringurl}}">Test Proctoring</a></li>
+                                <ul class="list-unstyled mb-3">
+                                    <li>
+                                        {{#pix}} {{proctoringsubmittedicon}}, local_schoolmanager {{/pix}}
+                                        {{proctoringsubmitted}} Proctoring reports have been submitted
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{proctoringmissingicon}}, local_schoolmanager {{/pix}}
+                                        {{proctoringmissing}} Proctoring reports are currently missing
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{proctorinwriting1icon}}, local_schoolmanager {{/pix}}
+                                        {{proctorinwriting1}} tests have 1 writing session
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{proctorinwriting2icon}}, local_schoolmanager {{/pix}}
+                                        {{proctorinwriting2}} tests have 2 writing sessions
+                                    </li>
+                                    {{#proctorinwriting3icon}}
+                                        <li>
+                                            {{#pix}} {{proctorinwriting3icon}}, local_schoolmanager {{/pix}}
+                                            {{proctorinwriting3}} tests have 3 or more writing sessions
+                                        </li>
+                                    {{/proctorinwriting3icon}}
+                                </ul>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 class="text-success">English Proficiency  </h3>
+                            <ul class="list-unstyled mb-3">
+                                <li><a href="{{osslturl}}">OSSLT Scores for Current School Year</a></li>
+                                <ul class="list-unstyled mb-3">
+                                    <li>
+                                        {{#pix}} {{wroteosslticon}}, local_schoolmanager {{/pix}}
+                                        {{wroteosslt}} students wrote the OSSLT
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{notwroteosslticon}}, local_schoolmanager {{/pix}}
+                                        {{notwroteosslt}} students did not write the OSSLT
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{passedosslticon}}, local_schoolmanager {{/pix}}
+                                        {{passedosslt}} students Passed OSSLT
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{failedosslticon}}, local_schoolmanager {{/pix}}
+                                        {{failedosslt}} students Failed OSSLT
+                                    </li>
+                                    {{#failedossltover75icon}}
+                                        <li>
+                                            {{#pix}} {{failedossltover75icon}}, local_schoolmanager {{/pix}}
+                                            {{failedossltover75}} students Failed OSSLT but have ENG3U or ENG4U grade over 75%
+                                        </li>
+                                    {{/failedossltover75icon}}
+                                </ul>
+
+                                <li><a href="{{prevosslturl}}">OSSLT Scores for Previous School Year</a></li>
+                                <ul class="list-unstyled mb-3">
+                                    <li>
+                                        {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
+                                        {{prevwroteosslt}} of students wrote the OSSLT
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
+                                        {{prevnotwroteosslt}} students did not write the OSSLT
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{prevpassedosslticon}}, local_schoolmanager {{/pix}}
+                                        {{prevpassedosslt}} students Passed OSSLT
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{prevfailedosslticon}}, local_schoolmanager {{/pix}}
+                                        {{prevfailedosslt}} students Failed OSSLT
+                                    </li>
+                                    {{#prevfailedossltover75icon}}
+                                        <li>
+                                            {{#pix}} {{prevfailedossltover75icon}}, local_schoolmanager {{/pix}}
+                                            {{prevfailedossltover75}} students Failed OSSLT but have ENG3U or ENG4U grade over 75%
+                                        </li>
+                                    {{/prevfailedossltover75icon}}
+                                </ul>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 class="text-success">Other   </h3>
+                            <ul class="list-unstyled mb-3">
+                                <li><a href="{{usersurl}}">Logins</a></li>
+                                <ul class="list-unstyled mb-3">
+                                    <li>
+                                        {{#pix}} {{loggedusers3icon}}, local_schoolmanager {{/pix}}
+                                        {{loggedusers3}} student have logged in with last 3 days
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{loggedusers7icon}}, local_schoolmanager {{/pix}}
+                                        {{loggedusers7}} students have logged in within last 7 days
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{notloggedusers8icon}}, local_schoolmanager {{/pix}}
+                                        {{notloggedusers8}} students have not logged for more than 8 days
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{notloggedstaff10icon}}, local_schoolmanager {{/pix}}
+                                        {{notloggedstaff10}} staff have not logged in for more that 10 days
+                                    </li>
+                                </ul>
+
+                                <li><a href="{{dmurl}}">Deadline Manager</a></li>
+                                <ul class="list-unstyled mb-3">
+                                    <li>{{#pix}} {{dmcompleteicon}}, local_schoolmanager {{/pix}}
+                                        {{dmcomplete}} active classes have complete Deadline Manager schedules
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{dmincompleteicon}}, local_schoolmanager {{/pix}}
+                                        {{dmincomplete}} active classes do not have complete Deadline Manager schedules
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{dmcompleteendedicon}}, local_schoolmanager {{/pix}}
+                                        {{dmcompleteended}} classes ended with complete Deadline Manager schedules
+                                    </li>
+                                    <li>
+                                        {{#pix}} {{dmincompleteendedicon}}, local_schoolmanager {{/pix}}
+                                        {{dmincompleteended}} classes ended with incomplete Deadline Manager schedules
+                                    </li>
+                                </ul>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h3 class="text-success">Academic Integrity</h3>
-                        <ul class="list-unstyled mb-3">
-                            <li><a href="{{aivurl}}">Academic Integrity Violations</a></li>
-                            <ul class="list-unstyled mb-3">
-                                <li>
-                                    {{#pix}} {{aivicon}}, local_schoolmanager {{/pix}}
-                                    {{aivschoolyear}} Academic Integrity Violations were given to students since {{aivstartdate}}
-                                </li>
-                                <li>
-                                    {{#pix}} {{majorplagiarismicon}}, local_schoolmanager {{/pix}}
-                                    {{majorplagiarism}} Academic Integrity Violations were given for Major plagiarism
-                                </li>
-                                <li>
-                                    {{#pix}} {{cheatingicon}}, local_schoolmanager {{/pix}}
-                                    {{cheating}} Academic Integrity Violations were given for Cheating on Test or Exam
-                                </li>
-                                <li>
-                                    {{#pix}} {{aiv30schoolyearicon}}, local_schoolmanager {{/pix}}
-                                    {{aiv30schoolyear}} Academic Integrity Violations were given to students in last 30 days.
-                                </li>
-                            </ul>
-
-                            <li><a href="{{deadlineurl}}">Activity Deadlines</a></li>
-                            <ul class="list-unstyled mb-3">
-                                <li>
-                                    {{#pix}} {{missed_deadlinesicon}}, local_schoolmanager {{/pix}}
-                                    {{missed_deadlines}} missed deadlines in this school year
-                                </li>
-                                <li>
-                                    {{#pix}} {{deadlineextensionsicon}}, local_schoolmanager {{/pix}}
-                                    {{deadlineextensions}} deadline extensions were awarded in this school year. This averages to {{deadlineextensionsaverage}} extensions per student.
-                                </li>
-                                {{#deadlineextensions20icon}}
-                                    <li>
-                                        {{#pix}} {{deadlineextensions20icon}}, local_schoolmanager {{/pix}}
-                                        {{deadlineextensions20}} students have more than 20 deadline extensions
-                                    </li>
-                                {{/deadlineextensions20icon}}
-                                <li>
-                                    {{#pix}} {{deadlineextensions30icon}}, local_schoolmanager {{/pix}}
-                                    {{deadlineextensions30}} missed deadlines in last 30 days
-                                </li>
-                            </ul>
-
-                            <li><a href="{{proctoringurl}}">Test Proctoring</a></li>
-                            <ul class="list-unstyled mb-3">
-                                <li>
-                                    {{#pix}} {{proctoringsubmittedicon}}, local_schoolmanager {{/pix}}
-                                    {{proctoringsubmitted}} Proctoring reports have been submitted
-                                </li>
-                                <li>
-                                    {{#pix}} {{proctoringmissingicon}}, local_schoolmanager {{/pix}}
-                                    {{proctoringmissing}} Proctoring reports are currently missing
-                                </li>
-                                <li>
-                                    {{#pix}} {{proctorinwriting1icon}}, local_schoolmanager {{/pix}}
-                                    {{proctorinwriting1}} tests have 1 writing session
-                                </li>
-                                <li>
-                                    {{#pix}} {{proctorinwriting2icon}}, local_schoolmanager {{/pix}}
-                                    {{proctorinwriting2}} tests have 2 writing sessions
-                                </li>
-                                {{#proctorinwriting3icon}}
-                                    <li>
-                                        {{#pix}} {{proctorinwriting3icon}}, local_schoolmanager {{/pix}}
-                                        {{proctorinwriting3}} tests have 3 or more writing sessions
-                                    </li>
-                                {{/proctorinwriting3icon}}
-                            </ul>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <h3 class="text-success">English Proficiency  </h3>
-                        <ul class="list-unstyled mb-3">
-                            <li><a href="{{osslturl}}">OSSLT Scores for Current School Year</a></li>
-                            <ul class="list-unstyled mb-3">
-                                <li>
-                                    {{#pix}} {{wroteosslticon}}, local_schoolmanager {{/pix}}
-                                    {{wroteosslt}} students wrote the OSSLT
-                                </li>
-                                <li>
-                                    {{#pix}} {{notwroteosslticon}}, local_schoolmanager {{/pix}}
-                                    {{notwroteosslt}} students did not write the OSSLT
-                                </li>
-                                <li>
-                                    {{#pix}} {{passedosslticon}}, local_schoolmanager {{/pix}}
-                                    {{passedosslt}} students Passed OSSLT
-                                </li>
-                                <li>
-                                    {{#pix}} {{failedosslticon}}, local_schoolmanager {{/pix}}
-                                    {{failedosslt}} students Failed OSSLT
-                                </li>
-                                {{#failedossltover75icon}}
-                                    <li>
-                                        {{#pix}} {{failedossltover75icon}}, local_schoolmanager {{/pix}}
-                                        {{failedossltover75}} students Failed OSSLT but have ENG3U or ENG4U grade over 75%
-                                    </li>
-                                {{/failedossltover75icon}}
-                            </ul>
-
-                            <li><a href="{{prevosslturl}}">OSSLT Scores for Previous School Year</a></li>
-                            <ul class="list-unstyled mb-3">
-                                <li>
-                                    {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
-                                    {{prevwroteosslt}} of students wrote the OSSLT
-                                </li>
-                                <li>
-                                    {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
-                                    {{prevnotwroteosslt}} students did not write the OSSLT
-                                </li>
-                                <li>
-                                    {{#pix}} {{prevpassedosslticon}}, local_schoolmanager {{/pix}}
-                                    {{prevpassedosslt}} students Passed OSSLT
-                                </li>
-                                <li>
-                                    {{#pix}} {{prevfailedosslticon}}, local_schoolmanager {{/pix}}
-                                    {{prevfailedosslt}} students Failed OSSLT
-                                </li>
-                                {{#prevfailedossltover75icon}}
-                                    <li>
-                                        {{#pix}} {{prevfailedossltover75icon}}, local_schoolmanager {{/pix}}
-                                        {{prevfailedossltover75}} students Failed OSSLT but have ENG3U or ENG4U grade over 75%
-                                    </li>
-                                {{/prevfailedossltover75icon}}
-                            </ul>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <h3 class="text-success">Other   </h3>
-                        <ul class="list-unstyled mb-3">
-                            <li><a href="{{usersurl}}">Logins</a></li>
-                            <ul class="list-unstyled mb-3">
-                                <li>
-                                    {{#pix}} {{loggedusers3icon}}, local_schoolmanager {{/pix}}
-                                    {{loggedusers3}} student have logged in with last 3 days
-                                </li>
-                                <li>
-                                    {{#pix}} {{loggedusers7icon}}, local_schoolmanager {{/pix}}
-                                    {{loggedusers7}} students have logged in within last 7 days
-                                </li>
-                                <li>
-                                    {{#pix}} {{notloggedusers8icon}}, local_schoolmanager {{/pix}}
-                                    {{notloggedusers8}} students have not logged for more than 8 days
-                                </li>
-                                <li>
-                                    {{#pix}} {{notloggedstaff10icon}}, local_schoolmanager {{/pix}}
-                                    {{notloggedstaff10}} staff have not logged in for more that 10 days
-                                </li>
-                            </ul>
-
-                            <li><a href="{{dmurl}}">Deadline Manager</a></li>
-                            <ul class="list-unstyled mb-3">
-                                <li>{{#pix}} {{dmcompleteicon}}, local_schoolmanager {{/pix}}
-                                    {{dmcomplete}} active classes have complete Deadline Manager schedules
-                                </li>
-                                <li>
-                                    {{#pix}} {{dmincompleteicon}}, local_schoolmanager {{/pix}}
-                                    {{dmincomplete}} active classes do not have complete Deadline Manager schedules
-                                </li>
-                                <li>
-                                    {{#pix}} {{dmcompleteendedicon}}, local_schoolmanager {{/pix}}
-                                    {{dmcompleteended}} classes ended with complete Deadline Manager schedules
-                                </li>
-                                <li>
-                                    {{#pix}} {{dmincompleteendedicon}}, local_schoolmanager {{/pix}}
-                                    {{dmincompleteended}} classes ended with incomplete Deadline Manager schedules
-                                </li>
-                            </ul>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {{/viewpscompliancereport}}
     </div>
     <div class="col-md-4">
         <div class="card mb-3">

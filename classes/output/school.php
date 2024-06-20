@@ -232,6 +232,7 @@ class school implements \renderable, \templatable {
             $data->advancedcert = 0;
             $data->certifiedproctors = 0;
             $data->staffs = 0;
+            $data->viewpscompliancereport = has_capability('local/schoolmanager:view_ps_compliance_report', \context_system::instance());
             $aivschoolyear = $aiv30schoolyear = $deadlineextensions = $deadlineextensions20 = $deadlineextensions30 = 0;
             $ngc_data = array_fill_keys(static::NGC_KEYS, 0);
             $students_ngc = NED::$ned_grade_controller::get_students_ngc_records_count(array_keys($data->students));
