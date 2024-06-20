@@ -335,7 +335,8 @@ class school implements \renderable, \templatable {
             $majorplagiarism = infraction::get_user_aiv_count(
                 array_keys($data->students), null, $startdate,
                 $enddate, null, false,
-                infraction::PLAGIARISM_REASONS
+                null,
+                infraction::PENALTY_MAJOR_PLAGIARISM
             );
             $data->majorplagiarism = $this->percentage_format($majorplagiarism, $aivschoolyear);
             $data->majorplagiarismicon = $this->get_icon($majorplagiarism, 'A');
@@ -343,7 +344,8 @@ class school implements \renderable, \templatable {
             $cheating = infraction::get_user_aiv_count(
                 array_keys($data->students), null, $startdate,
                 $enddate, null, false,
-                infraction::CHEATING_REASONS
+                null,
+                infraction::PENALTY_CHEATING
             );
             $data->cheating = $this->percentage_format($cheating, $aivschoolyear);
             $data->cheatingicon = $this->get_icon($cheating, 'A');
