@@ -413,15 +413,15 @@ class school implements \renderable, \templatable {
 
             $passedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Pass');
             $data->passedosslticon = $this->get_icon($passedosslt, 'B');
-            $data->passedosslt = $this->percentage_format($passedosslt, $data->activestudents);
+            $data->passedosslt = $this->percentage_format($passedosslt, $wroteosslt);
 
             $failedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Fail');
             $data->failedosslticon = $this->get_icon($failedosslt, 'A');
-            $data->failedosslt = $this->percentage_format($failedosslt, $data->activestudents);
+            $data->failedosslt = $this->percentage_format($failedosslt, $wroteosslt);
 
             $failedossltover75 = GHS::count_osslt_failed_over75($this->_persistent->get('code'));
             $data->failedossltover75icon = $this->get_icon($failedossltover75, 'D');
-            $data->failedossltover75 = $this->percentage_format($failedossltover75, $data->activestudents);
+            $data->failedossltover75 = $this->percentage_format($failedossltover75, $wroteosslt);
 
             // OSSLT Scores for Previous School Year.
             $data->prevosslturl = (new \moodle_url('/report/ghs/ghs_english_proficiency.php', [
@@ -431,23 +431,19 @@ class school implements \renderable, \templatable {
 
             $prevwroteosslt = GHS::count_osslt($this->_persistent->get('code'), ['Fail', 'Pass'], true);
             $data->prevwroteosslticon = $this->get_icon($prevwroteosslt, 'A');
-            $data->prevwroteosslt = $this->percentage_format($prevwroteosslt, $data->activestudents);
-
-            $prevnotwroteosslt = $data->activestudents - $prevwroteosslt;
-            $data->prevnotwroteosslticon = $this->get_icon($prevnotwroteosslt, 'A');
-            $data->prevnotwroteosslt = $this->percentage_format($prevnotwroteosslt, $data->activestudents);
+            $data->prevwroteosslt = $prevwroteosslt;
 
             $prevpassedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Pass', true);
             $data->prevpassedosslticon = $this->get_icon($prevpassedosslt, 'B');
-            $data->prevpassedosslt = $this->percentage_format($prevpassedosslt, $data->activestudents);
+            $data->prevpassedosslt = $this->percentage_format($prevpassedosslt, $prevwroteosslt);
 
             $prevfailedosslt = GHS::count_osslt($this->_persistent->get('code'), 'Fail', true);
             $data->prevfailedosslticon = $this->get_icon($prevfailedosslt, 'A');
-            $data->prevfailedosslt = $this->percentage_format($prevfailedosslt, $data->activestudents);
+            $data->prevfailedosslt = $this->percentage_format($prevfailedosslt, $prevwroteosslt);
 
             $prevfailedossltover75 = GHS::count_osslt_failed_over75($this->_persistent->get('code'), true);
             $data->prevfailedossltover75icon = $this->get_icon($prevfailedossltover75, 'D');
-            $data->prevfailedossltover75 = $this->percentage_format($prevfailedossltover75, $data->activestudents);;
+            $data->prevfailedossltover75 = $this->percentage_format($prevfailedossltover75, $prevwroteosslt);
 
             // Logins.
             $data->usersurl = (new \moodle_url('/local/schoolmanager/view.php', [
