@@ -233,9 +233,10 @@ class school implements \renderable, \templatable {
             $data->certifiedproctors = 0;
             $data->staffs = 0;
             $data->viewpscompliancereport = has_capability('local/schoolmanager:view_ps_compliance_report', \context_system::instance());
-            $aivschoolyear = $aiv30schoolyear = $deadlineextensions = $deadlineextensions20 = $deadlineextensions30 = 0;
-            $ngc_data = array_fill_keys(static::NGC_KEYS, 0);
+            $aivschoolyear = $aiv30schoolyear = $deadlineextensions = $deadlineextensions20 = 0;
+            $ngc_data = $ngc_data30 = array_fill_keys(static::NGC_KEYS, 0);
             $students_ngc = NED::$ned_grade_controller::get_students_ngc_records_count(array_keys($data->students));
+            $students_ngc30 = NED::$ned_grade_controller::get_students_ngc_records_count(array_keys($data->students), 30);
 
             if ($administrator = $this->_sm->get_school_students($this->schoolid, true, $this->_sm::SCHOOL_ADMINISTRATOR_ROLE, false)) {
                 $administrator = reset($administrator);
@@ -258,10 +259,8 @@ class school implements \renderable, \templatable {
                 $aiv30schoolyear += $student->aiv30;
                 $courses = enrol_get_users_courses($student->id, true);
                 $student->deadlineextentions = SH::get_user_number_of_dl_extensions($student, $courses);
-                $student->deadlineextentions30 = SH::get_user_number_of_dl_extensions($student, $courses, 30);
 
                 $deadlineextensions += $student->deadlineextentions;
-                $deadlineextensions30 += $student->deadlineextentions30;
 
                 if ($student->deadlineextentions > 20) {
                     $deadlineextensions20++;
@@ -276,6 +275,15 @@ class school implements \renderable, \templatable {
 
                     $student->$ngc_key = $val;
                     $ngc_data[$ngc_key] += $val;
+                }
+
+                foreach (static::NGC_KEYS as $ngc_key) {
+                    if (empty($students_ngc30[$sid])) {
+                        $val = 0;
+                    } else {
+                        $val = $students_ngc30[$sid]->$ngc_key ?? 0;
+                    }
+                    $ngc_data30[$ngc_key] += $val;
                 }
             }
 
@@ -366,8 +374,8 @@ class school implements \renderable, \templatable {
             $data->deadlineextensions20 = $deadlineextensions20;
             $data->deadlineextensions20icon = $this->get_icon($deadlineextensions20, 'D');
 
-            $data->deadlineextensions30 = $deadlineextensions30;
-            $data->deadlineextensions30icon = $this->get_icon($deadlineextensions30, 'A');
+            $data->deadlineextensions30 = $ngc_data30['missed_deadlines'];
+            $data->deadlineextensions30icon = $this->get_icon($data->deadlineextensions30, 'A');
 
             // Test Proctoring.
             $data->proctoringurl = (new \moodle_url('/local/tem/sessions.php', [
