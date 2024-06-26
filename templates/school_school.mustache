@@ -69,7 +69,7 @@
                         <div class="col-md-12">
                             <h3 class="text-success">Academic Integrity</h3>
                             <ul class="list-unstyled mb-3">
-                                <li><a href="{{aivurl}}">Academic Integrity Violations</a></li>
+                                <li><a target="_blank" href="{{aivurl}}">Academic Integrity Violations</a></li>
                                 <ul class="list-unstyled mb-3">
                                     <li>
                                         {{#pix}} {{aivicon}}, local_schoolmanager {{/pix}}
@@ -89,7 +89,7 @@
                                     </li>
                                 </ul>
 
-                                <li><a href="{{deadlineurl}}">Activity Deadlines</a></li>
+                                <li><a target="_blank" href="{{deadlineurl}}">Activity Deadlines</a></li>
                                 <ul class="list-unstyled mb-3">
                                     <li>
                                         {{#pix}} {{missed_deadlinesicon}}, local_schoolmanager {{/pix}}
@@ -144,7 +144,7 @@
                         <div class="col-md-12">
                             <h3 class="text-success">English Proficiency  </h3>
                             <ul class="list-unstyled mb-3">
-                                <li><a href="{{osslturl}}">OSSLT Scores for Current School Year</a></li>
+                                <li><a target="_blank" href="{{osslturl}}">OSSLT Scores for Current School Year</a></li>
                                 <ul class="list-unstyled mb-3">
                                     <li>
                                         {{#pix}} {{wroteosslticon}}, local_schoolmanager {{/pix}}
@@ -154,14 +154,16 @@
                                         {{#pix}} {{notwroteosslticon}}, local_schoolmanager {{/pix}}
                                         {{notwroteosslt}} students did not write the OSSLT
                                     </li>
-                                    <li>
-                                        {{#pix}} {{passedosslticon}}, local_schoolmanager {{/pix}}
-                                        {{passedosslt}} students Passed OSSLT
-                                    </li>
-                                    <li>
-                                        {{#pix}} {{failedosslticon}}, local_schoolmanager {{/pix}}
-                                        {{failedosslt}} students Failed OSSLT
-                                    </li>
+                                    {{#showpassfailosslt}}
+                                        <li>
+                                            {{#pix}} {{passedosslticon}}, local_schoolmanager {{/pix}}
+                                            {{passedosslt}} students Passed OSSLT
+                                        </li>
+                                        <li>
+                                            {{#pix}} {{failedosslticon}}, local_schoolmanager {{/pix}}
+                                            {{failedosslt}} students Failed OSSLT
+                                        </li>
+                                    {{/showpassfailosslt}}
                                     {{#failedossltover75icon}}
                                         <li>
                                             {{#pix}} {{failedossltover75icon}}, local_schoolmanager {{/pix}}
@@ -170,20 +172,22 @@
                                     {{/failedossltover75icon}}
                                 </ul>
 
-                                <li><a href="{{prevosslturl}}">OSSLT Scores for Previous School Year</a></li>
+                                <li><a target="_blank" href="{{prevosslturl}}">OSSLT Scores for Previous School Year</a></li>
                                 <ul class="list-unstyled mb-3">
                                     <li>
                                         {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
                                         {{prevwroteosslt}} of students wrote the OSSLT
                                     </li>
-                                    <li>
-                                        {{#pix}} {{prevpassedosslticon}}, local_schoolmanager {{/pix}}
-                                        {{prevpassedosslt}} students Passed OSSLT
-                                    </li>
-                                    <li>
-                                        {{#pix}} {{prevfailedosslticon}}, local_schoolmanager {{/pix}}
-                                        {{prevfailedosslt}} students Failed OSSLT
-                                    </li>
+                                    {{#showprevpassfailosslt}}
+                                        <li>
+                                            {{#pix}} {{prevpassedosslticon}}, local_schoolmanager {{/pix}}
+                                            {{prevpassedosslt}} students Passed OSSLT
+                                        </li>
+                                        <li>
+                                            {{#pix}} {{prevfailedosslticon}}, local_schoolmanager {{/pix}}
+                                            {{prevfailedosslt}} students Failed OSSLT
+                                        </li>
+                                    {{/showprevpassfailosslt}}
                                     {{#prevfailedossltover75icon}}
                                         <li>
                                             {{#pix}} {{prevfailedossltover75icon}}, local_schoolmanager {{/pix}}
@@ -199,7 +203,7 @@
                         <div class="col-md-12">
                             <h3 class="text-success">Other   </h3>
                             <ul class="list-unstyled mb-3">
-                                <li><a href="{{usersurl}}">Logins</a></li>
+                                <li><a target="_blank" href="{{usersurl}}">Logins</a></li>
                                 <ul class="list-unstyled mb-3">
                                     <li>
                                         {{#pix}} {{loggedusers3icon}}, local_schoolmanager {{/pix}}
@@ -219,7 +223,7 @@
                                     </li>
                                 </ul>
 
-                                <li><a href="{{dmurl}}">Deadline Manager</a></li>
+                                <li><a target="_blank" href="{{dmurl}}">Deadline Manager</a></li>
                                 <ul class="list-unstyled mb-3">
                                     <li>{{#pix}} {{dmcompleteicon}}, local_schoolmanager {{/pix}}
                                         {{dmcomplete}} active classes have complete Deadline Manager schedules
