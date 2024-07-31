@@ -264,5 +264,20 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024061801, 'local', 'schoolmanager');
     }
 
+    if ($oldversion < 2024073000) {
+
+        // Define field extensionsallowed to be added to local_schoolmanager_school.
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('extensionsallowed', XMLDB_TYPE_INTEGER, '11', null, null, null, '3', 'schoolyeartype');
+
+        // Conditionally launch add field extensionsallowed.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Schoolmanager savepoint reached.
+        upgrade_plugin_savepoint(true, 2024073000, 'local', 'schoolmanager');
+    }
+
     return true;
 }

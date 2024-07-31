@@ -30,7 +30,9 @@ $string['schoolmanager:viewallschooldashboards'] = 'View all school manager';
 $string['schoolmanager:manage_schools'] = 'Manage schools';
 $string['schoolmanager:manage_crews'] = 'Manage school cohorts';
 $string['schoolmanager:manage_members'] = 'Manage cohort members';
-$string['schoolmanager:view_ps_compliance_report'] = 'Can view Partner School Compliance report ';
+$string['schoolmanager:view_ps_compliance_report'] = 'Can view Partner School Compliance report';
+$string['schoolmanager:manage_extension_limit'] = 'Can view and manage number of allowed extensions in School Manager';
+$string['schoolmanager:manage_extension_limit_override'] = 'Can ignore extension limit restriction set in School Manager';
 
 // Config
 $string['general'] = 'General';
@@ -180,3 +182,4 @@ $string['resedaledefault'] = 'Rosedale Default';
 $string['custom'] = 'Custom';
 $string['schoolprofile'] = 'School Profile';
 $string['compliancereport'] = 'Compliance Report';
+$string['extensionsallowed'] = 'Extensions allowed per student per activity';

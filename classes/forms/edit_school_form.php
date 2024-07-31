@@ -10,6 +10,7 @@
 
 namespace local_schoolmanager\forms;
 
+use context_system;
 use local_schoolmanager\school;
 use local_schoolmanager\school_manager as SM;
 use local_schoolmanager\shared_lib as NED;
@@ -74,6 +75,16 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('country', $school->country);
         } elseif (!empty($CFG->country)){
             $mform->setDefault('country', $SM->user->country);
+        }
+
+        $context = context_system::instance();
+        if (has_capability('local/schoolmanager:manage_extension_limit', $context)) {
+            $mform->addElement('select', 'extensionsallowed', NED::str('extensionsallowed'),
+                [0 => 0, 1 => 1, 2 => 2, 3 => 3]);
+            $mform->setDefault('extensionsallowed', 3);
+        } else {
+            $mform->addElement('hidden', 'extensionsallowed');
+            $mform->setType('extensionsallowed', PARAM_INT);
         }
 
         // Timezone

@@ -38,6 +38,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property int    proctormanager
  * @property int    academicintegritymanager
  * @property int    forceproxysubmissionwindow
+ * @property int    extensionsallowed
  * @property int    timecreated
  * @property int    timemodified
  */
@@ -182,6 +183,9 @@ class school extends \core\persistent implements \cacheable_object  {
                 'type' => PARAM_INT,
             ),
             'forceproxysubmissionwindow' => array(
+                'type' => PARAM_INT,
+            ),
+            'extensionsallowed' => array(
                 'type' => PARAM_INT,
             ),
         );
