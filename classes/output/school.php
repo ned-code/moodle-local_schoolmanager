@@ -140,6 +140,8 @@ class school implements \renderable, \templatable {
             }
         } elseif ($this->_view == SH::VIEW_STAFF) {
             $data->staffs = $this->_sm->get_school_students($this->schoolid, true, SM\school_manager::STAFF_ROLES, false);
+            $data->cts = $this->_sm->get_school_students($this->schoolid, true, ['Classroom Teacher'], false);
+
             $courses = $gpas = $activestudents = [];
 
             $data->activestudents = 0;
@@ -167,15 +169,17 @@ class school implements \renderable, \templatable {
                         $staff->badges = $badgerenderer->print_badges_list($records, $staff->id, true);
                     }
 
-                    $data->classroomteachers++;
+                    if (!empty($data->cts) && in_array($staff->id, array_keys($data->cts))) {
+                        $data->classroomteachers++;
 
-                    if (SH::has_certificate_badge($staff->id, 'general')) {
-                        $data->generalcert++;
-                        $staff->ctgc = 'Y';
-                    }
-                    if (SH::has_certificate_badge($staff->id, 'advanced')) {
-                        $data->advancedcert++;
-                        $staff->ctac = 'Y';
+                        if (SH::has_certificate_badge($staff->id, 'general')) {
+                            $data->generalcert++;
+                            $staff->ctgc = 'Y';
+                        }
+                        if (SH::has_certificate_badge($staff->id, 'advanced')) {
+                            $data->advancedcert++;
+                            $staff->ctac = 'Y';
+                        }
                     }
 
                     if ($staff->role === SM\school_manager::SCHOOL_CT_ROLE) {
