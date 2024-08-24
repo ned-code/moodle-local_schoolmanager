@@ -24,11 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2024073100;
-$plugin->requires = 2017051500.00;
-$plugin->maturity = MATURITY_ALPHA;
+$plugin->version  = 2024080100;    // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires = 2022112800.00;    // Moodle 4.1 (Build: 20221128)
+$plugin->release = '4.1.0.0.0';
 $plugin->component = 'local_schoolmanager';
-$plugin->release = '0.1.3';
+$plugin->maturity = MATURITY_ALPHA;
 $plugin->dependencies = array(
-    'local_ned_controller' => 2024052300,
+    'local_ned_controller' => 2024072200,
 );

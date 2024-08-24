@@ -43,7 +43,7 @@ class edit_crew_form extends \moodleform {
         $this->_can_manage = $SM->can_manage_crews();
 
         if (!$this->_school || (!$this->_crew && !$this->_can_manage)){
-            print_error('nopermissions', 'error', '', 'There is no such crew!');
+            NED::print_module_error('nopermissions', 'error', '', 'There is no such crew!');
         }
 
         $mform->addElement('hidden', 'schoolid', $schoolid);

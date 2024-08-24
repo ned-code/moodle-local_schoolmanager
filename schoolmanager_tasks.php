@@ -26,8 +26,7 @@ $PAGE->navbar->add(NED::str('pluginname'), NED::url('~/'));
 $PAGE->navbar->add($title, $url);
 
 if (!has_capability('moodle/site:config', $ctx)){
-    print_error('accessdenied', 'admin');
-    die;
+    NED::print_module_error('accessdenied', 'admin');
 }
 
 $task_records = $DB->get_records('task_scheduled', ['component' => NED::$PLUGIN_NAME], 'id');
