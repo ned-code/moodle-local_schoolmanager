@@ -46,7 +46,7 @@ class edit_school_form extends \moodleform {
         } elseif ($school = ($SM->get_potential_schools($this->_schoolid) ?? false)){
             $this->_new = true;
         } else {
-            print_error('nopermissions', 'error', '', 'There is no school or potential school for edit!');
+            NED::print_module_error('nopermissions', 'error', '', 'There is no school or potential school for edit!');
         }
 
         $this->_school = $school;
@@ -256,7 +256,7 @@ class edit_school_form extends \moodleform {
         if ($school = $SM->get_school_by_ids($this->_schoolid, true)) {
             $this->_school->timezone = $school->get_cohort()->timezone ?? 99;
         }
-        
+
         $this->_school->proctormanager = ($this->_school->proctormanager) ?: null;
         $this->_school->academicintegritymanager = ($this->_school->academicintegritymanager) ?: null;
 

@@ -30,7 +30,7 @@ class choose_potential_school_form extends \moodleform
         $SM = NED::$SM::get_school_manager();
         $ps = $SM->get_potential_schools();
         if (empty($ps)){
-            print_error('nopermissions', 'error', '', 'There are no potential schools for the form!');
+            NED::print_module_error('nopermissions', 'error', '', 'There are no potential schools for the form!');
         }
 
         $ps_list = [];

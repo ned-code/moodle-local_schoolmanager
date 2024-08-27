@@ -237,7 +237,7 @@ class school_manager {
      */
     public function show_error_if_necessary($check_other_capabilities_all=[], $check_other_capabilities_any=[], $ignore_base_capability=false){
         $pr_error = function(){
-            print_error('nopermissions', 'error', '', get_string('checkpermissions', 'core_role'));
+            NED::print_module_error('nopermissions', 'error', '', get_string('checkpermissions', 'core_role'));
         };
         $ctx = $this->_ctx;
 
