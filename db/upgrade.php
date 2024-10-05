@@ -23,6 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+use local_schoolmanager\shared_lib as NED;
 
 require_once(__DIR__ . '/upgradelib.php');
 
@@ -30,45 +31,21 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2024072200){
+    if ($oldversion < 2024073000){
         local_schoolmanager_moodle3_upgrades($oldversion);
     }
 
-    if ($oldversion < 2024061700) {
-
-        // Define field schoolyeartype to be added to local_schoolmanager_school.
+    if ($oldversion < 2024100400) {
         $table = new xmldb_table('local_schoolmanager_school');
-        $field = new xmldb_field('schoolyeartype', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'compact_logo');
-
-        // Conditionally launch add field schoolyeartype.
+        $field = new xmldb_field('cohortname', XMLDB_TYPE_CHAR, '255', null, null, null, NULL, 'id');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
+
+            /** @noinspection SqlWithoutWhere */
+            $DB->execute('UPDATE {local_schoolmanager_school} SET `cohortname` = `name`');
         }
 
-        // Schoolmanager savepoint reached.
-        upgrade_plugin_savepoint(true, 2024061700, 'local', 'schoolmanager');
-    }
-
-    if ($oldversion < 2024061801) {
-        $DB->execute("UPDATE {local_schoolmanager_school} SET schoolyeartype = 1");
-
-        // Schoolmanager savepoint reached.
-        upgrade_plugin_savepoint(true, 2024061801, 'local', 'schoolmanager');
-    }
-
-    if ($oldversion < 2024073000) {
-
-        // Define field extensionsallowed to be added to local_schoolmanager_school.
-        $table = new xmldb_table('local_schoolmanager_school');
-        $field = new xmldb_field('extensionsallowed', XMLDB_TYPE_INTEGER, '11', null, null, null, '3', 'schoolyeartype');
-
-        // Conditionally launch add field extensionsallowed.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Schoolmanager savepoint reached.
-        upgrade_plugin_savepoint(true, 2024073000, 'local', 'schoolmanager');
+        NED::upgrade_plugin_savepoint(2024100400);
     }
 
     return true;

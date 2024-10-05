@@ -231,7 +231,7 @@ class school_manager_render implements \renderable, \templatable{
         if ($this->_schoolid){
             $form = new sm_forms\edit_school_form($this->get_my_url(), ['cancel' => self::get_url(), 'schoolid' => $this->_schoolid]);
             if ($data = $form->get_data()){
-                if ($data->deletebutton ?? false){
+                if (($data->deletebutton ?? false) && $SM->can_delete_schools()){
                     if ($SM->delete_school($data->id)){
                         $this->add_notification('schooldeletedsuccessfully', NED::NOTIFY_SUCCESS);
                     }

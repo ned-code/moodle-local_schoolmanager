@@ -65,6 +65,8 @@ class school_manager {
 
     protected $_view = self::CAP_CANT_VIEW_SM;
     protected $_manage_schools = self::CAP_CANT_EDIT;
+    protected $_manage_schools_extra = self::CAP_CANT_EDIT;
+    protected $_delete_schools = self::CAP_CANT_EDIT;
     protected $_manage_crews = self::CAP_CANT_EDIT;
     protected $_manage_members = self::CAP_CANT_EDIT;
 
@@ -107,7 +109,15 @@ class school_manager {
             return;
         }
 
-        foreach (['manage_schools', 'manage_crews', 'manage_members'] as $cap){
+        /**
+         * Set school capabilities for the current user
+         * @see static::$_manage_schools
+         * @see static::$_manage_schools_extra
+         * @see static::$_delete_schools
+         * @see static::$_manage_crews
+         * @see static::$_manage_members
+         */
+        foreach (['manage_schools', 'manage_schools_extra', 'delete_schools', 'manage_crews', 'manage_members'] as $cap){
             $this->{'_'.$cap} = (int)NED::has_capability($cap, $this->_ctx);
         }
 
@@ -688,10 +698,44 @@ class school_manager {
     }
 
     /**
+     * @param int $school_id
+     *
+     * @return object|null
+     */
+    public function get_school_admin($school_id){
+        if (empty($school_id)) return null;
+
+        $admins = $this->get_school_students($school_id, true, static::SCHOOL_ADMINISTRATOR_ROLE, false);
+
+        if (empty($admins)) return null;
+        return reset($admins);
+    }
+
+    /**
+     * Permission to manage schools in general
+     *
      * @return bool
      */
     public function can_manage_schools(){
         return $this->_manage_schools == static::CAP_CAN_EDIT;
+    }
+
+    /**
+     * Permission to manage (and sometimes view) some extra fields of school
+     *
+     * @return bool
+     */
+    public function can_manage_schools_extra(){
+        return $this->_manage_schools_extra == static::CAP_CAN_EDIT;
+    }
+
+    /**
+     * Permission to manage (and sometimes view) some extra fields of school
+     *
+     * @return bool
+     */
+    public function can_delete_schools(){
+        return $this->_delete_schools == static::CAP_CAN_EDIT;
     }
 
     /**
@@ -716,55 +760,66 @@ class school_manager {
      * @return bool|int
      */
     public function save_school($data){
+        global $USER;
         $data = (object)$data;
         if (!($data->id ?? false) || !$this->can_manage_schools()){
             return false;
         }
 
+        $can_manage_extra = $this->can_manage_schools_extra();
         $new_school = false;
+        $school = null;
         $upd_school = school::get_school_by_id($data->id);
         if (!$upd_school && $school = $this->get_potential_schools($data->id)){
             $new_school = true;
             $upd_school = school::create_school_from_data();
             $upd_school->id = $school->id;
+            $upd_school->cohortname = $school->name;
             $upd_school->name = $school->name;
             $upd_school->code = $school->code ?? $school->idnumber;
         }
 
-        if (empty($upd_school)){
-            return false;
-        }
+        if (empty($upd_school)) return false;
 
+        $administrator = $this->get_school_admin($school->id ?? null);
         $upd_school->url = $data->url ?? '';
         $upd_school->city = $data->city ?? '';
         $upd_school->country = $data->country ?? $this->_user->country ?? '';
-        if (has_capability('local/schoolmanager:manage_extension_limit', $this->_ctx)) {
-            $upd_school->extensionsallowed = $data->extensionsallowed ?? 3;
-        }
         $upd_school->schoolyeartype = $data->schoolyeartype ?? 0;
         $upd_school->startdate = $data->startdate ?? time();
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
         $upd_school->note = $data->note ?? '';
         $upd_school->iptype = $data->iptype ?? null;
-        if (is_siteadmin()) {
+
+        if (has_capability('local/schoolmanager:manage_extension_limit', $this->_ctx)) {
+            $upd_school->extensionsallowed = $data->extensionsallowed ?? 3;
+        }
+
+        if ($can_manage_extra) {
+            if (!empty($data->name)){
+                $upd_school->name = $data->name;
+            }
             $upd_school->synctimezone = $data->synctimezone ?? 0;
-            $upd_school->enabletem = $data->enabletem ?? 0;
             $upd_school->forceproxysubmissionwindow = $data->forceproxysubmissionwindow ?? 0;
+            $upd_school->enabletem = $data->enabletem ?? 0;
+            $upd_school->extmanager = $data->extmanager ?? 0;
+            $upd_school->esl = $data->esl;
+
+            // save logo
+            $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
+                NED::$PLUGIN_NAME, 'logo', $upd_school->id);
+            $upd_school->logo = !empty($data->logo) ? $data->logo_filemanager : 0;
+
+            // save compact logo
+            $data = file_postupdate_standard_filemanager($data, 'compact_logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
+                NED::$PLUGIN_NAME, 'compact_logo', $upd_school->id);
+            $upd_school->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
+        }
+
+        if ($can_manage_extra || ($administrator && $administrator->id == $USER->id)){
             $upd_school->proctormanager = $data->proctormanager ?? 0;
             $upd_school->academicintegritymanager = $data->academicintegritymanager ?? 0;
-            $upd_school->extmanager = $data->extmanager ?? 0;
         }
-        $upd_school->esl = $data->esl;
-
-        // save logo
-        $data = file_postupdate_standard_filemanager($data, 'logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
-            NED::$PLUGIN_NAME, 'logo', $upd_school->id);
-        $upd_school->logo = !empty($data->logo) ? $data->logo_filemanager : 0;
-
-        // save compact logo
-        $data = file_postupdate_standard_filemanager($data, 'compact_logo', ['subdirs' => 0, 'maxfiles' => 1], $this->ctx,
-            NED::$PLUGIN_NAME, 'compact_logo', $upd_school->id);
-        $upd_school->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
 
         if ($new_school){
             // don't use create() or save() method here, as it can't create object with ID
@@ -790,9 +845,8 @@ class school_manager {
      */
     public function delete_school($id){
         global $DB;
-        if (!$school = $this->get_school_by_ids($id, true)){
-            return false;
-        }
+        if (!$this->can_delete_schools()) return false;
+        if (!$school = $this->get_school_by_ids($id, true)) return false;
 
         $DB->delete_records(static::TABLE_SCHOOL, ['id' => $id]);
         $DB->delete_records(static::TABLE_CREW, ['schoolid' => $id]);

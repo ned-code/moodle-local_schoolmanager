@@ -326,7 +326,7 @@ class school implements \renderable, \templatable {
                 $data->$ngc_key = $ngc_data[$ngc_key];
             }
 
-            $data->caneditschool = true;
+            $data->caneditschool = $this->_sm->can_manage_schools();
             $data->editschoolurl = NED::url('~/index.php', ['schoolid' => $this->schoolid]);
             $data->hasdifferenttimezone = SH::has_different_timezone_users_in_school($this->_persistent->get_cohort());
             $data->edittimezoneurl = (NED::url('~/view.php', [
@@ -550,14 +550,17 @@ class school implements \renderable, \templatable {
                     $data->totalctgc += $school->ctgc;
                     $data->totalctac += $school->ctac;
                 }
-                $actions = [];
-                $actions[] = array(
-                    'url' =>  NED::url('~/index.php', ['schoolid' => $school->id]),
-                    'icon' => new \pix_icon('i/edit', get_string('edit')),
-                    'attributes' => array('class' => 'action-edit')
-                );
 
-                $actionshtml = array();
+                $actions = [];
+                if ($this->_sm->can_manage_schools()){
+                    $actions[] = [
+                        'url' =>  NED::url('~/index.php', ['schoolid' => $school->id]),
+                        'icon' => new \pix_icon('i/edit', get_string('edit')),
+                        'attributes' => ['class' => 'action-edit']
+                    ];
+                }
+
+                $actionshtml = [];
                 foreach ($actions as $action) {
                     $action['attributes']['role'] = 'button';
                     $actionshtml[] = $OUTPUT->action_icon($action['url'], $action['icon'], null, $action['attributes']);
