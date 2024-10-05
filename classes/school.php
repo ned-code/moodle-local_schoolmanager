@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * For properties @see school::define_properties()
  * @property int    id
+ * @property string cohortname
  * @property string name
  * @property string code
  * @property string url
@@ -128,6 +129,9 @@ class school extends \core\persistent implements \cacheable_object  {
      */
     protected static function define_properties() {
         return array(
+            'cohortname' => array(
+                'type' => PARAM_RAW,
+            ),
             'name' => array(
                 'type' => PARAM_RAW,
             ),
@@ -264,7 +268,7 @@ class school extends \core\persistent implements \cacheable_object  {
      */
     public function _get_startdate() {
         if ($this->get('schoolyeartype')) {
-            return strtotime(get_config('local_schoolmanager', 'defaultschoolyearstart'));
+            return NED::get_default_school_year_start();
         } else {
             return $this->get('startdate') ?? 0;
         }
@@ -275,19 +279,19 @@ class school extends \core\persistent implements \cacheable_object  {
      */
     public function _get_enddate() {
         if ($this->get('schoolyeartype')) {
-            return strtotime(get_config('local_schoolmanager', 'defaultschoolyearend'));
+            return NED::get_default_school_year_end();
         } else {
             return $this->get('enddate') ?? 0;
         }
     }
 
     /**
+     * Return formatted school year dates
+     *
      * @return string
      */
     public function get_schoolyear() {
-        return NED::ned_date($this->_get_startdate(), '', null, NED::DT_FORMAT_DATE).
-            ' – '.
-            NED::ned_date($this->_get_enddate(), '', null, NED::DT_FORMAT_DATE);
+        return NED::get_format_school_year($this->_get_startdate(), $this->_get_enddate());
     }
 
     /**

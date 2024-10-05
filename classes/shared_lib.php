@@ -34,7 +34,7 @@ class shared_lib extends \local_ned_controller\shared\base_class {
     static function count_logged_user($users, $lastdays) {
         global $DB;
 
-        list($insql, $params) = $DB->get_in_or_equal($users);
+        [$insql, $params] = $DB->get_in_or_equal($users);
 
         $params[] = time() - $lastdays * DAYSECS;
 
@@ -50,7 +50,7 @@ class shared_lib extends \local_ned_controller\shared\base_class {
     static function count_not_logged_user($users, $lastdays) {
         global $DB;
 
-        list($insql, $params) = $DB->get_in_or_equal($users);
+        [$insql, $params] = $DB->get_in_or_equal($users);
 
         $params[] = time() - $lastdays * DAYSECS;
 
@@ -103,6 +103,38 @@ class shared_lib extends \local_ned_controller\shared\base_class {
         }
 
         return [$complete, $incomplete, $classes, $completeended, $incompleteended];
+    }
+
+    /**
+     * @return int - UNIX timestamp
+     */
+    static public function get_default_school_year_start(){
+        return strtotime(get_config('local_schoolmanager', 'defaultschoolyearstart'));
+    }
+
+    /**
+     * @return int - UNIX timestamp
+     */
+    static public function get_default_school_year_end(){
+        return strtotime(get_config('local_schoolmanager', 'defaultschoolyearend'));
+    }
+
+    /**
+     * Return formatted school year dates
+     *
+     * @param int|null $school_year_start - UNIX time or null (uses default school year start)
+     * @param int|null $school_year_end - UNIX time or null (uses default school year end)
+     * @param string $format - string format for dates
+     *
+     * @return string
+     */
+    static public function get_format_school_year($school_year_start=null, $school_year_end=null, $format=self::DT_FORMAT_DATE) {
+        $school_year_start = $school_year_start ?? static::get_default_school_year_start();
+        $school_year_end = $school_year_end ?? static::get_default_school_year_end();
+        return
+            static::ned_date($school_year_start, '', null, $format).
+            ' – '.
+            static::ned_date($school_year_end, '', null, $format);
     }
 }
 

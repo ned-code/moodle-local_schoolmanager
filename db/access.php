@@ -40,6 +40,16 @@ $capabilities = array(
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array()
     ),
+    'local/schoolmanager:manage_schools_extra' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array()
+    ),
+    'local/schoolmanager:delete_schools' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array()
+    ),
     'local/schoolmanager:manage_crews' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
