@@ -28,6 +28,8 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 class edit_school_form extends \moodleform {
     protected $_new = false;
     protected $_can_manage = false;
+    protected $_can_manage_extra = false;
+    protected $_can_delete = false;
     protected $_schoolid;
     protected $_school;
 
@@ -51,6 +53,8 @@ class edit_school_form extends \moodleform {
 
         $this->_school = $school;
         $this->_can_manage = $SM->can_manage_schools();
+        $this->_can_manage_extra = $SM->can_manage_schools_extra();
+        $this->_can_delete = $SM->can_delete_schools();
 
         $mform->addElement('hidden', 'schoolid', $this->_schoolid);
         $mform->setType('schoolid', PARAM_INT);
@@ -59,8 +63,20 @@ class edit_school_form extends \moodleform {
 
         $mform->addElement('text', 'name', NED::str('schoolname'), []);
         $mform->setType('name', PARAM_TEXT);
+        $mform->setDefault('name', $this->_school->name ?? '');
+
+        if ($this->_can_manage_extra){
+            $mform->addElement('text', 'cohortname', NED::str('schoolcohortname'), []);
+            $mform->setType('cohortname', PARAM_TEXT);
+            $mform->setDefault('cohortname', $this->_school->name ?? '');
+            $mform->hardFreeze('cohortname');
+        } else {
+            $mform->hardFreeze('name');
+        }
+
         $mform->addElement('text', 'code', NED::str('schoolid'), []);
         $mform->setType('code', PARAM_TEXT);
+        $mform->hardFreeze('code');
 
         $mform->addElement('text', 'url', NED::str('schoolwebsite'), []);
         $mform->setType('url', PARAM_URL);
@@ -77,14 +93,15 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('country', $SM->user->country);
         }
 
+        if (!$this->_can_manage_extra){
+            $mform->hardFreeze(['city', 'country']);
+        }
+
         $context = context_system::instance();
         if (has_capability('local/schoolmanager:manage_extension_limit', $context)) {
             $mform->addElement('select', 'extensionsallowed', NED::str('extensionsallowed'),
                 [0 => 0, 1 => 1, 2 => 2, 3 => 3]);
             $mform->setDefault('extensionsallowed', 3);
-        } else {
-            $mform->addElement('hidden', 'extensionsallowed');
-            $mform->setType('extensionsallowed', PARAM_INT);
         }
 
         // Timezone
@@ -92,7 +109,7 @@ class edit_school_form extends \moodleform {
         $mform->addElement('select', 'timezone', get_string('timezone'), $choices);
         $mform->setDefault('timezone', $CFG->timezone);
 
-        if (is_siteadmin()) {
+        if ($this->_can_manage_extra) {
             // Sync timezone
             $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
             $mform->setDefault('synctimezone', 0);
@@ -105,15 +122,6 @@ class edit_school_form extends \moodleform {
             // Enable TEM
             $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
             $mform->setDefault('enabletem', 0);
-        } else {
-            $mform->addElement('hidden', 'synctimezone');
-            $mform->setType('synctimezone', PARAM_INT);
-
-            $mform->addElement('hidden', 'enabletem');
-            $mform->setType('enabletem', PARAM_INT);
-
-            $mform->addElement('hidden', 'forceproxysubmissionwindow');
-            $mform->setType('forceproxysubmissionwindow', PARAM_INT);
         }
 
         // IP type
@@ -131,55 +139,48 @@ class edit_school_form extends \moodleform {
         }
 
         // School Administrator.
-        if ($administrator = $SM->get_school_students($this->_schoolid, true, $SM::SCHOOL_ADMINISTRATOR_ROLE, false)) {
-            $administrator = reset($administrator);
-        }
+        $administrator = $SM->get_school_admin($this->_schoolid);
 
-        $mform->addElement('select', 'schooladministrator', NED::str('schooladministrator'), $staffoptions, ['disabled']);
+        // it doesn't save anywhere, just info
+        $mform->addElement('select', 'schooladministrator', NED::str('schooladministrator'), $staffoptions);
         $mform->setDefault('schooladministrator', $administrator->id ?? 0);
+        $mform->hardFreeze('schooladministrator');
 
-        if (is_siteadmin() || ($administrator && $administrator->id == $USER->id)) {
+        if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)) {
             // Proctor Manager for tests/Exams.
             $mform->addElement('select', 'proctormanager', NED::str('proctormanager'), $staffoptions);
+            $mform->setDefault('proctormanager', $administrator->id ?? 0);
             // Academic Integrity Manager.
             $mform->addElement('select', 'academicintegritymanager', NED::str('academicintegritymanager'), $staffoptions);
-        } else {
-            $mform->addElement('hidden', 'proctormanager');
-            $mform->setType('proctormanager', PARAM_INT);
-
-            $mform->addElement('hidden', 'academicintegritymanager');
-            $mform->setType('academicintegritymanager', PARAM_INT);
+            $mform->setDefault('academicintegritymanager', $administrator->id ?? 0);
         }
-        $mform->setDefault('proctormanager', $administrator->id ?? 0);
-        $mform->setDefault('academicintegritymanager', $administrator->id ?? 0);
 
-        if (is_siteadmin()){
+        if ($this->_can_manage_extra){
             $mform->addElement('select', 'extmanager', NED::str('extmanager'), NED::strings2menu(school::EXTENSION_MANAGER));
             $mform->addHelpButton('extmanager', 'extmanager', NED::$PLUGIN_NAME);
             $mform->setDefault('extmanager', school::EXT_MANAGE_CT);
-        } else {
-            $mform->addElement('hidden', 'extmanager', school::EXT_MANAGE_CT);
-            $mform->setType('extmanager', PARAM_INT);
         }
 
         // ESL.
-        $mform->addElement('selectyesno', 'esl', NED::str('esl'));
-        $mform->setDefault('esl', 0);
+        if ($this->_can_manage_extra){
+            $mform->addElement('selectyesno', 'esl', NED::str('esl'));
+            $mform->setDefault('esl', 0);
+        }
 
         // Logo
-        if ($this->_can_manage){
+        if ($this->_can_manage_extra){
             $mform->addElement('filemanager', 'logo_filemanager', NED::str('logo'), null,
                 array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
             //Compact Logo
             $mform->addElement('filemanager', 'compact_logo_filemanager', NED::$C::str('compactlogo'), null,
                 array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
-        } else {
-            $mform->addElement('static', 'currentpicture', NED::str('logo'));
-            $mform->addElement('static', 'currentpicture_compact', NED::$C::str('compactlogo'));
         }
 
         // School year.
-        $schoolyearoptions = [NED::str('custom'), NED::str('resedaledefault')];
+        $schoolyearoptions = [
+            NED::str('custom'),
+            NED::str('rosedaledefault', NED::get_format_school_year()),
+        ];
         $mform->addElement('select', 'schoolyeartype', NED::str('schoolyear'), $schoolyearoptions);
         $mform->setDefault('schoolyeartype', 0);
 
@@ -193,12 +194,14 @@ class edit_school_form extends \moodleform {
         $mform->setDefault('enddate', time() + YEARSECS);
         $mform->hideIf('enddate', 'schoolyeartype', 'eq', 1);
 
-        $mform->addElement('editor', 'note', NED::str('note'));
+        $mform->addElement('editor', 'note', NED::str('aboutschool'));
         $mform->setType('note', PARAM_RAW);
 
         $buttonarray = [];
         if ($this->_can_manage){
             $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('save'));
+        }
+        if ($this->_can_delete){
             $buttonarray[] = $mform->createElement('submit', 'deletebutton', get_string('delete'));
             $mform->hideIf('deletebutton', 'new', 'eq', 1);
         }
@@ -226,26 +229,6 @@ class edit_school_form extends \moodleform {
                     $mform->hardFreeze($elem->getName());
                 }
             }
-            // set static logo image
-            $imageelement = $mform->getElement('currentpicture');
-            $logourl = SM::get_logo_url($this->_schoolid);
-            if ($logourl){
-                $imageelement->setValue(\html_writer::img($logourl, 'logo'));
-            } else {
-                $imageelement->setValue(get_string('none'));
-            }
-
-            // set static compact logo image
-            $imageelement = $mform->getElement('currentpicture_compact');
-            $logourl = SM::get_compact_logo_url($this->_schoolid);
-            if ($logourl){
-                $imageelement->setValue(\html_writer::img($logourl, 'compact_logo'));
-            } else {
-                $imageelement->setValue(get_string('none'));
-            }
-        } else {
-            $mform->hardFreeze('name');
-            $mform->hardFreeze('code');
         }
 
         if ($this->_school->idnumber ?? false){
@@ -257,8 +240,8 @@ class edit_school_form extends \moodleform {
             $this->_school->timezone = $school->get_cohort()->timezone ?? 99;
         }
 
-        $this->_school->proctormanager = ($this->_school->proctormanager) ?: null;
-        $this->_school->academicintegritymanager = ($this->_school->academicintegritymanager) ?: null;
+        $this->_school->proctormanager = $this->_school->proctormanager ?? null;
+        $this->_school->academicintegritymanager = $this->_school->academicintegritymanager ?? null;
 
         $this->set_data($this->_school);
     }
