@@ -35,6 +35,8 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use local_schoolmanager\shared_lib as NED;
+use local_kica as kica;
+use local_kica\output\menu_bar as KMB;
 
 // Paging options.
 $page      = optional_param('page', 0, PARAM_INT);
@@ -45,6 +47,8 @@ $export    = optional_param('export', 'full', PARAM_ALPHA);
 // Action.
 $action    = optional_param('action', false, PARAM_ALPHA);
 $search    = optional_param('search', '', PARAM_TEXT);
+
+$download      = optional_param('download', 0, PARAM_INT);
 
 // Filters.
 $view = optional_param('view', '', PARAM_TEXT);
@@ -324,7 +328,50 @@ LEFT OUTER JOIN {cohort} coh ON r.cohortid = coh.id
                $where
                $order";
 
-if ($action == 'excel') {
+if ($download) {
+    ob_start();
+    set_time_limit(300);
+
+    raise_memory_limit(MEMORY_EXTRA);
+
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+
+    /** @var \local_kica\output\renderer $renderer */
+    $renderer = $PAGE->get_renderer('local_kica');
+
+    $school = $DB->get_record('local_schoolmanager_school', ['id' => $schoolid]);
+
+    $exportdata = [];
+
+    $rs = $DB->get_recordset_sql($sql, $params);
+    foreach ($rs as $tablerow) {
+        $group = $DB->get_record("groups", array('id' => $tablerow->groupid));
+
+        $coursecontext = \context_course::instance($group->courseid);
+        $activestudents = get_enrolled_users($coursecontext, 'mod/assign:submit', $group->id, 'u.*', 'u.id', 0, 0, true);
+
+        foreach ($activestudents as $index => $activestudent) {
+            if ($activestudent->suspended == 1) {
+                unset($activestudents[$index]);
+            } else {
+                $activestudent->group = $group;
+            }
+        }
+
+        list($head, $data) = $renderer->export_users_grades($group->courseid, $activestudents, $group, true);
+
+        foreach ($data as $datum) {
+            array_push($exportdata, $datum);
+        }
+    }
+
+    $rs->close();
+    $filename = $school->code . '_grades_' . date('jMY');
+    NED::export_to_xlsx($head, $exportdata, $filename);
+    exit;
+} else if ($action == 'excel') {
     ob_start();
     set_time_limit(300);
     raise_memory_limit(MEMORY_EXTRA);
@@ -530,6 +577,12 @@ if ($action == 'excel') {
     // Override cell wrap.
     $table->wrap['action'] = 'nowrap';
     $table->wrap['dmstatus'] = 'nowrap';
+    $table->wrap['startdate'] = 'nowrap';
+    $table->wrap['enddate'] = 'nowrap';
+    $table->wrap['coursecode'] = 'nowrap';
+    $table->wrap['groupname'] = 'nowrap';
+    $table->align['activestudents'] = 'center';
+    $table->align['totaldays'] = 'center';
 
     $tablerows = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
 
