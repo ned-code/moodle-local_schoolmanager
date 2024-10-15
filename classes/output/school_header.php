@@ -90,7 +90,7 @@ class school_header implements \renderable, \templatable {
         $data->{'btn'.$this->view.'csl'} = 'btn-primary';
         $data->{'show_'.$this->view} = 1;
 
-        if ($this->view == SH::VIEW_CLASSES) {
+        if ($this->view == SH::VIEW_CLASSES && has_capability('report/ghs:downloadgradesbulk', \context_system::instance())) {
             $name = NED::str('downloadallgrades', null, 'local_schoolmanager');
             $downloadallgradesurl = clone $this->url;
             $downloadallgradesurl->param('view', SH::VIEW_CLASSES);

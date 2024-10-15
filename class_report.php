@@ -328,7 +328,7 @@ LEFT OUTER JOIN {cohort} coh ON r.cohortid = coh.id
                $where
                $order";
 
-if ($download) {
+if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)) {
     ob_start();
     set_time_limit(300);
 
