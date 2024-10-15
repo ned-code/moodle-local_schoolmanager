@@ -90,6 +90,14 @@ class school_header implements \renderable, \templatable {
         $data->{'btn'.$this->view.'csl'} = 'btn-primary';
         $data->{'show_'.$this->view} = 1;
 
+        if ($this->view == SH::VIEW_CLASSES) {
+            $name = NED::str('downloadallgrades', null, 'local_schoolmanager');
+            $downloadallgradesurl = clone $this->url;
+            $downloadallgradesurl->param('view', SH::VIEW_CLASSES);
+            $downloadallgradesurl->param('download', 1);
+            $data->downloadallgrades = NED::link($downloadallgradesurl, NED::fa('fa-download') . $name, 'float-right');
+        }
+
         $data->btn_students_url = clone $this->url;
         $data->btn_students_url->param('view', SH::VIEW_STUDENTS);
         $data->btn_students_url = $data->btn_students_url->out(false);

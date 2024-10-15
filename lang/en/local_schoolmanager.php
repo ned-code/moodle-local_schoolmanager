@@ -187,3 +187,4 @@ $string['custom'] = 'Custom';
 $string['schoolprofile'] = 'School Profile';
 $string['compliancereport'] = 'Compliance Report';
 $string['extensionsallowed'] = 'Extensions allowed per student per activity';
+$string['downloadallgrades'] = 'Download all grades';

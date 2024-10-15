@@ -59,6 +59,9 @@
             <a class="btn {{#show_classes}}btn-primary{{/show_classes}}{{^show_classes}}btn-secondary{{/show_classes}}" href="{{btn_classes_url}}">{{#str}}classes, local_schoolmanager{{/str}}</a>
         </div>
         <div class="col-md-3 text-align-right">
+            {{#downloadallgrades}}
+                {{{downloadallgrades}}}
+            {{/downloadallgrades}}
             {{#caneditschool}}
                 <a class="btn btn-secondary float-right" href="{{editschoolurl}}">{{#str}}editschool, local_schoolmanager{{/str}}</a>
             {{/caneditschool}}
