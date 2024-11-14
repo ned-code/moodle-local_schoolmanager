@@ -228,3 +228,4 @@ $string['downloadallgrades'] = 'Download all grades';
 $string['dynamic-up'] = 'up';
 $string['dynamic-down'] = 'down';
 $string['dynamic-same'] = 'remained the same';
+$string['epchecks'] = 'EP Checks';

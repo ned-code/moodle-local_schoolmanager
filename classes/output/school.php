@@ -102,6 +102,17 @@ class school implements \renderable, \templatable {
                 $this->_data->class_report = $html;
                 $has_summary_blocks = false;
                 break;
+            case SH::VIEW_EPC:
+                /** @var string $html - get it from /local/epctracker/epc_report.php */
+                global $html;
+                $this->_data->show_output = true;
+                $students = $this->get_students();
+                if (!empty($students)) {
+                    include_once(NED::$DIRROOT . '/local/epctracker/epc_report.php');
+                }
+                $this->_data->class_report = $html;
+                $has_summary_blocks = false;
+                break;
         }
 
         if ($has_summary_blocks){

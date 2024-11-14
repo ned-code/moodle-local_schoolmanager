@@ -110,6 +110,10 @@ class school_header implements \renderable, \templatable {
         $data->btn_classes_url->param('view', SH::VIEW_CLASSES);
         $data->btn_classes_url = $data->btn_classes_url->out(false);
 
+        $data->btn_epc_url = clone $this->url;
+        $data->btn_epc_url->param('view', SH::VIEW_EPC);
+        $data->btn_epc_url = $data->btn_epc_url->out(false);
+
         $reportheader = (new \local_schoolmanager\output\reports_header($this->schoolid))->export_for_template($output);
         unset($reportheader->showheader);
 
