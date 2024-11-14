@@ -8,12 +8,9 @@
  */
 
 namespace local_schoolmanager\output;
-use block_ned_teacher_tools\deadline_manager as DM;
 use local_schoolmanager as SM;
 use local_schoolmanager\school_handler as SH;
-use Matrix\Exception;
-use theme_ned_boost\shared_lib as NED;
-use tool_brickfield\local\areas\core_course\fullname;
+use local_schoolmanager\shared_lib as NED;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -35,14 +32,13 @@ class school_header implements \renderable, \templatable {
     private \moodle_url $url;
 
     public function __construct($schoolid, $view) {
-        global $DB;
         $this->schoolid = $schoolid;
         $this->school = new SM\school($schoolid);
         $this->sm = new SM\school_manager();
         $this->view = $view;
         $this->url = SH::get_url();
         if (!$this->schoolid) {
-            $sh = new SH();
+            $sh = SH::get_school_handler();
             $schools = $sh->get_schools();
             if (count($schools) == 1) {
                 $this->url->param('schoolid', reset($schools)->id);
@@ -117,7 +113,7 @@ class school_header implements \renderable, \templatable {
         $reportheader = (new \local_schoolmanager\output\reports_header($this->schoolid))->export_for_template($output);
         unset($reportheader->showheader);
 
-        $data = (object)array_merge((array) $data, (array) $reportheader);
+        $data = NED::object_merge($data, $reportheader);
 
         return $data;
     }

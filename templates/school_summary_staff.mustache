@@ -1,0 +1,96 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_schoolmanager/school_summary_staff
+
+    school_summary_staff layout template.
+
+    Context variables required for this template:
+    * classroomteachers int
+    * classroomassistants int
+    * guidancecounsellors int
+    * guidancecounsellors int
+    * staff_count int
+    * generalcert int
+    * advancedcert int
+    * certifiedproctors int
+    * certifiedproctors int
+    * schooladministrator string – html (user link)
+    * proctormanager string – html (user link)
+    * academicintegritymanager string – html (user link)
+}}
+<div class="card school-staffsummary">
+    <div class="card-header text-align-center">
+        {{#str}}staffsummary, local_schoolmanager{{/str}}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">{{#str}}classroomteachers, local_schoolmanager{{/str}}</div>
+            <div class="col-md-4">{{classroomteachers}}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">{{#str}}classroomassistants, local_schoolmanager{{/str}}</div>
+            <div class="col-md-4">{{classroomassistants}}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">{{#str}}guidancecounsellors, local_schoolmanager{{/str}}</div>
+            <div class="col-md-4">{{guidancecounsellors}}</div>
+        </div>
+        {{#staff_count}}
+            <div class="row">
+                <div class="col-md-12"><hr></div>
+            </div>
+            {{#classroomteachers}}
+                <div class="row">
+                    <div class="col-md-8">{{#str}}generalcert, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-4">{{generalcert}}/{{classroomteachers}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">{{#str}}advancedcert, local_schoolmanager{{/str}}</div>
+                    <div class="col-md-4">{{advancedcert}}/{{classroomteachers}}</div>
+                </div>
+            {{/classroomteachers}}
+            <div class="row">
+                <div class="col-md-8">{{#str}}certifiedproctors, local_schoolmanager{{/str}}</div>
+                <div class="col-md-4">{{certifiedproctors}}</div>
+            </div>
+        {{/staff_count}}
+        {{#schooladministrator}}
+            <div class="row">
+                <div class="col-md-12"><hr></div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">{{#str}}schooladministrator, local_schoolmanager{{/str}}</div>
+                <div class="col-md-4">{{{schooladministrator}}}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">{{#str}}proctormanager, local_schoolmanager{{/str}}</div>
+                <div class="col-md-4">
+                    {{#proctormanager}}{{{proctormanager}}}{{/proctormanager}}
+                    {{^proctormanager}}{{{schooladministrator}}}{{/proctormanager}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">{{#str}}academicintegritymanager, local_schoolmanager{{/str}}</div>
+                <div class="col-md-4">
+                    {{#academicintegritymanager}}{{{academicintegritymanager}}}{{/academicintegritymanager}}
+                    {{^academicintegritymanager}}{{{schooladministrator}}}{{/academicintegritymanager}}
+                </div>
+            </div>
+        {{/schooladministrator}}
+    </div>
+</div>

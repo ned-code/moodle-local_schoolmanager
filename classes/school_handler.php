@@ -10,14 +10,8 @@
 namespace local_schoolmanager;
 
 use block_ned_teacher_tools\deadline_manager as DM;
-use block_ned_teacher_tools\utils;
-use theme_ned_boost\output\core_renderer;
-use theme_ned_boost\output\course;
-use theme_ned_boost\output\dashboard_content;
-use theme_ned_boost\shared_lib as NED;
-use local_kica as KICA;
+use local_schoolmanager\shared_lib as NED;
 use local_schoolmanager as SM;
-use function block_ned_teacher_tools\is_kica_exists;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -35,12 +29,17 @@ class school_handler {
     const VIEW_SCHOOL = 'school';
     const VIEW_SCHOOLS = 'schools';
     const VIEW_CLASSES = 'classes';
+    /** @var static */
+    static $self = null;
 
     protected $user;
     protected $ctx;
     protected $capability;
     protected $schools;
 
+    /**
+     * Use {@see static::get_school_handler()} instead of raw __construct() method
+     */
     public function __construct() {
         global $USER;
 
@@ -48,6 +47,21 @@ class school_handler {
         $this->ctx = \context_system::instance();
         $this->capability = static::get_capability($this->ctx);
         $this->set_schools();
+        static::$self = $this;
+    }
+
+    /**
+     * Get school_handler object
+     * @constructor
+     *
+     * @return static
+     */
+    static public function get_school_handler(){
+        if (empty(static::$self)){
+            static::$self = new static();
+        }
+
+        return static::$self;
     }
 
     /**
@@ -60,10 +74,10 @@ class school_handler {
      */
     static public function get_capability($ctx=null){
         $ctx = $ctx ?? \context_system::instance();
-        if (has_capability('local/schoolmanager:viewallschooldashboards', $ctx)){
+        if (NED::has_capability('viewallschooldashboards', $ctx)){
             return static::CAP_SEE_ALL_SCHOOLS;
         }
-        if (has_capability('local/schoolmanager:viewownschooldashboard', $ctx)){
+        if (NED::has_capability('viewownschooldashboard', $ctx)){
             return static::CAP_SEE_OWN_SCHOOL;
         }
         return static::CAP_CANT_SEE_SCHOOL;
@@ -98,7 +112,7 @@ class school_handler {
     static public function get_schools_by_cohorts($cohorts=[]){
         global $DB;
 
-        list($sql_cohorts, $params) = $DB->get_in_or_equal(array_keys($cohorts), SQL_PARAMS_NAMED);
+        [$sql_cohorts, $params] = $DB->get_in_or_equal(array_keys($cohorts), SQL_PARAMS_NAMED);
         return $DB->get_records_select('local_schoolmanager_school', 'id '.$sql_cohorts, $params, 'name');
     }
 
@@ -173,27 +187,40 @@ class school_handler {
     }
 
     /**
-     * @param numeric|object     $user_or_id
-     * @param array|null         $courses
-     * @param numeric|null       $lastdays - count only for some last days (num of days)
+     * Get student's count deadline extensions for all courses
+     *
+     * @param array      $userids
+     * @param int        $startime - UNIX time
+     * @param int        $endtime  - UNIX time
+     * @param int[]|null $courseids
+     *
      * @return int|null
      */
-    public static function get_user_number_of_dl_extensions($user_or_id, $courses=null, $lastdays=0) {
-        $userid = NED::get_id($user_or_id);
-        if (is_null($courses)) {
-            $courses = enrol_get_users_courses($userid);
-        } elseif (empty($courses)){
-            return null;
-        } else {
-            $courses = NED::val2arr($courses);
-        }
+    public static function get_user_number_of_dl_extensions($userids, $startime=0, $endtime=0, $courseids=null){
+        if (!NED::is_tt_exists()) return null;
 
-        $deadlineextentions = 0;
-        foreach ($courses as $course) {
-            $deadlineextentions += DM::get_number_of_extensions_in_course($userid, $course->id, false, $lastdays);
-        }
+        $obj = DM::get_extensions_raw($userids, $courseids, null, null, null, $startime, $endtime, true);
+        return $obj->{NED::PERIOD_TOTAL} ?? 0;
+    }
 
-        return $deadlineextentions;
+    /**
+     * Get count of students with 20+ deadline extensions
+     *
+     * @param array $userids
+     * @param int $startime - UNIX time
+     * @param int $endtime - UNIX time
+     *
+     * @return int
+     */
+    public static function get_user_number_with_extensions20($userids, $startime=0, $endtime=0){
+        if (!NED::is_tt_exists()) return null;
+
+        $count = 0;
+        $records = DM::get_extensions_raw($userids, null, null, null, null, $startime, $endtime, true, null, 'userid');
+        foreach ($records as $record){
+            if (($record->{NED::PERIOD_TOTAL} ?? 0) >= 20) $count++;
+        }
+        return $count;
     }
 
     /**
@@ -250,17 +277,17 @@ class school_handler {
      * Get count of student AIVs
      * Alias {@see \local_academic_integrity\infraction::get_user_aiv_count()}
      *
-     * @param object|numeric      $user         - student
-     * @param numeric|null        $startdate    - count only after some date (UNIX time)
-     * @param numeric|null        $enddate      - count only before some date (UNIX time)
-     * @param numeric|null        $lastdays     - count only for some last days (num of days)
-     * @param object|numeric|null $courseid     - filter by some course (otherwise count for all site)
-     * @param bool                $count_hidden - if true, count all AIVs, otherwise count only shown AIVs
+     * @param object|numeric|array $users_or_ids - student (id) or list of students ids
+     * @param numeric|null         $startdate    - count only after some date (UNIX time)
+     * @param numeric|null         $enddate      - count only before some date (UNIX time)
+     * @param numeric|null         $lastdays     - count only for some last days (num of days)
+     * @param object|numeric|null  $courseid     - filter by some course (otherwise count for all site)
+     * @param bool                 $count_hidden - if true, count all AIVs, otherwise count only shown AIVs
      *
      * @return int|null - count of the AIVs, or null, if AI plugin doesn't exist
      */
-    public static function get_user_aiv($user, $startdate, $enddate, $lastdays=0, $courseid=0, $count_hidden=false) {
-        return NED::ai_get_user_aiv_count($user, $courseid, $startdate, $enddate, $lastdays, $count_hidden);
+    public static function get_users_aiv($users_or_ids, $startdate, $enddate, $lastdays=0, $courseid=0, $count_hidden=false){
+        return NED::ai_get_users_aiv_count($users_or_ids, $courseid, $startdate, $enddate, $lastdays, $count_hidden);
     }
 
     public static function get_classes($user, $schoolid, $courses = null) {
@@ -280,7 +307,7 @@ class school_handler {
             return null;
         }
 
-        list($coursewhere, $courseparams) = $DB->get_in_or_equal(array_keys($courses), SQL_PARAMS_NAMED, 'cor');
+        [$coursewhere, $courseparams] = $DB->get_in_or_equal(array_keys($courses), SQL_PARAMS_NAMED, 'cor');
         $filter[] = "g.courseid {$coursewhere}";
 
 
@@ -410,26 +437,6 @@ class school_handler {
                    AND u.timezone != ?";
 
         return $DB->record_exists_sql($sql, [$cohort->id, $cohort->timezone]);
-    }
-
-    /**
-     * @param $courseid
-     * @param $userid
-     * @param $precision
-     *
-     * @return float|string
-     */
-    // TODO load (count) all of them, if we need all user grades form course
-    public static function get_course_grade($courseid, $userid, $precision=2){
-        if (is_kica_exists() && utils::kica_gradebook_enabled($courseid)){
-            $finalgrade = KICA\helper::get_course_average($userid, $courseid, $precision, false, true);
-        } else {
-            $courseitem = \grade_item::fetch_course_item($courseid);
-            $coursegrade = new \grade_grade(array('itemid' => $courseitem->id, 'userid' => $userid));
-            $coursegrade->grade_item =& $courseitem;
-            $finalgrade = $coursegrade->finalgrade;
-        }
-        return is_null($finalgrade) ? '-' : round($finalgrade, $precision);
     }
 
     /**

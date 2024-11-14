@@ -9,6 +9,8 @@
 
 namespace local_schoolmanager;
 
+use local_tem\helper as tem_helper;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -135,6 +137,125 @@ class shared_lib extends \local_ned_controller\shared\base_class {
             static::ned_date($school_year_start, '', null, $format).
             ' – '.
             static::ned_date($school_year_end, '', null, $format);
+    }
+
+    /**
+     * @param string  $school_code
+     * @param int     $startdate - UNIX time
+     * @param int     $enddate   - UNIX time
+     * @param numeric $last_days
+     *
+     * @return int
+     */
+    public static function count_school_classes_enddate_extensions($school_code, $startdate=0, $enddate=0, $last_days=0) {
+        if (!static::is_tt_exists() || empty($school_code)) return 0;
+
+        $where = [static::db()->sql_like('g.name', ':code', false, false)];
+        $params = ['code' => static::db()->sql_like_escape($school_code).'%'];
+        static::sql_add_equal("r.changetype", 'classenddate', $where, $params);
+
+        if ($startdate){
+            static::sql_add_condition("r.timecreated", $startdate, $where, $params, static::SQL_COND_GTE);
+        }
+        if ($enddate){
+            static::sql_add_condition("r.timecreated", $enddate, $where, $params, static::SQL_COND_LTE);
+        }
+        if ($last_days){
+            $val = time() - $last_days * DAYSECS;
+            static::sql_add_condition("r.timecreated", $val, $where, $params, static::SQL_COND_GTE);
+        }
+
+        $where = static::sql_where($where);
+        $sql = "SELECT COUNT(1)
+                    FROM {block_ned_teacher_tools_cued} r
+                    INNER JOIN {groups} g ON r.groupid = g.id
+                    $where";
+
+        return static::db()->count_records_sql($sql, $params);
+    }
+
+    /**
+     * TODO rebuild query
+     *
+     * @param int $schoolid
+     * @param array $args
+     *
+     * @return array
+     */
+    public static function get_school_proctoring_sqlquery(int $schoolid, array $args): array {
+        if (!static::is_tem_exists() || empty($args['filter']) || !$schoolid) {
+            return [];
+        }
+
+        $select = empty($args['fields']) ? 'COUNT(1)' : implode(',', $args['fields']);
+        $where = '';
+        [$filtersql, $params] = tem_helper::get_view_filter($schoolid);
+
+        if (!empty($args['overdue'])) {
+            $where .= " AND :overdue > (SELECT MAX(qa.timefinish) FROM {local_tem_attempt} a JOIN {quiz_attempts} qa ON a.attemptid = qa.id WHERE a.sessionid = s.id)";
+            $params['overdue'] = time() - $args['overdue'];
+        }
+
+        if (!empty($args['starttime'])) {
+            $where .= " AND s.timestart > :timestart";
+            $params['timestart'] = $args['starttime'];
+        }
+
+        if (!empty($args['endtime'])) {
+            $where .= " AND s.timestart < :endtime";
+            $params['endtime'] = $args['endtime'];
+        }
+
+        $filtersql .= match($args['filter']){
+            tem_helper::FILTER_ACTION_REQUIRED => ' AND (s.timescheduled  = 0 OR p.proctor IS NULL OR r.id IS NULL)',
+            tem_helper::FILTER_COMPLETED => ' AND (s.timescheduled  != 0 AND p.proctor IS NOT NULL AND r.id IS NOT NULL)',
+            default => ''
+        };
+        $filtersql .= empty($args['show_disabled']) ? ' ' : ' AND sc.enabletem = 1 ';
+
+        $sql = "SELECT $select
+               FROM {local_tem_session} AS s
+          LEFT JOIN {local_tem_proctor} AS p ON s.id = p.sessionid
+          LEFT JOIN {local_tem_report} AS r ON s.id = r.sessionid
+          LEFT JOIN {user} AS u ON p.proctor = u.id
+          LEFT JOIN {local_schoolmanager_school} AS sc ON s.schoolid = sc.id
+               JOIN {course} AS c ON s.courseid = c.id
+               JOIN {groups} AS g ON s.groupid = g.id
+               JOIN {quiz} AS q ON s.quizid = q.id
+              WHERE s.quizid NOT IN (SELECT cm.instance 
+                                       FROM {tag_instance} ti
+                                       JOIN {tag} t ON  ti.tagid = t.id
+                                       JOIN {course_modules} cm ON ti.itemid = cm.id
+                                       JOIN {modules} m ON cm.module= m.id
+                                      WHERE ti.itemtype = 'course_modules' AND t.name = 'tem excluded' AND m.name = 'quiz')
+                    $filtersql
+                    $where";
+
+        return ['sql' => $sql, 'params' => $params];
+    }
+
+    /**
+     * @param numeric $schoolid
+     * @param int     $starttime - UNIX time
+     * @param int     $endtime   - UNIX time
+     * @param int     $overdue
+     *
+     * @return int
+     */
+    public static function count_school_proctoring_reports($schoolid, int $starttime = 0, int $endtime = 0, int $overdue = 0){
+        if (!static::is_tem_exists() || empty($schoolid)) return 0;
+
+        $args = [
+            'filter' => tem_helper::FILTER_ACTION_REQUIRED,
+            'overdue' => $overdue,
+            'starttime' => $starttime,
+            'endtime' => $endtime
+        ];
+
+        $query = static::get_school_proctoring_sqlquery($schoolid, $args);
+        if (empty($query)) return 0;
+
+        return static::db()->count_records_sql($query['sql'], $query['params']);
     }
 }
 

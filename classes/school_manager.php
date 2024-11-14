@@ -47,11 +47,14 @@ class school_manager {
     const CAP_CANT_EDIT = 0;
     const CAP_CAN_EDIT = 1;
 
-    const FIELD_ROLE = 'default_role';
-    const DEF_MEMBER_ROLE = 'Student';
-    const STAFF_ROLES = ['Classroom Teacher', 'School Administrator', 'Classroom Assistant', 'Guidance Counsellor', 'Online Teacher', 'District Administrator'];
-    const SCHOOL_ADMINISTRATOR_ROLE = 'School Administrator';
-    const SCHOOL_CT_ROLE = 'Classroom Teacher';
+    const FIELD_ROLE = NED::FIELD_DEFAULT_ROLE;
+    const DEF_MEMBER_ROLE = NED::DEFAULT_ROLE_STUDENT;
+    const STAFF_ROLES = [
+        NED::DEFAULT_ROLE_CT, NED::DEFAULT_ROLE_OT,
+        NED::DEFAULT_ROLE_SCHOOL_ADMINISTRATOR, NED::DEFAULT_ROLE_CA, NED::DEFAULT_ROLE_GC, NED::DEFAULT_ROLE_DA,
+    ];
+    const SCHOOL_ADMINISTRATOR_ROLE = NED::DEFAULT_ROLE_SCHOOL_ADMINISTRATOR;
+    const SCHOOL_CT_ROLE = NED::DEFAULT_ROLE_CT;
 
     static protected $_school_managers = [];
     /**@var school[] */
@@ -549,10 +552,12 @@ class school_manager {
 
     /**
      * Load users by schoolid for this course
+     * Returned records contain user.* fields, + schoolid, crewid, def_role
+     *  - where def_role - string data from user profile (example: "Student"), don't mix up with role (and its id) table
      * Note: this fill crew_users too
      *
      * @param null   $schoolid
-     * @param bool   $return_one - return onl first value, if true
+     * @param bool   $return_one - return only first value (for one school), if true
      * @param string|array $role_names - "Student" by default
      * @param bool   $use_cache
      *
@@ -585,35 +590,31 @@ class school_manager {
 
         if (!empty($to_load) && (!$return_one || empty($res))){
             $params = [];
-            [$sql_param, $school_params] = $DB->get_in_or_equal($to_load, SQL_PARAMS_NAMED);
-            $params = array_merge($params, $school_params);
-            $where = ["m.cohortid $sql_param"];
+            $where = [];
+            NED::sql_add_get_in_or_equal_options('m.cohortid', $to_load, $where, $params);
+
             $where[] = 'u.suspended = 0';
             $groupby = ['u.id'];
-            $sql = "SELECT u.*, m.cohortid AS schoolid, COALESCE(m.crewid, 0) AS crewid
-                    FROM {user} AS u
-                    JOIN {".static::TABLE_MEMBERS."} AS m
-                        ON m.userid = u.id
-                    ";
+            $select = ["u.*", "m.cohortid AS schoolid", "COALESCE(m.crewid, 0) AS crewid"];
+            $joins = ["JOIN {".static::TABLE_MEMBERS."} AS m ON m.userid = u.id"];
             /** @noinspection DuplicatedCode */
             if (static::$_default_role_field_id && !empty($role_names)){
                 $field_id = static::$_default_role_field_id;
-                $sql .= "LEFT JOIN {user_info_data} uid
+                $joins[] = "LEFT JOIN {user_info_data} uid
                             ON uid.userid = u.id AND uid.fieldid = '$field_id'
                 ";
-
-                [$where_role, $rn_params] = $DB->get_in_or_equal($role_names, SQL_PARAMS_NAMED, 'rolename');
-                $params = array_merge($params, $rn_params);
-
+                $select[] = "COALESCE(uid.data, '".static::$_default_role_default_value."') AS def_role";
+                $where_role = [];
+                NED::sql_add_get_in_or_equal_options('uid.data', $role_names, $where_role, $params);
                 if (in_array(static::$_default_role_default_value, $role_names)){
-                    $where_role .= ' OR uid.data IS NULL';
+                    $where_role []= 'uid.data IS NULL';
                 }
 
-                $where[] = 'uid.data ' . $where_role;
+                $where[] = NED::sql_condition($where_role, "OR");
             }
-            $where = empty($where) ? '' : ('WHERE (' . join(') AND (', $where) . ')');
-            $groupby = empty($groupby) ? '' : ("\nGROUP BY " . join(', ', $groupby));
-            $members = $DB->get_records_sql("$sql $where $groupby", $params);
+
+            $sql = NED::sql_generate($select, $joins, 'user', 'u', $where, $groupby);
+            $members = $DB->get_records_sql($sql, $params);
             foreach ($members as $member){
                 $this->_school_users[$member->schoolid][$member->id] = $member;
                 $this->_crew_users[$member->crewid][$member->id] = $member;
