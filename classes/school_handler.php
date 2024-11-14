@@ -29,6 +29,7 @@ class school_handler {
     const VIEW_SCHOOL = 'school';
     const VIEW_SCHOOLS = 'schools';
     const VIEW_CLASSES = 'classes';
+    const VIEW_EPC = 'epc';
     /** @var static */
     static $self = null;
 
