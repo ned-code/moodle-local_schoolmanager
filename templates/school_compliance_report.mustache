@@ -1,0 +1,283 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_schoolmanager/school_compliance_report
+
+    school_compliance_report.mustache layout template.
+
+    Context variables required for this template:
+    ...
+}}
+<div class="card school-compliance-report">
+    <div class="card-header text-align-center">
+        {{#str}}compliancereport, local_schoolmanager{{/str}}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="text-success">{{#str}}aiv_title, local_schoolmanager{{/str}}</h3>
+                <ul class="list-unstyled mb-3">
+                    {{#aiv_report}}
+                        <li><a target="_blank" href="{{aivurl}}">{{#str}}aiv_conduct, local_schoolmanager{{/str}}</a></li>
+                        <ul class="list-unstyled mb-3">
+                            <li>
+                                {{#pix}} {{aivicon}}, local_schoolmanager {{/pix}}
+                                {{aivschoolyear}} {{#str}}aivstudents, local_schoolmanager{{/str}} {{#str}}since_start_school_year, local_schoolmanager{{/str}}
+                            </li>
+                            {{#aivschoolyear}}
+                                <li>
+                                    {{#pix}} {{majorplagiarismicon}}, local_schoolmanager {{/pix}}
+                                    {{majorplagiarism}} {{#str}}aivgivenfor, local_schoolmanager, {{#str}}majorplagiarism, local_schoolmanager{{/str}}{{/str}}
+                                </li>
+                                <li>
+                                    {{#pix}} {{cheatingicon}}, local_schoolmanager {{/pix}}
+                                    {{cheating}} {{#str}}aivgivenfor, local_schoolmanager, {{#str}}cheating, local_schoolmanager{{/str}}{{/str}}
+                                </li>
+                            {{/aivschoolyear}}
+                            {{#show_prev30}}
+                                <li>
+                                    {{#pix}} {{aiv_prev_30icon}}, local_schoolmanager {{/pix}}
+                                    {{aiv_prev_30}} {{#str}}aivstudents, local_schoolmanager{{/str}} {{#str}}in_prev_30_days, local_schoolmanager{{/str}}
+                                </li>
+                            {{/show_prev30}}
+                            <li>
+                                {{#pix}} {{aiv30schoolyearicon}}, local_schoolmanager {{/pix}}
+                                {{aiv30schoolyear}} {{#str}}aivstudents, local_schoolmanager{{/str}} {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                            </li>
+                            {{#show_prev30}}
+                                <li>
+                                    {{#pix}} {{aiv30_dynamic_icon}}, local_schoolmanager {{/pix}}
+                                    {{#str}}the_nubmber_of_violations, local_schoolmanager, {{aiv30_dynamic_state}}{{/str}}  {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                                </li>
+                            {{/show_prev30}}
+                        </ul>
+                    {{/aiv_report}}
+                    {{#ngc_dm_report}}
+                        <li><a target="_blank" href="{{ngcurl}}">{{#str}}activitydeadlines, local_schoolmanager{{/str}}</a></li>
+                        <ul class="list-unstyled mb-3">
+                            <li>
+                                {{#pix}} {{missed_deadlinesicon}}, local_schoolmanager {{/pix}}
+                                {{missed_deadlines}} {{#str}}misseddeadlines_l, local_schoolmanager{{/str}} {{#str}}since_start_school_year, local_schoolmanager{{/str}}
+                            </li>
+                            {{#show_prev30}}
+                                <li>
+                                    {{#pix}} {{missed_deadlines_prev_30_icon}}, local_schoolmanager {{/pix}}
+                                    {{missed_deadlines_prev_30}} {{#str}}misseddeadlines_l, local_schoolmanager{{/str}} {{#str}}in_prev_30_days, local_schoolmanager{{/str}}
+                                </li>
+                            {{/show_prev30}}
+                            <li>
+                                {{#pix}} {{missed_deadlines_last_30_icon}}, local_schoolmanager {{/pix}}
+                                {{missed_deadlines_last_30}} {{#str}}misseddeadlines_l, local_schoolmanager{{/str}} {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                            </li>
+                            {{#show_prev30}}
+                                <li>
+                                    {{#pix}} {{missed_deadlines_30_dynamic_icon}}, local_schoolmanager {{/pix}}
+                                    {{#str}}the_nubmber_of_misseddeadlines, local_schoolmanager, {{missed_deadlines_30_dynamic_state}}{{/str}} {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                                </li>
+                            {{/show_prev30}}
+                            <br>
+                            <li>
+                                {{#pix}} {{deadlineextensionsicon}}, local_schoolmanager {{/pix}}
+                                {{deadlineextensions}} {{#str}}awarder_dedlinextensions, local_schoolmanager{{/str}} {{#str}}since_start_school_year, local_schoolmanager{{/str}}
+                            </li>
+                            {{#deadlineextensions20icon}}
+                                <li>
+                                    {{#pix}} {{deadlineextensions20icon}}, local_schoolmanager {{/pix}}
+                                    {{deadlineextensions20}} {{#str}}deadlinestudents20, local_schoolmanager{{/str}}
+                                </li>
+                            {{/deadlineextensions20icon}}
+                            {{#show_prev30}}
+                                <li>
+                                    {{#pix}} {{deadlineextensions_prev_30_icon}}, local_schoolmanager {{/pix}}
+                                    {{deadlineextensions_prev_30}} {{#str}}awarder_dedlinextensions, local_schoolmanager{{/str}} {{#str}}in_prev_30_days, local_schoolmanager{{/str}}
+                                </li>
+                            {{/show_prev30}}
+                            <li>
+                                {{#pix}} {{deadlineextensionsicon_last_30}}, local_schoolmanager {{/pix}}
+                                {{deadlineextensions_last_30}}  {{#str}}awarder_dedlinextensions, local_schoolmanager{{/str}} {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                            </li>
+                            {{#show_prev30}}
+                                <li>
+                                    {{#pix}} {{deadlineextensions30_dynamic_icon}}, local_schoolmanager {{/pix}}
+                                    {{#str}}the_nubmber_of_deadlineextensions, local_schoolmanager, {{deadlineextensions30_dynamic_state}}{{/str}} {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                                </li>
+                            {{/show_prev30}}
+                        </ul>
+                    {{/ngc_dm_report}}
+                    {{#tem_report}}
+                        <li><a href="{{proctoringurl}}">{{#str}}test_proctoring, local_schoolmanager{{/str}}</a></li>
+                        <ul class="list-unstyled mb-3">
+                            <li>
+                                {{#pix}} {{proctoringsubmittedicon}}, local_schoolmanager {{/pix}}
+                                {{proctoringsubmitted}} {{#str}}proctoring_reports, local_schoolmanager{{/str}} {{#str}}submitted, local_schoolmanager{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{proctoringmissingicon}}, local_schoolmanager {{/pix}}
+                                {{proctoringmissing}} {{#str}}proctoring_reports, local_schoolmanager{{/str}} {{#str}}missing, local_schoolmanager{{/str}}
+                            </li>
+                            {{#proctoringoverdue10daysicon}}
+                                <li>
+                                    {{#pix}} {{proctoringoverdue10daysicon}}, local_schoolmanager {{/pix}}
+                                    {{proctoringoverdue10days}} {{#str}}proctoring_reports, local_schoolmanager{{/str}} {{#str}}overdue10, local_schoolmanager{{/str}}
+                                </li>
+                            {{/proctoringoverdue10daysicon}}
+                            <br>
+                            <li>
+                                {{#pix}} {{proctorinwriting1icon}}, local_schoolmanager {{/pix}}
+                                {{proctorinwriting1}} {{#str}}tests_have_writing_sessions, local_schoolmanager, 1{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{proctorinwriting2icon}}, local_schoolmanager {{/pix}}
+                                {{proctorinwriting2}} {{#str}}tests_have_writing_sessions, local_schoolmanager, 2{{/str}}
+                            </li>
+                            {{#proctorinwriting3icon}}
+                                <li>
+                                    {{#pix}} {{proctorinwriting3icon}}, local_schoolmanager {{/pix}}
+                                    {{proctorinwriting3}} {{#str}}tests_have_writing_sessions, local_schoolmanager, 3 or more{{/str}}
+                                </li>
+                            {{/proctorinwriting3icon}}
+                        </ul>
+                    {{/tem_report}}
+                </ul>
+            </div>
+        </div>
+        {{#osslt_report}}
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="text-success">{{#str}}englishproficiency, local_schoolmanager{{/str}}</h3>
+                    <ul class="list-unstyled mb-3">
+                        <li><a target="_blank" href="{{osslturl}}">{{#str}}osslt_scores, local_schoolmanager, for Current School Year{{/str}}</a></li>
+                        <ul class="list-unstyled mb-3">
+                            <li>
+                                {{#pix}} {{wroteosslticon}}, local_schoolmanager {{/pix}}
+                                {{wroteosslt}} {{#str}}student_status_osslt, local_schoolmanager, wrote{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{notwroteosslticon}}, local_schoolmanager {{/pix}}
+                                {{notwroteosslt}} {{#str}}student_status_osslt, local_schoolmanager, did not write{{/str}}
+                            </li>
+                            {{#showpassfailosslt}}
+                                <li>
+                                    {{#pix}} {{passedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{passedosslt}} {{#str}}student_status_osslt, local_schoolmanager, passed{{/str}}
+                                </li>
+                                <li>
+                                    {{#pix}} {{failedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{failedosslt}} {{#str}}student_status_osslt, local_schoolmanager, failed{{/str}}
+                                </li>
+                            {{/showpassfailosslt}}
+                            {{#failedossltover75icon}}
+                                <li>
+                                    {{#pix}} {{failedossltover75icon}}, local_schoolmanager {{/pix}}
+                                    {{failedossltover75}} {{#str}}student_status_osslt, local_schoolmanager, failed{{/str}} but have ENG3U or ENG4U grade over 75%
+                                </li>
+                            {{/failedossltover75icon}}
+                        </ul>
+
+                        <li><a target="_blank" href="{{prevosslturl}}">{{#str}}osslt_scores, local_schoolmanager, for Previous School Year{{/str}}</a></li>
+                        <ul class="list-unstyled mb-3">
+                            <li>
+                                {{#pix}} {{prevwroteosslticon}}, local_schoolmanager {{/pix}}
+                                {{prevwroteosslt}} {{#str}}student_status_osslt, local_schoolmanager, wrote{{/str}}
+                            </li>
+                            {{#showprevpassfailosslt}}
+                                <li>
+                                    {{#pix}} {{prevpassedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{prevpassedosslt}} {{#str}}student_status_osslt, local_schoolmanager, passed{{/str}}
+                                </li>
+                                <li>
+                                    {{#pix}} {{prevfailedosslticon}}, local_schoolmanager {{/pix}}
+                                    {{prevfailedosslt}} {{#str}}student_status_osslt, local_schoolmanager, faied{{/str}}
+                                </li>
+                            {{/showprevpassfailosslt}}
+                            {{#prevfailedossltover75icon}}
+                                <li>
+                                    {{#pix}} {{prevfailedossltover75icon}}, local_schoolmanager {{/pix}}
+                                    {{prevfailedossltover75}} {{#str}}student_status_osslt, local_schoolmanager, faied{{/str}} but have ENG3U or ENG4U grade over 75%
+                                </li>
+                            {{/prevfailedossltover75icon}}
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        {{/osslt_report}}
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="text-success">Other</h3>
+                <ul class="list-unstyled mb-3">
+                    {{#login_report}}
+                        <li><a target="_blank" href="{{usersurl}}">{{#str}}logins, local_schoolmanager{{/str}}</a></li>
+                        <ul class="list-unstyled mb-3">
+                            {{#show_loggedusers3}}
+                                <li>
+                                    {{#pix}} {{loggedusers3icon}}, local_schoolmanager {{/pix}}
+                                    {{loggedusers3}} {{#str}}students_logged_in_x, local_schoolmanager, 3{{/str}}
+                                </li>
+                            {{/show_loggedusers3}}
+                            {{#show_loggedusers7}}
+                                <li>
+                                    {{#pix}} {{loggedusers7icon}}, local_schoolmanager {{/pix}}
+                                    {{loggedusers7}} {{#str}}students_logged_in_x, local_schoolmanager, 7{{/str}}
+                                </li>
+                            {{/show_loggedusers7}}
+                            {{#show_notloggedusers8}}
+                                <li>
+                                    {{#pix}} {{notloggedusers8icon}}, local_schoolmanager {{/pix}}
+                                    {{notloggedusers8}} {{#str}}students_not_logged_in_x, local_schoolmanager, 8{{/str}}
+                                </li>
+                            {{/show_notloggedusers8}}
+                            {{#show_notloggedstaff10}}
+                                <li>
+                                    {{#pix}} {{notloggedstaff10icon}}, local_schoolmanager {{/pix}}
+                                    {{notloggedstaff10}}{{#str}}staff_not_logged_in_x, local_schoolmanager, 10{{/str}}
+                                </li>
+                            {{/show_notloggedstaff10}}
+                        </ul>
+                    {{/login_report}}
+                    {{#dm_report}}
+                        <li><a target="_blank" href="{{dmurl}}">{{#str}}deadline_manager, local_schoolmanager{{/str}}</a></li>
+                        <ul class="list-unstyled mb-3">
+                            <li>{{#pix}} {{dmcompleteicon}}, local_schoolmanager {{/pix}}
+                                {{dmcomplete}} {{#str}}active_classes_deadline_manager, local_schoolmanager,{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{dmincompleteicon}}, local_schoolmanager {{/pix}}
+                                {{dmincomplete}} {{#str}}active_classes_deadline_manager, local_schoolmanager,do not{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{dmcompleteendedicon}}, local_schoolmanager {{/pix}}
+                                {{dmcompleteended}} {{#str}}active_classes_deadline_manager, local_schoolmanager, complete{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{dmincompleteendedicon}}, local_schoolmanager {{/pix}}
+                                {{dmincompleteended}} {{#str}}active_classes_deadline_manager, local_schoolmanager, incomplete{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{classenddateextesionicon}}, local_schoolmanager {{/pix}}
+                                {{classenddateextesion}} {{#str}}number_enddate_extensions, local_schoolmanager{{/str}}
+                            </li>
+                            <li>
+                                {{#pix}} {{classenddateextesionicon_last_30days}}, local_schoolmanager {{/pix}}
+                                {{classenddateextesion_last_30days}} {{#str}}number_enddate_extensions, local_schoolmanager{{/str}} {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                            </li>
+                        </ul>
+                    {{/dm_report}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
