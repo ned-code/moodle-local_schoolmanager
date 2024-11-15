@@ -855,14 +855,14 @@ class school implements \renderable, \templatable {
             $res->loggedusers7 = $this->percentage_format($loggedusers7, $students_count);
         }
         if (isset($notloggedusers8)){
-            $res->show_notloggedusers8 = true;
             $res->notloggedusers8icon = $this->get_icon($notloggedusers8, static::ICON_SAD_FALSE);
             $res->notloggedusers8 = $this->percentage_format($notloggedusers8, $students_count);
+            $res->show_notloggedusers8 = (bool)$res->notloggedusers8icon;
         }
         if (isset($notloggedstaff10)){
-            $res->show_notloggedstaff10 = true;
             $res->notloggedstaff10icon = $this->get_icon($notloggedstaff10, static::ICON_SAD_FALSE);
             $res->notloggedstaff10 = $this->percentage_format($notloggedstaff10, $staffs_count);
+            $res->show_notloggedstaff10 = (bool)$res->notloggedstaff10icon;
         }
 
         return $res;
