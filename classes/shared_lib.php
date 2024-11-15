@@ -65,41 +65,63 @@ class shared_lib extends \local_ned_controller\shared\base_class {
         return $DB->count_records_sql($sql, $params);
     }
 
-    static function count_dm_scheule($code) {
-        global $DB;
-
-        $filter = $DB->sql_like('g.name', ':code', false, false);
-        $params['code'] = $DB->sql_like_escape($code).'%';
-
-        $sql = "SELECT g.*
-                  FROM {groups}  g
-	              JOIN {course} c
-                    ON g.courseid = c.id
-                 WHERE $filter 
-                   AND c.visible = 1";
-
+    /**
+     * Get $complete/$incomplete statistics by school groups
+     *
+     * @param string $school_code
+     * @param int $startdate - UNIX time
+     * @param int $enddate - UNIX time
+     *
+     * @return int[] - [$complete, $incomplete, $classes, $completeended, $incompleteended]
+     */
+    static function count_dm_schedule($school_code, $startdate=0, $enddate=0) {
         $complete = 0;
         $incomplete = 0;
         $classes = 0;
         $completeended = 0;
         $incompleteended = 0;
+        if (!static::is_tt_exists() || empty($school_code)){
+            return [$complete, $incomplete, $classes, $completeended, $incompleteended];
+        }
 
-        if ($groups = $DB->get_records_sql($sql, $params)) {
-            foreach ($groups as $group) {
-                if ($group->schedule) {
-                    $deadlinemanager = new \block_ned_teacher_tools\deadline_manager($group->courseid);
-                    $classes++;
-                    if ($missedschedule = $deadlinemanager->has_missed_schedule($group->id)) {
-                        $incomplete++;
-                        if ($group->enddate < time()) {
-                            $incompleteended++;
-                        }
-                    } else {
-                        $complete++;
-                        if ($group->enddate < time()) {
-                            $completeended++;
-                        }
-                    }
+        $joins = ["JOIN {course} c ON g.courseid = c.id"];
+        $where = ["c.visible = 1", static::db()->sql_like('g.name', ':code', false, false)];
+        $params = ['code' => static::db()->sql_like_escape($school_code).'%'];
+
+        if (!empty($startdate) && !empty($enddate)){
+            $time_conds = [];
+            static::sql_add_between('g.startdate', $startdate, $enddate, $time_conds, $params);
+            static::sql_add_between('g.enddate', $startdate, $enddate, $time_conds, $params);
+
+            $gr_inside_year = [];
+            static::sql_add_condition("g.startdate", $startdate, $gr_inside_year, $params, static::SQL_COND_LTE);
+            static::sql_add_condition("g.enddate", $enddate, $gr_inside_year, $params, static::SQL_COND_GTE);
+            $time_conds[] = static::sql_condition($gr_inside_year);
+
+            $where[] = static::sql_condition($time_conds, "OR");
+        } elseif (!empty($startdate)){
+            static::sql_add_condition("g.enddate", $startdate, $where, $params, static::SQL_COND_GT);
+        } elseif (!empty($enddate)){
+            static::sql_add_condition("g.startdate", $enddate, $where, $params, static::SQL_COND_LT);
+        }
+
+        $sql = static::sql_generate("g.*", $joins, "groups", "g", $where);
+        $groups = static::db()->get_records_sql($sql, $params);
+        $now = time();
+        foreach ($groups as $group) {
+            if (!$group->schedule) continue;
+
+            $deadlinemanager = new \block_ned_teacher_tools\deadline_manager($group->courseid);
+            $classes++;
+            if ($deadlinemanager->has_missed_schedule($group->id)){
+                $incomplete++;
+                if ($group->enddate < $now) {
+                    $incompleteended++;
+                }
+            } else {
+                $complete++;
+                if ($group->enddate < $now) {
+                    $completeended++;
                 }
             }
         }
