@@ -51,9 +51,11 @@ $string['sync_course_admins'] = 'Auto enroll School and District Admins to cours
 
 // Other
 $string['allschools'] = 'All Schools';
-$string['active_classes_deadline_manager'] = 'active classes {$a} have complete Deadline Manager schedules';
 $string['cheating'] = 'Cheating on Test or Exam';
-$string['classes_ended_deadline_manager'] = 'classes ended with {$a} Deadline Manager schedules';
+$string['active_classes_dm_complete'] = 'active classes have complete Deadline Manager schedules';
+$string['active_classes_dm_incomplete'] = 'active classes did not have completed Deadline Manager schedules';
+$string['finished_classes_dm_complete'] = 'finished classes had completed Deadline Manager schedules';
+$string['finished_classes_dm_incomplete'] = 'finished classes did not have completed Deadline Manager schedules';
 $string['in_last_30_days'] = 'in the last 30 days.';
 $string['in_prev_30_days'] = 'in the previous 30-day period.';
 $string['since_start_school_year'] = 'since the start of this school year.';
@@ -135,7 +137,7 @@ $string['nomyschools'] = 'There are no schools to display.';
 $string['noschools'] = 'There are no schools to display.';
 $string['note'] = 'Note';
 $string['aboutschool'] = 'About this School';
-$string['number_enddate_extensions'] = 'number of class end-date extensions';
+$string['number_enddate_extensions'] = 'class end-date extensions';
 $string['nousersatschool'] = 'There are no users in this school.';
 $string['overdue10'] = 'are currently overdue by more than 10 days';
 $string['ppa'] = 'PPA';
