@@ -29,7 +29,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-12">
-                <h3 class="text-success">{{#str}}aiv_title, local_schoolmanager{{/str}}</h3>
+                <h6 class="text-success">{{#str}}aiv_title, local_schoolmanager{{/str}}</h6>
                 <ul class="list-unstyled mb-3">
                     {{#aiv_report}}
                         <li><a target="_blank" href="{{aivurl}}">{{#str}}aiv_conduct, local_schoolmanager{{/str}}</a></li>
@@ -158,7 +158,7 @@
         {{#osslt_report}}
             <div class="row">
                 <div class="col-md-12">
-                    <h3 class="text-success">{{#str}}englishproficiency, local_schoolmanager{{/str}}</h3>
+                    <h6 class="text-success">{{#str}}englishproficiency, local_schoolmanager{{/str}}</h6>
                     <ul class="list-unstyled mb-3">
                         <li><a target="_blank" href="{{osslturl}}">{{#str}}osslt_scores, local_schoolmanager, for Current School Year{{/str}}</a></li>
                         <ul class="list-unstyled mb-3">
@@ -217,7 +217,7 @@
         {{/osslt_report}}
         <div class="row">
             <div class="col-md-12">
-                <h3 class="text-success">Other</h3>
+                <h6 class="text-success">Other</h6>
                 <ul class="list-unstyled mb-3">
                     {{#login_report}}
                         <li><a target="_blank" href="{{usersurl}}">{{#str}}logins, local_schoolmanager{{/str}}</a></li>
@@ -252,19 +252,19 @@
                         <li><a target="_blank" href="{{dmurl}}">{{#str}}deadline_manager, local_schoolmanager{{/str}}</a></li>
                         <ul class="list-unstyled mb-3">
                             <li>{{#pix}} {{dmcompleteicon}}, local_schoolmanager {{/pix}}
-                                {{dmcomplete}} {{#str}}active_classes_deadline_manager, local_schoolmanager,{{/str}}
+                                {{dmcomplete}} {{#str}}active_classes_dm_complete, local_schoolmanager,{{/str}}
                             </li>
                             <li>
                                 {{#pix}} {{dmincompleteicon}}, local_schoolmanager {{/pix}}
-                                {{dmincomplete}} {{#str}}active_classes_deadline_manager, local_schoolmanager,do not{{/str}}
+                                {{dmincomplete}} {{#str}}active_classes_dm_incomplete, local_schoolmanager{{/str}}
                             </li>
                             <li>
                                 {{#pix}} {{dmcompleteendedicon}}, local_schoolmanager {{/pix}}
-                                {{dmcompleteended}} {{#str}}active_classes_deadline_manager, local_schoolmanager, complete{{/str}}
+                                {{dmcompleteended}} {{#str}}finished_classes_dm_complete, local_schoolmanager{{/str}}
                             </li>
                             <li>
                                 {{#pix}} {{dmincompleteendedicon}}, local_schoolmanager {{/pix}}
-                                {{dmincompleteended}} {{#str}}active_classes_deadline_manager, local_schoolmanager, incomplete{{/str}}
+                                {{dmincompleteended}} {{#str}}finished_classes_dm_incomplete, local_schoolmanager{{/str}}
                             </li>
                             <li>
                                 {{#pix}} {{classenddateextesionicon}}, local_schoolmanager {{/pix}}
