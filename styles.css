@@ -52,7 +52,7 @@ body.pagelayout-schoolmanager .control-panel {
 }
 .pagelayout-schoolmanager .school-header {
   background-color: #ddd;
-  padding: 20px 20px;
+  padding: 10px 10px;
 }
 .pagelayout-schoolmanager .school-page {
   padding: 25px;
@@ -69,7 +69,7 @@ body.pagelayout-schoolmanager .control-panel {
 .pagelayout-schoolmanager span#maincontent {
   display: none;
 }
-.pagelayout-schoolmanager .school-header img {
+.pagelayout-schoolmanager .school-schoolinfo img {
   max-height: 90px;
 }
 .schoolmanager-header .btn.btn-secondary.active {
