@@ -818,8 +818,8 @@ class school_manager {
         }
 
         if ($can_manage_extra || ($administrator && $administrator->id == $USER->id)){
-            $upd_school->proctormanager = $data->proctormanager ?? 0;
-            $upd_school->academicintegritymanager = $data->academicintegritymanager ?? 0;
+            $upd_school->proctormanager = !empty($data->proctormanager) ? $data->proctormanager : 0;
+            $upd_school->academicintegritymanager = !empty($data->academicintegritymanager) ? $data->academicintegritymanager : 0;
         }
 
         if ($new_school){
