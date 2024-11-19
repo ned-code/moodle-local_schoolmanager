@@ -103,15 +103,26 @@ class school implements \renderable, \templatable {
                 $has_summary_blocks = false;
                 break;
             case SH::VIEW_EPC:
+                $has_summary_blocks = false;
+                $this->_data->show_output = true;
+
+                $file = NED::$DIRROOT . '/local/epctracker/epc_report.php';
+                if (!file_exists($file)){
+                    $this->_data->class_report = NED::notification('noepctracker', NED::NOTIFY_ERROR, false);
+                    break;
+                }
+
+                $students = $this->get_students();
+                if (empty($students)) {
+                    $this->_data->class_report = NED::notification('nostudents', NED::NOTIFY_WARNING, false);
+                    break;
+                }
+
                 /** @var string $html - get it from /local/epctracker/epc_report.php */
                 global $html;
-                $this->_data->show_output = true;
-                $students = $this->get_students();
-                if (!empty($students)) {
-                    include_once(NED::$DIRROOT . '/local/epctracker/epc_report.php');
-                }
+                include_once($file);
                 $this->_data->class_report = $html;
-                $has_summary_blocks = false;
+
                 break;
         }
 
@@ -844,14 +855,14 @@ class school implements \renderable, \templatable {
             $res->loggedusers7 = $this->percentage_format($loggedusers7, $students_count);
         }
         if (isset($notloggedusers8)){
-            $res->show_notloggedusers8 = true;
             $res->notloggedusers8icon = $this->get_icon($notloggedusers8, static::ICON_SAD_FALSE);
             $res->notloggedusers8 = $this->percentage_format($notloggedusers8, $students_count);
+            $res->show_notloggedusers8 = (bool)$res->notloggedusers8icon;
         }
         if (isset($notloggedstaff10)){
-            $res->show_notloggedstaff10 = true;
             $res->notloggedstaff10icon = $this->get_icon($notloggedstaff10, static::ICON_SAD_FALSE);
             $res->notloggedstaff10 = $this->percentage_format($notloggedstaff10, $staffs_count);
+            $res->show_notloggedstaff10 = (bool)$res->notloggedstaff10icon;
         }
 
         return $res;
@@ -873,7 +884,8 @@ class school implements \renderable, \templatable {
             'filterschool' => $this->_schoolid,
         ]))->out(false);
 
-        [$res->dmcomplete, $res->dmincomplete, $res->dmclasses, $res->dmcompleteended, $res->dmincompleteended] = NED::count_dm_scheule($school_code);
+        [$res->dmcomplete, $res->dmincomplete, $res->dmclasses, $res->dmcompleteended, $res->dmincompleteended] =
+            NED::count_dm_schedule($school_code, $startdate, $enddate);
         $res->dmcompleteicon = $this->get_icon($res->dmcomplete, static::ICON_HAPPY_SAD);
         $res->dmincompleteicon = $this->get_icon($res->dmincomplete);
         $res->dmcompleteendedicon = $this->get_icon($res->dmcompleteended, static::ICON_HAPPY_SAD);

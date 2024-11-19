@@ -285,9 +285,10 @@ class school_handler {
      * @param object|numeric|null  $courseid     - filter by some course (otherwise count for all site)
      * @param bool                 $count_hidden - if true, count all AIVs, otherwise count only shown AIVs
      *
-     * @return int|null - count of the AIVs, or null, if AI plugin doesn't exist
+     * @return int|bool|null - count of the AIVs, or null, if AI plugin doesn't exist
      */
     public static function get_users_aiv($users_or_ids, $startdate, $enddate, $lastdays=0, $courseid=0, $count_hidden=false){
+        if (empty($users_or_ids)) return false;
         return NED::ai_get_users_aiv_count($users_or_ids, $courseid, $startdate, $enddate, $lastdays, $count_hidden);
     }
 
