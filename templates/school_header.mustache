@@ -26,29 +26,8 @@
 }}
 {{#showheader}}
     <div class="row school-header">
-        <div class="col-md-6 d-flex align-items-center">
-            {{#logourl}}
-                <img src="{{logourl}}">
-            {{/logourl}}
-            {{^logourl}}
-                <span class="school-shortname">{{shortname}}</span>
-            {{/logourl}}
-        </div>
-        <div class="col-md-6 d-flex justify-content-end">
-            <div class="d-table float-right">
-                <div>
-                    <strong>{{{name}}}</strong>
-                </div>
-                <div>
-                    <strong>{{city}}, {{country}} - {{localtime}}</strong>{{#timezone}} ({{timezone}}){{/timezone}}
-                </div>
-                <div>
-                    {{#str}}schoolyear, local_schoolmanager{{/str}}: <strong>{{schoolyear}}</strong>
-                </div>
-                <div>
-                    {{#str}}administrator{{/str}}: <strong>{{administrator}}</strong>
-                </div>
-            </div>
+        <div class="col-md-12 text-align-center">
+            <h4 class="color-red">{{{name}}}</h4>
         </div>
     </div>
     <div class="row school-body p-4">

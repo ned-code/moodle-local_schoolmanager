@@ -71,6 +71,7 @@ class school_header implements \renderable, \templatable {
         }
         $data->name = $this->school->get('name');
         $data->code = $this->school->get('code');
+        $data->note = $this->school->get('note');
         $data->city = $this->school->get('city');
         $data->country = $this->school->get('country');
         $data->schoolwebsite = $this->school->get('url');
