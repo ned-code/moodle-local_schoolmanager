@@ -176,18 +176,14 @@ class shared_lib extends \local_ned_controller\shared\base_class {
         $params = ['code' => static::db()->sql_like_escape($school_code).'%'];
         static::sql_add_equal("r.changetype", 'classenddate', $where, $params);
 
-        if ($startdate){
-            static::sql_add_condition("r.timecreated", $startdate, $where, $params, static::SQL_COND_GTE);
-        }
-        if ($enddate){
-            static::sql_add_condition("r.timecreated", $enddate, $where, $params, static::SQL_COND_LTE);
-        }
         if ($last_days){
-            $val = time() - $last_days * DAYSECS;
-            static::sql_add_condition("r.timecreated", $val, $where, $params, static::SQL_COND_GTE);
+            $startdate2 = time() - $last_days * DAYSECS;
+            $startdate = empty($startdate) ? $startdate2 : max($startdate, $startdate2);
         }
 
+        static::sql_add_between("r.timecreated", $startdate, $enddate, $where, $params, true);
         $where = static::sql_where($where);
+
         $sql = "SELECT COUNT(1)
                     FROM {block_ned_teacher_tools_cued} r
                     INNER JOIN {groups} g ON r.groupid = g.id
