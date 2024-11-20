@@ -135,7 +135,7 @@ class edit_school_form extends \moodleform {
             foreach ($staffs as $staff) {
                 $staffoptions[$staff->id] = fullname($staff);
             }
-            $staffoptions = ['' => get_string('choose')] + $staffoptions;
+            $staffoptions = [0 => get_string('choose')] + $staffoptions;
         }
 
         // School Administrator.

@@ -154,7 +154,7 @@ class school_handler {
             if ($hideschoolswithoutstudent && !$students = $SM->get_school_students($school->id, true, $SM::DEF_MEMBER_ROLE, false)) {
                 continue;
             }
-            $school_opts[$school->id] = $school->name;
+            $school_opts[$school->id] = $school->cohortname;
         }
         $form[] = NED::single_autocomplete($url, 'schoolid', $school_opts, $schoolid, NED::fa('fa-university'), '', $attr);
 

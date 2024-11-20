@@ -547,7 +547,7 @@ class school implements \renderable, \templatable {
         $res->tem_report = $this->_get_proctoring_report();
         $res->osslt_report = $this->_get_osslt_report();
         // Other - Logins
-        $res->login_report = $this->_get_login_report();
+        $res->login_report = $this->_get_logins_report();
         // Other - DM
         $res->dm_report = $this->_get_dm_report();
 
@@ -566,6 +566,7 @@ class school implements \renderable, \templatable {
         $res->aivurl = (new \moodle_url(NED::PAGE_AI_INFRACTIONS,
             ['school' => $this->_schoolid, 'state' => -1,])
         )->out(false);
+        $res->title_help_obj = NED::get_help_icon('cr_aiv_help');
 
         [$startdate, $enddate] = $this->get_school_year();
         [$prev_30_start, $prev_30_end] = NED::time_process_period(NED::PERIOD_PREV_30);
@@ -629,6 +630,7 @@ class school implements \renderable, \templatable {
      * Reports, "Activity deadlines" section
      *
      * @return object|null
+     * @noinspection PhpConditionAlreadyCheckedInspection
      */
     protected function _get_ngc_dm_report(){
         $res = (object)[];
@@ -639,6 +641,7 @@ class school implements \renderable, \templatable {
             $NGC::$NGC_RENDER::PAR_REASON => $NGC::REASON_SUBMISSION,
             $NGC::$NGC_RENDER::PAR_GRADE_TYPE => $NGC::GT_AWARD_ZERO,
         ]))->out(false);
+        $res->title_help_obj = NED::get_help_icon('cr_ngc_dm_help');
 
         [$startdate, $enddate] = $this->get_school_year();
         [$last_30_start, $last_30_end] = NED::time_process_period(NED::PERIOD_LAST_30);
@@ -652,24 +655,28 @@ class school implements \renderable, \templatable {
         $students_count = count($students);
         $students_ids = array_keys($students);
 
-        $missed_deadlines = $this->_data->missed_deadlines ?? $this->_data->student_summary->missed_deadlines ?? null;
-        $ngc_periods = [NED::PERIOD_LAST_30];
-        if ($res->show_prev30){
-            $ngc_periods[] = NED::PERIOD_PREV_30;
+        // Hide missed_deadlines metrics for now
+        $res->show_missed_deadlines = false;
+        if ($res->show_missed_deadlines){
+            $missed_deadlines = $this->_data->missed_deadlines ?? $this->_data->student_summary->missed_deadlines ?? null;
+            $ngc_periods = [NED::PERIOD_LAST_30];
+            if ($res->show_prev30){
+                $ngc_periods[] = NED::PERIOD_PREV_30;
+            }
+            if (!isset($missed_deadlines)){
+                $ngc_periods[] = NED::PERIOD_TOTAL;
+            }
+
+            $ngc_data = $NGC::get_students_ngc_records_count($students_ids, $startdate, $enddate, null, $ngc_periods);
+            $ngc_data = reset($ngc_data);
+
+            $res->missed_deadlines = $missed_deadlines ?? $ngc_data->{"missed_deadlines_".NED::PERIOD_TOTAL} ?? 0;
+            $res->missed_deadlines_last_30 = $ngc_data->{"missed_deadlines_".NED::PERIOD_LAST_30} ?? 0;
+            $res->missed_deadlines_prev_30 = $ngc_data->{"missed_deadlines_".NED::PERIOD_PREV_30} ?? 0;
+
+            $res->missed_deadlinesicon = $this->get_icon($res->missed_deadlines);
+            $res->missed_deadlines_last_30_icon = $this->get_icon($res->missed_deadlines_last_30);
         }
-        if (!isset($missed_deadlines)){
-            $ngc_periods[] = NED::PERIOD_TOTAL;
-
-        }
-
-        $ngc_data = $NGC::get_students_ngc_records_count($students_ids, $startdate, $enddate, null, $ngc_periods);
-        $ngc_data = reset($ngc_data);
-        $res->missed_deadlines = $missed_deadlines ?? $ngc_data->{"missed_deadlines_".NED::PERIOD_TOTAL} ?? 0;
-        $res->missed_deadlines_last_30 = $ngc_data->{"missed_deadlines_".NED::PERIOD_LAST_30} ?? 0;
-        $res->missed_deadlines_prev_30 = $ngc_data->{"missed_deadlines_".NED::PERIOD_PREV_30} ?? 0;
-
-        $res->missed_deadlinesicon = $this->get_icon($res->missed_deadlines);
-        $res->missed_deadlines_last_30_icon = $this->get_icon($res->missed_deadlines_last_30);
 
         $res->deadlineextensions = $this->_data->student_summary->deadlineextensions ?? $this->_data->deadlineextensions ?? null;
         if (!isset($res->deadlineextensions)){
@@ -689,13 +696,15 @@ class school implements \renderable, \templatable {
         $res->deadlineextensions20icon = $this->get_icon($res->deadlineextensions20, static::ICON_WARN_FALSE);
 
         if ($res->show_prev30){
+            if ($res->show_missed_deadlines){
+                $res->missed_deadlines_prev_30_icon = $this->get_icon($res->missed_deadlines_prev_30);
+                $res->missed_deadlines_30_dynamic_icon =
+                    $this->get_icon($res->missed_deadlines_last_30, static::ICON_WARN_SAD_HAPPY, $res->missed_deadlines_prev_30);
+                $res->missed_deadlines_30_dynamic_state = $this->get_dynamic($res->missed_deadlines_last_30, $res->missed_deadlines_prev_30);
+            }
+
             $res->deadlineextensions_prev_30 = SH::get_user_number_of_dl_extensions($students_ids, $prev_30_start, $prev_30_end);
             $res->deadlineextensions_prev_30_icon = $this->get_icon($res->deadlineextensions_prev_30);
-
-            $res->missed_deadlines_prev_30_icon = $this->get_icon($res->missed_deadlines_prev_30);
-            $res->missed_deadlines_30_dynamic_icon =
-                $this->get_icon($res->missed_deadlines_last_30, static::ICON_WARN_SAD_HAPPY, $res->missed_deadlines_prev_30);
-            $res->missed_deadlines_30_dynamic_state = $this->get_dynamic($res->missed_deadlines_last_30, $res->missed_deadlines_prev_30);
 
             $res->deadlineextensions30_dynamic_icon =
                 $this->get_icon($res->deadlineextensions_last_30, static::ICON_WARN_SAD_HAPPY, $res->deadlineextensions_prev_30);
@@ -719,6 +728,7 @@ class school implements \renderable, \templatable {
         $res->proctoringurl = (new \moodle_url('/local/tem/sessions.php', [
             'schoolid' => $this->_schoolid,
         ]))->out(false);
+        $res->title_help_obj = NED::get_help_icon('cr_tem_proctoring_help');
 
         $res->proctoringsubmitted = TEM::count_school_submitted_reports($this->_schoolid, $startdate, $enddate);
         $res->proctoringsubmittedicon = $this->get_icon($res->proctoringsubmitted, static::ICON_HAPPY_SAD);
@@ -759,27 +769,31 @@ class school implements \renderable, \templatable {
             'schoolid' => $this->_schoolid,
             'ossltyear' => GHS::get_osslt_year(false),
         ]))->out(false);
+        $res->title_help_obj = NED::get_help_icon('cr_osslt_help');
 
-        $wroteosslt = GHS::count_osslt($school_code, [NED::OSSLT_STATUS_PASS, NED::OSSLT_STATUS_FAIL]);
-        $res->showpassfailosslt = $wroteosslt;
-        $res->wroteosslticon = $this->get_icon($wroteosslt, static::ICON_HAPPY_SAD);
-        $res->wroteosslt = $this->percentage_format($wroteosslt, $activestudents);
+        $res->show_current_year = empty(NED::$C::get_config('hideossltdata'));
+        if ($res->show_current_year){
+            $wroteosslt = GHS::count_osslt($school_code, [NED::OSSLT_STATUS_PASS, NED::OSSLT_STATUS_FAIL]);
+            $res->showpassfailosslt = $wroteosslt;
+            $res->wroteosslticon = $this->get_icon($wroteosslt, static::ICON_HAPPY_SAD);
+            $res->wroteosslt = $this->percentage_format($wroteosslt, $activestudents);
 
-        $notwroteosslt = $activestudents - $wroteosslt;
-        $res->notwroteosslticon = $this->get_icon($notwroteosslt);
-        $res->notwroteosslt = $this->percentage_format($notwroteosslt, $activestudents);
+            $notwroteosslt = $activestudents - $wroteosslt;
+            $res->notwroteosslticon = $this->get_icon($notwroteosslt);
+            $res->notwroteosslt = $this->percentage_format($notwroteosslt, $activestudents);
 
-        $passedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_PASS);
-        $res->passedosslticon = $this->get_icon($passedosslt, static::ICON_HAPPY_SAD);
-        $res->passedosslt = $this->percentage_format($passedosslt, $wroteosslt);
+            $passedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_PASS);
+            $res->passedosslticon = $this->get_icon($passedosslt, static::ICON_HAPPY_SAD);
+            $res->passedosslt = $this->percentage_format($passedosslt, $wroteosslt);
 
-        $failedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_FAIL);
-        $res->failedosslticon = $this->get_icon($failedosslt);
-        $res->failedosslt = $this->percentage_format($failedosslt, $wroteosslt);
+            $failedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_FAIL);
+            $res->failedosslticon = $this->get_icon($failedosslt);
+            $res->failedosslt = $this->percentage_format($failedosslt, $wroteosslt);
 
-        $failedossltover75 = GHS::count_osslt_failed_over75($school_code);
-        $res->failedossltover75icon = $this->get_icon($failedossltover75, static::ICON_WARN_FALSE);
-        $res->failedossltover75 = $this->percentage_format($failedossltover75, $wroteosslt);
+            $failedossltover75 = GHS::count_osslt_failed_over75($school_code);
+            $res->failedossltover75icon = $this->get_icon($failedossltover75, static::ICON_WARN_FALSE);
+            $res->failedossltover75 = $this->percentage_format($failedossltover75, $wroteosslt);
+        }
 
         // OSSLT Scores for Previous School Year.
         $res->prevosslturl = (new \moodle_url('/report/ghs/ghs_english_proficiency.php', [
@@ -787,32 +801,36 @@ class school implements \renderable, \templatable {
             'ossltyear' => GHS::get_osslt_year(true),
         ]))->out(false);
 
-        $prevwroteosslt = GHS::count_osslt($school_code, [NED::OSSLT_STATUS_PASS, NED::OSSLT_STATUS_FAIL], true);
-        $res->showprevpassfailosslt = $prevwroteosslt;
-        $res->prevwroteosslticon = $this->get_icon($prevwroteosslt, static::ICON_HAPPY_SAD);
-        $res->prevwroteosslt = $prevwroteosslt;
+        $res->show_prev_year = true;
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
+        if ($res->show_prev_year){
+            $prevwroteosslt = GHS::count_osslt($school_code, [NED::OSSLT_STATUS_PASS, NED::OSSLT_STATUS_FAIL], true);
+            $res->showprevpassfailosslt = $prevwroteosslt;
+            $res->prevwroteosslticon = $this->get_icon($prevwroteosslt, static::ICON_HAPPY_SAD);
+            $res->prevwroteosslt = $prevwroteosslt;
 
-        $prevpassedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_PASS, true);
-        $res->prevpassedosslticon = $this->get_icon($prevpassedosslt, static::ICON_HAPPY_SAD);
-        $res->prevpassedosslt = $this->percentage_format($prevpassedosslt, $prevwroteosslt);
+            $prevpassedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_PASS, true);
+            $res->prevpassedosslticon = $this->get_icon($prevpassedosslt, static::ICON_HAPPY_SAD);
+            $res->prevpassedosslt = $this->percentage_format($prevpassedosslt, $prevwroteosslt);
 
-        $prevfailedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_FAIL, true);
-        $res->prevfailedosslticon = $this->get_icon($prevfailedosslt);
-        $res->prevfailedosslt = $this->percentage_format($prevfailedosslt, $prevwroteosslt);
+            $prevfailedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_FAIL, true);
+            $res->prevfailedosslticon = $this->get_icon($prevfailedosslt);
+            $res->prevfailedosslt = $this->percentage_format($prevfailedosslt, $prevwroteosslt);
 
-        $prevfailedossltover75 = GHS::count_osslt_failed_over75($school_code, true);
-        $res->prevfailedossltover75icon = $this->get_icon($prevfailedossltover75, static::ICON_WARN_FALSE);
-        $res->prevfailedossltover75 = $this->percentage_format($prevfailedossltover75, $prevwroteosslt);
+            $prevfailedossltover75 = GHS::count_osslt_failed_over75($school_code, true);
+            $res->prevfailedossltover75icon = $this->get_icon($prevfailedossltover75, static::ICON_WARN_FALSE);
+            $res->prevfailedossltover75 = $this->percentage_format($prevfailedossltover75, $prevwroteosslt);
+        }
 
         return $res;
     }
 
     /**
-     * Get login section report
+     * Get logins section report
      *
      * @return object|null
      */
-    protected function _get_login_report(){
+    protected function _get_logins_report(){
         [$startdate,] = $this->get_school_year();
         $school_year_days = (time() - $startdate)/DAYSECS;
         if ($school_year_days < 0) return null;
@@ -828,6 +846,7 @@ class school implements \renderable, \templatable {
             'schoolid' => $this->_schoolid,
             'view' => 'students',
         ]))->out(false);
+        $res->title_help_obj = NED::get_help_icon('cr_logins_help');
 
         if ($students_count > 0){
             if ($school_year_days >= 3){
@@ -883,6 +902,7 @@ class school implements \renderable, \templatable {
         $res->dmurl = (new \moodle_url('/report/ghs/ghs_group_enrollment.php', [
             'filterschool' => $this->_schoolid,
         ]))->out(false);
+        $res->title_help_obj = NED::get_help_icon('cr_dm_help');
 
         [$res->dmcomplete, $res->dmincomplete, $res->dmclasses, $res->dmcompleteended, $res->dmincompleteended] =
             NED::count_dm_schedule($school_code, $startdate, $enddate);
