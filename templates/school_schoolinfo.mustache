@@ -33,15 +33,15 @@
 <div class="card mb-3 school-schoolinfo">
     <div class="card-body">
         <div class="row">
-            <div class="col-md-auto p-2">
+            <div class="col-lg-3 p-2">
                 {{#logourl}}
-                    <img src="{{logourl}}">
+                    <img class="img-fluid m-2" src="{{logourl}}">
                 {{/logourl}}
                 {{^logourl}}
                     <span class="school-shortname">{{shortname}}</span>
                 {{/logourl}}
             </div>
-            <div class="col-md-9 p-2">{{{note}}}</div>
+            <div class="col-lg-9 py-2 px-4">{{{note}}}</div>
         </div>
     </div>
 </div>

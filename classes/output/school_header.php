@@ -75,6 +75,10 @@ class school_header implements \renderable, \templatable {
         $data->city = $this->school->get('city');
         $data->country = $this->school->get('country');
         $data->schoolwebsite = $this->school->get('url');
+        $data->schoolwebsiteurl = $data->schoolwebsite;
+        if (!preg_match("@^htt?ps?://@", $data->schoolwebsiteurl)) {
+            $data->schoolwebsiteurl = "https://" . $data->schoolwebsiteurl;
+        }
         $data->synctimezone = $this->school->get('synctimezone');
 
 
