@@ -36,7 +36,6 @@ $string['cr_aiv_help'] = "
     <div> 
         Promoting and upholding academic integrity is a cornerstone of the OSSD program, ensuring that students develop honesty, 
         accountability, and respect for intellectual property in their academic pursuits. 
-        This commitment is fundamental to fostering a culture of trust and fairness within the educational environment. 
         All teachers and administrators share the collective responsibility of instilling these values 
         and ensuring compliance with academic integrity standards.
     </div>
