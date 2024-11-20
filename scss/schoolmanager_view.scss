@@ -1,0 +1,58 @@
+/**
+ * School view page
+ *
+ * @package    local_schoolmanager
+ * @subpackage scss/schoolmanager_view
+ * @copyright  2024 NED {@link http://ned.ca}
+ * @author     NED {@link http://ned.ca}
+ */
+
+body#page-local-schoolmanager-view {
+
+    .popover[role="tooltip"] {
+        max-width: 450px;
+    }
+
+    .badges {
+        ul.badges {
+            padding: 0;
+        }
+
+        li {
+            display: inline;
+
+            .badge-image {
+                width: 25px;
+                height: 25px;
+            }
+            .badge-actions, .badge-name {
+                display: none;
+            }
+        }
+    }
+}
+
+
+@media (max-width: 760px), (max-width: 900px) {
+    #page-local-schoolmanager-view .staff {
+        .generaltable {
+            margin-bottom: 0;
+        }
+        .table-wrapper {
+            margin-bottom: 20px;
+
+            .table-container{
+                overflow-x: auto;
+            }
+        }
+    }
+}
+@media (max-width: 1000px), (max-width: 1200px) {
+    #page-local-schoolmanager-view .staff {
+        flex-direction: column;
+
+        div {
+            max-width: 100%;
+        }
+    }
+}
