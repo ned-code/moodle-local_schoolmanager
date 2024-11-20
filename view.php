@@ -46,7 +46,8 @@ if (!$schoolid) {
 require_login();
 
 $ctx = NED::ctx();
-if (!NED::has_any_capability(['viewownschooldashboard', 'viewallschooldashboards'], $ctx)){
+$caps = ['viewownschooldashboard', 'viewallschooldashboards', 'viewstudentstaffsummary'];
+if (!NED::has_any_capability($caps, $ctx)){
     throw new moodle_exception('permission');
 }
 

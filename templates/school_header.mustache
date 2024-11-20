@@ -33,10 +33,18 @@
     <div class="row school-body p-4">
         <div class="col-md-9">
             <a class="btn {{#show_school}}btn-primary{{/show_school}}{{^show_school}}btn-secondary{{/show_school}}" href="{{btn_school_url}}">{{#str}}school, local_schoolmanager{{/str}}</a>
-            <a class="btn {{#show_students}}btn-primary{{/show_students}}{{^show_students}}btn-secondary{{/show_students}}" href="{{btn_students_url}}">{{#str}}students, local_schoolmanager{{/str}}</a>
-            <a class="btn {{#show_staff}}btn-primary{{/show_staff}}{{^show_staff}}btn-secondary{{/show_staff}}" href="{{btn_staff_url}}">{{#str}}staff, local_schoolmanager{{/str}}</a>
-            <a class="btn {{#show_classes}}btn-primary{{/show_classes}}{{^show_classes}}btn-secondary{{/show_classes}}" href="{{btn_classes_url}}">{{#str}}classes, local_schoolmanager{{/str}}</a>
-            <a class="btn {{#show_epc}}btn-primary{{/show_epc}}{{^show_epc}}btn-secondary{{/show_epc}}" href="{{btn_epc_url}}">{{#str}}epchecks, local_schoolmanager{{/str}}</a>
+            {{#canview_students}}
+                <a class="btn {{#show_students}}btn-primary{{/show_students}}{{^show_students}}btn-secondary{{/show_students}}" href="{{btn_students_url}}">{{#str}}students, local_schoolmanager{{/str}}</a>
+            {{/canview_students}}
+            {{#canview_staff}}
+                <a class="btn {{#show_staff}}btn-primary{{/show_staff}}{{^show_staff}}btn-secondary{{/show_staff}}" href="{{btn_staff_url}}">{{#str}}staff, local_schoolmanager{{/str}}</a>
+            {{/canview_staff}}
+            {{#canview_classes}}
+                <a class="btn {{#show_classes}}btn-primary{{/show_classes}}{{^show_classes}}btn-secondary{{/show_classes}}" href="{{btn_classes_url}}">{{#str}}classes, local_schoolmanager{{/str}}</a>
+            {{/canview_classes}}
+            {{#canview_epc}}
+                <a class="btn {{#show_epc}}btn-primary{{/show_epc}}{{^show_epc}}btn-secondary{{/show_epc}}" href="{{btn_epc_url}}">{{#str}}epchecks, local_schoolmanager{{/str}}</a>
+            {{/canview_epc}}
         </div>
         <div class="col-md-3 text-align-right">
             {{#downloadallgrades}}

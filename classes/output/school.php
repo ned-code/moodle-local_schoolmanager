@@ -79,12 +79,16 @@ class school implements \renderable, \templatable {
         $this->_data = NED::object_merge($this->_data, $header->export_for_template($output));
         $this->_data->show_prev_30 = false;
         $has_summary_blocks = true;
+        $context = NED::ctx();
+        $this->_data->viewschoolprofile = NED::has_capability('viewschoolprofile', $context);
 
         switch ($this->_view){
             case SH::VIEW_STUDENTS:
+                NED::require_capability('viewstudentstaffsummary', $context);
                 $this->_export_view_students();
                 break;
             case SH::VIEW_STAFF:
+                NED::require_capability('viewstudentstaffsummary', $context);
                 $this->_export_view_staff();
                 break;
             case SH::VIEW_SCHOOL:
@@ -335,6 +339,7 @@ class school implements \renderable, \templatable {
             'action' => 'resettimezone',
         ]))->out(false);
         $this->_data->isadmin = is_siteadmin();
+        $this->_data->viewschooldescription = NED::has_capability('viewschooldescription', NED::ctx());
 
         $this->_data->compliance_report = $this->_get_compliance_report_data();
     }
@@ -435,8 +440,10 @@ class school implements \renderable, \templatable {
      * @return void
      */
     protected function _export_summary_blocks(){
-        $this->_data->student_summary = $this->_get_student_summary_block_data();
-        $this->_data->staff_summary = $this->_get_staff_summary_block_data();
+        if (NED::has_capability('viewstudentstaffsummary', NED::ctx())) {
+            $this->_data->student_summary = $this->_get_student_summary_block_data();
+            $this->_data->staff_summary = $this->_get_staff_summary_block_data();
+        }
     }
 
     /**

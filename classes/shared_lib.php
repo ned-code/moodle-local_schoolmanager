@@ -275,6 +275,18 @@ class shared_lib extends \local_ned_controller\shared\base_class {
 
         return static::db()->count_records_sql($query['sql'], $query['params']);
     }
+
+    /**
+     * Check if the user can view the class enrollment report
+     *
+     * @return bool True if the user has the capability to view the report, false otherwise
+     */
+    public static function can_view_class_enrollment_report() {
+        $contextsystem = \context_system::instance();
+        return has_capability('report/ghs:viewgroupenrollment', $contextsystem) ||
+            \report_ghs\helper::has_capability_in_any_course('report/ghs:viewgroupenrollment');
+
+    }
 }
 
 shared_lib::init();

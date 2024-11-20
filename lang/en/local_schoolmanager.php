@@ -27,9 +27,10 @@ include_once(__DIR__.'/compliancereport.php');
 $string['pluginname'] = 'Rosedale School Manager';
 
 // Capabilities
-$string['schoolmanager:viewownschooldashboard'] = 'View own school manager';
+$string['schoolmanager:viewownschooldashboard'] = 'Can view own school manager';
+$string['schoolmanager:viewstudentstaffsummary'] = 'Can view student and staff pages and summary blocks';
 $string['schoolmanager:viewallschooldashboards'] = 'View all school manager';
-$string['schoolmanager:manage_schools'] = 'Manage schools';
+$string['schoolmanager:manage_schools'] = 'Can manage own schools';
 $string['schoolmanager:manage_schools_extra'] = 'Manage extra school fields';
 $string['schoolmanager:delete_schools'] = 'Delete schools';
 $string['schoolmanager:manage_crews'] = 'Manage school cohorts';
@@ -37,6 +38,8 @@ $string['schoolmanager:manage_members'] = 'Manage cohort members';
 $string['schoolmanager:view_ps_compliance_report'] = 'Can view Partner School Compliance report';
 $string['schoolmanager:manage_extension_limit'] = 'Can view and manage number of allowed extensions in School Manager';
 $string['schoolmanager:manage_extension_limit_override'] = 'Can ignore extension limit restriction set in School Manager';
+$string['schoolmanager:viewschooldescription'] = 'Can view School Description';
+$string['schoolmanager:viewschoolprofile'] = 'Can view School Profile block';
 
 // Config
 $string['general'] = 'General';
@@ -235,3 +238,4 @@ $string['dynamic-up'] = 'gone up';
 $string['dynamic-down'] = 'gone down';
 $string['dynamic-same'] = 'remained the same';
 $string['epchecks'] = 'EP Checks';
+$string['epmarkers'] = 'EP Markers';
