@@ -84,12 +84,16 @@ class school implements \renderable, \templatable {
 
         switch ($this->_view){
             case SH::VIEW_STUDENTS:
-                NED::require_capability('viewstudentstaffsummary', $context);
-                $this->_export_view_students();
+                if (NED::has_capability('viewstudentstaffsummary', $context)) {
+                    $this->_export_view_students();
+                    $this->_data->viewstudents = 1;
+                }
                 break;
             case SH::VIEW_STAFF:
-                NED::require_capability('viewstudentstaffsummary', $context);
-                $this->_export_view_staff();
+                if (NED::has_capability('viewstudentstaffsummary', $context)) {
+                    $this->_export_view_staff();
+                    $this->_data->viewsstaff = 1;
+                }
                 break;
             case SH::VIEW_SCHOOL:
                 $this->_export_view_school();

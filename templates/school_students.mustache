@@ -35,68 +35,72 @@
 }}
 <div class="row students">
     <div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 table-wrapper">
-        <div class="table-container">
-            <table class="generaltable">
-                <thead>
-                <tr>
-                    <th>{{#str}}studentname, local_schoolmanager{{/str}}</th>
-                    <th>{{#str}}badges, local_schoolmanager{{/str}}</th>
-                    <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
-                    <th data-toggle="tooltip" title="{{#str}}studentextensionstooltip, local_schoolmanager{{/str}}">{{#str}}extensions, local_schoolmanager{{/str}}</th>
-                    <th data-toggle="tooltip" title="{{#str}}studentaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aiv, local_schoolmanager{{/str}}</th>
-                    <th data-toggle="tooltip" title="{{#str}}studentaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aiv30, local_schoolmanager{{/str}}</th>
-                    <th class="text-center">{{#str}}wrongsubmissions, local_schoolmanager{{/str}}</th>
-                    <th class="text-center">{{#str}}latesubmissions, mod_assign{{/str}}</th>
-                    <th class="text-center">{{#str}}misseddeadlines, local_schoolmanager{{/str}}</th>
-                </tr>
-                </thead>
-                <tbody>
-                {{#students}}
+        {{#viewstudents}}
+            <div class="table-container">
+                <table class="generaltable">
+                    <thead>
                     <tr>
-                        <td class="username userid-{{{id}}}">
-                            {{{username}}}
-                        </td>
-                        <td class="badges">{{{badges}}}</td>
-                        <td class="lastaceess">{{lastaccess}}</td>
-                        <td class="deadlineextensions text-center">{{deadlineextensions}}</td>
-                        <td class="aiv text-center">{{aiv}}</td>
-                        <td class="aiv30 text-center">{{aiv30}}</td>
-                        <td class="wrong_submission text-center">{{wrong_submissions}}</td>
-                        <td class="late_submission text-center">{{late_submissions}}</td>
-                        <td class="missed_deadline text-center">{{missed_deadlines}}</td>
+                        <th>{{#str}}studentname, local_schoolmanager{{/str}}</th>
+                        <th>{{#str}}badges, local_schoolmanager{{/str}}</th>
+                        <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
+                        <th data-toggle="tooltip" title="{{#str}}studentextensionstooltip, local_schoolmanager{{/str}}">{{#str}}extensions, local_schoolmanager{{/str}}</th>
+                        <th data-toggle="tooltip" title="{{#str}}studentaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aiv, local_schoolmanager{{/str}}</th>
+                        <th data-toggle="tooltip" title="{{#str}}studentaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aiv30, local_schoolmanager{{/str}}</th>
+                        <th class="text-center">{{#str}}wrongsubmissions, local_schoolmanager{{/str}}</th>
+                        <th class="text-center">{{#str}}latesubmissions, mod_assign{{/str}}</th>
+                        <th class="text-center">{{#str}}misseddeadlines, local_schoolmanager{{/str}}</th>
                     </tr>
-                {{/students}}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                    {{#students}}
+                        <tr>
+                            <td class="username userid-{{{id}}}">
+                                {{{username}}}
+                            </td>
+                            <td class="badges">{{{badges}}}</td>
+                            <td class="lastaceess">{{lastaccess}}</td>
+                            <td class="deadlineextensions text-center">{{deadlineextensions}}</td>
+                            <td class="aiv text-center">{{aiv}}</td>
+                            <td class="aiv30 text-center">{{aiv30}}</td>
+                            <td class="wrong_submission text-center">{{wrong_submissions}}</td>
+                            <td class="late_submission text-center">{{late_submissions}}</td>
+                            <td class="missed_deadline text-center">{{missed_deadlines}}</td>
+                        </tr>
+                    {{/students}}
+                    </tbody>
+                </table>
+            </div>
+        {{/viewstudents}}
     </div>
     {{> local_schoolmanager/school_summary_blocks }}
 </div>
-{{#js}}
-    require(['jquery', 'local_ned_controller/tablesorter'], function($, Tablesorter) {
-        $(document).ready(function() {
-            $(function() {
-                let $datatables = $('.generaltable');
-                let opt = {
-                    headers: {},
-                    cssAsc: 'sort-up',
-                    cssDesc: 'sort-down',
-                    cssNone: 'sort-none',
-                    textAttribute: 'data-sort-value',
-                    emptyTo: 'bottom',
-                    sortStable: true,
-                    widgetOptions: {
-                        headerTitle_useAria  : true,
-                        headerTitle_tooltip  : 'tooltip',
-                        headerTitle_callback : updateTooltips
-                    }
-                };
+{{#viewstudents}}
+    {{#js}}
+        require(['jquery', 'local_ned_controller/tablesorter'], function($, Tablesorter) {
+            $(document).ready(function() {
+                $(function() {
+                    let $datatables = $('.generaltable');
+                    let opt = {
+                        headers: {},
+                        cssAsc: 'sort-up',
+                        cssDesc: 'sort-down',
+                        cssNone: 'sort-none',
+                        textAttribute: 'data-sort-value',
+                        emptyTo: 'bottom',
+                        sortStable: true,
+                        widgetOptions: {
+                            headerTitle_useAria  : true,
+                            headerTitle_tooltip  : 'tooltip',
+                            headerTitle_callback : updateTooltips
+                        }
+                    };
 
-                $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');
-                $datatables.find('th:not(.sorter-false)').addClass('sorter-true');
-                $datatables.find('tr.nosort > td').attr('data-sort-value', '');
-                $datatables.tablesorter(opt);
+                    $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');
+                    $datatables.find('th:not(.sorter-false)').addClass('sorter-true');
+                    $datatables.find('tr.nosort > td').attr('data-sort-value', '');
+                    $datatables.tablesorter(opt);
+                });
             });
         });
-    });
-{{/js}}
+    {{/js}}
+{{/viewstudents}}
