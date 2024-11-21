@@ -33,12 +33,12 @@
 <div class="card mb-3 school-schoolinfo">
     <div class="card-body">
         <div class="row">
-            <div class="col-lg-3 p-2">
+            <div class="col-lg-3 p-2 d-flex flex-column justify-content-center align-items-center">
                 {{#logourl}}
                     <img class="img-fluid m-2" src="{{logourl}}">
                 {{/logourl}}
                 {{^logourl}}
-                    <span class="school-shortname">{{shortname}}</span>
+                    <div class="school-shortname py-4 px-5 bg-gray">{{shortname}}</div>
                 {{/logourl}}
             </div>
             <div class="col-lg-9 py-2 px-4">{{{note}}}</div>
