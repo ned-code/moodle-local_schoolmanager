@@ -70,7 +70,7 @@ body.pagelayout-schoolmanager .control-panel {
   display: none;
 }
 .pagelayout-schoolmanager .school-schoolinfo img {
-  max-height: 90px;
+  max-height: 170px;
 }
 .schoolmanager-header .btn.btn-secondary.active {
   background-color: yellow !important;
