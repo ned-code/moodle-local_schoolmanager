@@ -35,18 +35,14 @@ $view = optional_param('view', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_TEXT);
 
 if (!$schoolid) {
-    $context = NED::ctx();
-    if (NED::has_capability('viewschooldescription', $context)) {
-        $view = SH::VIEW_SCHOOL;
-    } else {
-        $view = SH::VIEW_SCHOOLS;
-    }
+    $view = SH::VIEW_SCHOOLS;
 } else {
     if ($action == 'resettimezone' && is_siteadmin()) {
         $school = new local_schoolmanager\school($schoolid);
         $school->reset_time_zone();
     }
 }
+
 require_login();
 
 $ctx = NED::ctx();
