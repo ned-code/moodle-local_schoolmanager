@@ -106,7 +106,7 @@ class school_header implements \renderable, \templatable {
         if (NED::can_view_class_enrollment_report()) {
             $data->{'canview_'.SH::VIEW_CLASSES} = 1;
         }
-        if (NED::has_capability('local/epctracker:viewownprofile', $ctx)) {
+        if (NED::has_capability('local/epctracker:viewownschool', $ctx)) {
             $data->{'canview_'.SH::VIEW_EPC} = 1;
         }
 
