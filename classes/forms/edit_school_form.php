@@ -104,6 +104,52 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('extensionsallowed', 3);
         }
 
+        // Options for Deadline Manager
+        if (NED::is_tt_exists()) {
+            $deadlines_json_data = $school->deadlinesdata;
+            $activatedeadlinesconfig = 0;
+            $deadlinesdata = null;
+
+            if ($deadlines_json_data) {
+                $activatedeadlinesconfig = 1;
+                $deadlinesdata = json_decode($deadlines_json_data);
+            }
+
+            $mform->addElement('checkbox', 'activatedeadlinesconfig', NED::str('activatedeadlinesconfig'));
+            $mform->setDefault('activatedeadlinesconfig', $activatedeadlinesconfig);
+
+            $deadlineselements = [
+                'x_days_between_dl_quiz' => [
+                    'type' => 'text',
+                ],
+                'x_days_between_dl_other' => [
+                    'type' => 'text',
+                ],
+                'allow_quiz_other_dl_in_one_day' => [
+                    'type' => 'selectyesno',
+                ],
+                'x_days_apply_to_all' => [
+                    'type' => 'select',
+                    'choices' => [
+                        0 => NED::str('group', null, NED::TT),
+                        1 => NED::str('all', null, NED::TT)
+                    ],
+                ]
+            ];
+
+            foreach ($deadlineselements as $name => $element) {
+                if ($element['type'] === 'select') {
+                    $mform->addElement($element['type'], $name, NED::str($name,null,NED::TT), $element['choices']);
+                } else {
+                    $mform->addElement($element['type'], $name, NED::str($name,null,NED::TT));
+                }
+
+                $mform->hideIf($name, 'activatedeadlinesconfig', 'notchecked');
+                $mform->setDefault($name, $deadlinesdata?->$name ?? ($element['type'] === 'text' ? '' : 0));
+                $mform->setType($name, PARAM_INT);
+            }
+        }
+
         // Timezone
         $choices = \core_date::get_list_of_timezones($CFG->timezone, true);
         $mform->addElement('select', 'timezone', get_string('timezone'), $choices);

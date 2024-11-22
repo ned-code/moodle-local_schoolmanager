@@ -796,6 +796,14 @@ class school_manager {
             $upd_school->extensionsallowed = $data->extensionsallowed ?? 3;
         }
 
+        $deadlinesdata = [
+            'x_days_between_dl_quiz' => $data->x_days_between_dl_quiz ?? 0,
+            'x_days_between_dl_other' =>  $data->x_days_between_dl_other ?? 0,
+            'allow_quiz_other_dl_in_one_day' => $data->allow_quiz_other_dl_in_one_day ?? 0,
+            'x_days_apply_to_all' => $data->x_days_apply_to_all ?? 0
+        ];
+        $upd_school->deadlinesdata = !empty($data->activatedeadlinesconfig) ? json_encode($deadlinesdata) : '';
+
         if ($can_manage_extra) {
             if (!empty($data->name)){
                 $upd_school->name = $data->name;
