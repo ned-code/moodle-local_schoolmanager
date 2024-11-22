@@ -40,6 +40,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property int    academicintegritymanager
  * @property int    forceproxysubmissionwindow
  * @property int    extensionsallowed
+ * @property string deadlinesdata
  * @property int    timecreated
  * @property int    timemodified
  */
@@ -191,6 +192,9 @@ class school extends \core\persistent implements \cacheable_object  {
             ),
             'extensionsallowed' => array(
                 'type' => PARAM_INT,
+            ),
+            'deadlinesdata' => array(
+                'type' => PARAM_TEXT,
             ),
         );
     }

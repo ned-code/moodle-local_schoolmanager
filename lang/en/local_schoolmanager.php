@@ -54,6 +54,7 @@ $string['sync_course_admins'] = 'Auto enroll School and District Admins to cours
 // Other
 $string['allschools'] = 'All Schools';
 $string['cheating'] = 'Cheating on Test or Exam';
+$string['activatedeadlinesconfig'] = 'Activate school deadlines configuration';
 $string['active_classes_dm_complete'] = 'active classes have complete Deadline Manager schedules';
 $string['active_classes_dm_incomplete'] = 'active classes did not have completed Deadline Manager schedules';
 $string['finished_classes_dm_complete'] = 'finished classes had completed Deadline Manager schedules';
