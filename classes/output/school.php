@@ -62,6 +62,9 @@ class school implements \renderable, \templatable {
             $schools = $sh->get_schools();
             if (count($schools) == 1) {
                 $url->param('schoolid', reset($schools)->id);
+                if ($this->_view) {
+                    $url->param('view', $this->_view);
+                }
                 redirect($url);
             }
         }
