@@ -35,67 +35,71 @@
 }}
 <div class="row staff">
     <div class="col-xl-9 col-lg-8 col-md-7 col-sm-6 table-wrapper">
-        <div class="table-container">
-            <table class="generaltable">
-                <thead>
-                <tr>
-                    <th>{{#str}}name, local_schoolmanager{{/str}}</th>
-                    <th>{{#str}}badges, local_schoolmanager{{/str}}</th>
-                    <th>{{#str}}role, local_schoolmanager{{/str}}</th>
-                    <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
-                    <th data-toggle="tooltip" title="{{#str}}staffextensionstooltip, local_schoolmanager{{/str}}">{{#str}}extensions, local_schoolmanager{{/str}}</th>
-                    <th data-toggle="tooltip" title="{{#str}}staffaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
-                    <th data-toggle="tooltip" data-title="{{#str}}staffaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
-                    <th>CT-GC</th>
-                    <th>CT-AC</th>
-                </tr>
-                </thead>
-                <tbody>
-                {{#staffs}}
+        {{#viewsstaff}}
+            <div class="table-container">
+                <table class="generaltable">
+                    <thead>
                     <tr>
-                        <td class="username userid-{{{id}}}">{{{username}}}</td>
-                        <td class="badges">{{{badges}}}</td>
-                        <td class="role">{{role}}</td>
-                        <td class="lastaccess">{{lastaccess}}</td>
-                        <td class="deadlineextensions text-center">{{deadlineextensions}}</td>
-                        <td class="aivreports text-center">{{aivreports}}</td>
-                        <td class="aivreports30 text-center">{{aivreports30}}</td>
-                        <td class="school-cts">{{#ctgc}}Y{{/ctgc}}{{^ctgc}}N{{/ctgc}}</td>
-                        <td class="school-cts">{{#ctac}}Y{{/ctac}}{{^ctac}}N{{/ctac}}</td>
+                        <th>{{#str}}name, local_schoolmanager{{/str}}</th>
+                        <th>{{#str}}badges, local_schoolmanager{{/str}}</th>
+                        <th>{{#str}}role, local_schoolmanager{{/str}}</th>
+                        <th>{{#str}}lastaccess, local_schoolmanager{{/str}}</th>
+                        <th data-toggle="tooltip" title="{{#str}}staffextensionstooltip, local_schoolmanager{{/str}}">{{#str}}extensions, local_schoolmanager{{/str}}</th>
+                        <th data-toggle="tooltip" title="{{#str}}staffaivreportstooltip, local_schoolmanager{{/str}}">{{#str}}aivreports, local_schoolmanager{{/str}}</th>
+                        <th data-toggle="tooltip" data-title="{{#str}}staffaivreports30tooltip, local_schoolmanager{{/str}}">{{#str}}aivreports30, local_schoolmanager{{/str}}</th>
+                        <th>CT-GC</th>
+                        <th>CT-AC</th>
                     </tr>
-                {{/staffs}}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                    {{#staffs}}
+                        <tr>
+                            <td class="username userid-{{{id}}}">{{{username}}}</td>
+                            <td class="badges">{{{badges}}}</td>
+                            <td class="role">{{role}}</td>
+                            <td class="lastaccess">{{lastaccess}}</td>
+                            <td class="deadlineextensions text-center">{{deadlineextensions}}</td>
+                            <td class="aivreports text-center">{{aivreports}}</td>
+                            <td class="aivreports30 text-center">{{aivreports30}}</td>
+                            <td class="school-cts">{{#ctgc}}Y{{/ctgc}}{{^ctgc}}N{{/ctgc}}</td>
+                            <td class="school-cts">{{#ctac}}Y{{/ctac}}{{^ctac}}N{{/ctac}}</td>
+                        </tr>
+                    {{/staffs}}
+                    </tbody>
+                </table>
+            </div>
+        {{/viewsstaff}}
     </div>
     {{> local_schoolmanager/school_summary_blocks }}
 </div>
-{{#js}}
-    require(['jquery', 'local_ned_controller/tablesorter'], function($, Tablesorter) {
-        $(document).ready(function() {
-            $(function() {
-                let $datatables = $('.generaltable');
-                let opt = {
-                    headers: {},
-                    cssAsc: 'sort-up',
-                    cssDesc: 'sort-down',
-                    cssNone: 'sort-none',
-                    textAttribute: 'data-sort-value',
-                    emptyTo: 'bottom',
-                    sortStable: true,
-                    widgets: ['headerTitles'],
-                    widgetOptions: {
-                        headerTitle_useAria  : true,
-                        headerTitle_tooltip  : 'tooltip',
-                        headerTitle_callback : updateTooltips
-                    }
-                };
+{{#viewsstaff}}
+    {{#js}}
+        require(['jquery', 'local_ned_controller/tablesorter'], function($, Tablesorter) {
+            $(document).ready(function() {
+                $(function() {
+                    let $datatables = $('.generaltable');
+                    let opt = {
+                        headers: {},
+                        cssAsc: 'sort-up',
+                        cssDesc: 'sort-down',
+                        cssNone: 'sort-none',
+                        textAttribute: 'data-sort-value',
+                        emptyTo: 'bottom',
+                        sortStable: true,
+                        widgets: ['headerTitles'],
+                        widgetOptions: {
+                            headerTitle_useAria  : true,
+                            headerTitle_tooltip  : 'tooltip',
+                            headerTitle_callback : updateTooltips
+                        }
+                    };
 
-                $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');
-                $datatables.find('th:not(.sorter-false)').addClass('sorter-true');
-                $datatables.find('tr.nosort > td').attr('data-sort-value', '');
-                $datatables.tablesorter(opt);
+                    $datatables.find('th:not([data-sorter])').attr('data-sorter', 'text');
+                    $datatables.find('th:not(.sorter-false)').addClass('sorter-true');
+                    $datatables.find('tr.nosort > td').attr('data-sort-value', '');
+                    $datatables.tablesorter(opt);
+                });
             });
         });
-    });
-{{/js}}
+    {{/js}}
+{{/viewsstaff}}

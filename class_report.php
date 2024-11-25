@@ -71,7 +71,7 @@ $contextsystem = context_system::instance();
 $isot = report_ghs\helper::is_ot($USER->id);
 
 // Permission.
-if (!has_capability('report/ghs:viewgroupenrollment', $contextsystem) && !\report_ghs\helper::has_capability_in_any_course('report/ghs:viewgroupenrollment')) {
+if (!NED::can_view_class_enrollment_report()) {
     throw new required_capability_exception($contextsystem, 'report/ghs:viewgroupenrollment', 'nopermissions', '');
 }
 

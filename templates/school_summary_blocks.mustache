@@ -24,7 +24,9 @@
     Main "block" should have "col-md-9" class and be inside the "row" block
 }}
 <div class="col-xl-3 col-lg-4 col-md-5 col-sm-6">
-    {{> local_schoolmanager/school_schoolprofile }}
+    {{#viewschoolprofile}}
+        {{> local_schoolmanager/school_schoolprofile }}
+    {{/viewschoolprofile}}
     {{#student_summary}}
         {{> local_schoolmanager/school_summary_students }}
     {{/student_summary}}

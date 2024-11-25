@@ -98,6 +98,17 @@ class school_header implements \renderable, \templatable {
             $downloadallgradesurl->param('download', 1);
             $data->downloadallgrades = NED::link($downloadallgradesurl, NED::fa('fa-download') . $name, 'float-right');
         }
+        $ctx = NED::ctx();
+        if ($viewstudentstaffsummary = NED::has_capability('viewstudentstaffsummary', $ctx)) {
+            $data->{'canview_'.SH::VIEW_STUDENTS} = 1;
+            $data->{'canview_'.SH::VIEW_STAFF} = 1;
+        }
+        if (NED::can_view_class_enrollment_report()) {
+            $data->{'canview_'.SH::VIEW_CLASSES} = 1;
+        }
+        if (NED::has_capability('local/epctracker:viewownschool', $ctx)) {
+            $data->{'canview_'.SH::VIEW_EPC} = 1;
+        }
 
         $data->btn_students_url = clone $this->url;
         $data->btn_students_url->param('view', SH::VIEW_STUDENTS);
