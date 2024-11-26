@@ -48,5 +48,15 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         NED::upgrade_plugin_savepoint(2024100400);
     }
 
+    if ($oldversion < 2024112200) {
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('deadlinesdata', XMLDB_TYPE_TEXT, null,null, null, null, null, 'forceproxysubmissionwindow');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        NED::upgrade_plugin_savepoint(2024112200);
+    }
+
     return true;
 }
