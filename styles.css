@@ -72,9 +72,6 @@ body.pagelayout-schoolmanager .control-panel {
 .pagelayout-schoolmanager .school-schoolinfo img {
   max-height: 170px;
 }
-.schoolmanager-header .btn.btn-secondary.active {
-  background-color: yellow !important;
-}
 
 .pagelayout-schoolmanager table.tablesorter thead tr th {
   cursor: pointer;
