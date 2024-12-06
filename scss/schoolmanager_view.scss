@@ -6,11 +6,66 @@
  * @copyright  2024 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  */
-
 body#page-local-schoolmanager-view {
 
     .popover[role="tooltip"] {
         max-width: 450px;
+    }
+
+    .schoolmanager-header {
+
+        //school title start
+        .ned-single-autocomplete {
+            color: white;
+            font-size: 19px;
+            font-weight: bold;
+
+            .icon {
+                font-size: 19px;
+                text-align: center;
+                margin-right: 5px;
+                font-weight: normal;
+            }
+
+            ul.form-autocomplete-suggestions {
+                color:#1d2125;
+            }
+
+            .inplaceeditable {
+                margin-left: .5rem;
+                background-color: unset;
+
+                &:not(.inplaceeditingon) {
+                    border: unset;
+                }
+
+                &.inplaceeditingon {
+                    background-color: unset;
+
+                    input {
+                        width: unset;
+                    }
+                }
+
+                .quickediticon .icon {
+                    font-size: 19px;
+                    font-weight: normal;
+                }
+
+                li {
+                    font-size: 15px;
+                }
+
+                &.inplaceeditable-autocomplete {
+                    padding: 0;
+                }
+            }
+        }
+
+        .form-autocomplete-downarrow {
+            top: 0;
+        }
+        //end school title
     }
 
     .badges {
@@ -29,6 +84,20 @@ body#page-local-schoolmanager-view {
                 display: none;
             }
         }
+    }
+
+    #school-list th, #school-list td {
+        font-size: 13px;
+        padding: 6px;
+
+        &.border-left {
+            border-left-width: 2px;
+        }
+    }
+
+    #school-list th {
+        background-color: #ECEEEF;
+
     }
 }
 

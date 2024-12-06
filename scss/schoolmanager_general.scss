@@ -1,0 +1,152 @@
+/**
+ * School view page
+ *
+ * @package    local_schoolmanager
+ * @subpackage scss/schoolmanager_general
+ * @copyright  2024 NED {@link http://ned.ca}
+ * @author     NED {@link http://ned.ca}
+ */
+body.pagelayout-schoolmanager {
+
+  #region-main {
+    overflow: visible;
+    background-color: #ECEEEF;
+    border: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  #region-main-box {
+    width: 100%;
+  }
+
+  .menu-links {
+    display: flex;
+    font-size: larger;
+    background-color: #ffffcc;
+    padding: 10px;
+    margin-bottom: 20px;
+
+    & > *:not(:last-child) {
+      margin-right: 20px;
+    }
+  }
+
+  .school-name {
+    padding: 20px 0;
+    font-size: larger;
+    font-family: cursive;
+    font-weight: bold;
+  }
+
+  .school-manager-links {
+    padding: 5px 20px;
+  }
+
+  .control-panel {
+    margin-top: 20px;
+  }
+
+  .schoolmanager-header {
+    margin: 0;
+    background-color: #0672b1;
+    padding: 10px 15px;
+
+    .school-title {
+      h4 {
+        color: #FFFFFF;
+        margin: 0;
+        font-size: 26px;
+      }
+    }
+  }
+
+  .container, .container-fluid, .container-sm, .container-md, .container-lg, .container-xl, div#region-main-box {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .school, .page-content-wrapper {
+    margin: 0 10%;
+  }
+
+  .school-page {
+    padding: 25px;
+    border: 1px solid #ddd;
+    margin-right: -15px;
+    margin-left: -15px;
+    background-color: white;
+
+    .card {
+      font-size: 13px;
+
+      .card-header {
+        padding: 6px;
+        background-color: #ECEEEF;
+      }
+
+      .card-body {
+        padding: 6px;
+
+        .col-md-3, .col-md-9 {
+          padding: 0 6px;
+        }
+      }
+    }
+
+    .form-check-label {
+      font-size: 13px;
+    }
+  }
+
+  span#maincontent {
+    display: none;
+  }
+
+  .school-schoolinfo img {
+    max-height: 170px;
+  }
+
+  table {
+    &.tablesorter {
+      thead {
+        tr {
+          th {
+            cursor: pointer;
+
+            &.tablesorter-headerDesc:after, &.tablesorter-headerAsc:after, &.header:after {
+              font-family: FontAwesome;
+              float: right;
+            }
+
+            &.header:after {
+              content: "\f0dc";
+            }
+
+            &.tablesorter-headerAsc:after {
+              content: "\f0de";
+            }
+
+            &.tablesorter-headerDesc:after {
+              content: "\f0dd";
+            }
+
+            .tablesorter-header-inner {
+              display: inline;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .generaltable {
+    border: 1px solid #ddd;
+  }
+
+  .school-shortname {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+}
