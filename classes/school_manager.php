@@ -12,6 +12,7 @@
 namespace local_schoolmanager;
 use block_ned_teacher_tools\deadline_manager;
 use local_schoolmanager\shared_lib as NED;
+use block_ned_teacher_tools\shared_lib as TT;
 
 defined('MOODLE_INTERNAL') || die();
 /** @var \stdClass $CFG */
@@ -796,13 +797,23 @@ class school_manager {
             $upd_school->extensionsallowed = $data->extensionsallowed ?? 3;
         }
 
-        $deadlinesdata = [
-            'x_days_between_dl_quiz' => $data->x_days_between_dl_quiz ?? 0,
-            'x_days_between_dl_other' =>  $data->x_days_between_dl_other ?? 0,
-            'allow_quiz_other_dl_in_one_day' => $data->allow_quiz_other_dl_in_one_day ?? 0,
-            'x_days_apply_to_all' => $data->x_days_apply_to_all ?? 0
-        ];
-        $upd_school->deadlinesdata = !empty($data->activatedeadlinesconfig) ? json_encode($deadlinesdata) : '';
+        $deadlinesdata = $deadlinesdata_keys = [];
+
+        if (NED::is_tt_exists()){
+            $deadlinesdata_keys = [
+                TT::X_DAYS_BETWEEN_DL_QUIZ,
+                TT::X_DAYS_BETWEEN_DL_OTHER,
+                TT::X_DAYS_APPLY_TO_ALL,
+            ];
+        }
+
+        foreach ($deadlinesdata_keys as $deadlinesdata_key){
+            if ($data->$deadlinesdata_key || $deadlinesdata_key === TT::X_DAYS_APPLY_TO_ALL){
+                $deadlinesdata[$deadlinesdata_key] = $data->$deadlinesdata_key;
+            }
+        }
+
+        $upd_school->deadlinesdata = (!empty($data->activatedeadlinesconfig) && !empty($deadlinesdata)) ? json_encode($deadlinesdata) : null;
 
         if ($can_manage_extra) {
             if (!empty($data->name)){

@@ -57,7 +57,7 @@ $string['sync_course_admins'] = 'Auto enroll School and District Admins to cours
 // Other
 $string['allschools'] = 'All Schools';
 $string['cheating'] = 'Cheating on Test or Exam';
-$string['activatedeadlinesconfig'] = 'Activate school deadlines configuration';
+$string['activatedeadlinesconfig'] = 'Activate school deadlines override';
 $string['active_classes_dm_complete'] = 'active classes have complete Deadline Manager schedules';
 $string['active_classes_dm_incomplete'] = 'active classes did not have completed Deadline Manager schedules';
 $string['finished_classes_dm_complete'] = 'finished classes had completed Deadline Manager schedules';
@@ -114,6 +114,8 @@ $string['ctgq'] = 'CT-GQ';
 $string['ctgqtooltip'] = 'Classroom Teachers with General Qualifications';
 $string['cts'] = 'CTs';
 $string['ctstooltip'] = 'Classroom Teachers';
+$string['deadline_config'] = ''; // required for "deadline_config_help" element
+$string['deadline_config_help'] = 'If the field is left empty or "0", the course setting will be applied';
 $string['deadlineextensions'] = 'Deadline Extensions';
 $string['deadlineextensions_l'] = 'deadline Extensions';
 $string['deadlinenotifications'] = 'Deadline Notifications';

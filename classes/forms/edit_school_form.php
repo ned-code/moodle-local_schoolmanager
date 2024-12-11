@@ -10,7 +10,7 @@
 
 namespace local_schoolmanager\forms;
 
-use context_system;
+use block_ned_teacher_tools\shared_lib as TT;
 use local_schoolmanager\school;
 use local_schoolmanager\school_manager as SM;
 use local_schoolmanager\shared_lib as NED;
@@ -97,20 +97,19 @@ class edit_school_form extends \moodleform {
             $mform->hardFreeze(['city', 'country']);
         }
 
-        $context = context_system::instance();
-        if (has_capability('local/schoolmanager:manage_extension_limit', $context)) {
+        if (NED::has_capability('manage_extension_limit')){
             $mform->addElement('select', 'extensionsallowed', NED::str('extensionsallowed'),
                 [0 => 0, 1 => 1, 2 => 2, 3 => 3]);
             $mform->setDefault('extensionsallowed', 3);
         }
 
         // Options for Deadline Manager
-        if (NED::is_tt_exists()) {
+        if (NED::is_tt_exists()){
             $deadlines_json_data = $school->deadlinesdata;
             $activatedeadlinesconfig = 0;
             $deadlinesdata = null;
 
-            if ($deadlines_json_data) {
+            if ($deadlines_json_data){
                 $activatedeadlinesconfig = 1;
                 $deadlinesdata = json_decode($deadlines_json_data);
             }
@@ -119,21 +118,17 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('activatedeadlinesconfig', $activatedeadlinesconfig);
 
             $deadlineselements = [
-                'x_days_between_dl_quiz' => [
+                TT::X_DAYS_BETWEEN_DL_QUIZ => [
                     'type' => 'text',
+                    'help' => 'deadline_config'
                 ],
-                'x_days_between_dl_other' => [
+                TT::X_DAYS_BETWEEN_DL_OTHER => [
                     'type' => 'text',
+                    'help' => 'deadline_config'
                 ],
-                'allow_quiz_other_dl_in_one_day' => [
-                    'type' => 'selectyesno',
-                ],
-                'x_days_apply_to_all' => [
+                TT::X_DAYS_APPLY_TO_ALL => [
                     'type' => 'select',
-                    'choices' => [
-                        0 => NED::str('group', null, NED::TT),
-                        1 => NED::str('all', null, NED::TT)
-                    ],
+                    'choices' => TT::get_x_days_apply_to_all_choices()
                 ]
             ];
 
@@ -142,6 +137,10 @@ class edit_school_form extends \moodleform {
                     $mform->addElement($element['type'], $name, NED::str($name,null,NED::TT), $element['choices']);
                 } else {
                     $mform->addElement($element['type'], $name, NED::str($name,null,NED::TT));
+                }
+
+                if (!empty($element['help'])){
+                    $mform->addHelpButton($name, $element['help'], NED::$PLUGIN_NAME);
                 }
 
                 $mform->hideIf($name, 'activatedeadlinesconfig', 'notchecked');

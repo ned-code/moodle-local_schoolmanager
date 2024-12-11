@@ -195,6 +195,8 @@ class school extends \core\persistent implements \cacheable_object  {
             ),
             'deadlinesdata' => array(
                 'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
         );
     }
