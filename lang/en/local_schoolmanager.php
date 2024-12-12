@@ -38,6 +38,7 @@ $string['schoolmanager:manage_members'] = 'Manage cohort members';
 $string['schoolmanager:view_ps_compliance_report'] = 'Can view Partner School Compliance report';
 $string['schoolmanager:manage_extension_limit'] = 'Can view and manage number of allowed extensions in School Manager';
 $string['schoolmanager:manage_extension_limit_override'] = 'Can ignore extension limit restriction set in School Manager';
+$string['schoolmanager:manage_deadlines_data_override'] = 'Can manage deadline override settings';
 $string['schoolmanager:viewschooldescription'] = 'Can view School Description';
 $string['schoolmanager:viewschoolprofile'] = 'Can view School Profile block';
 

@@ -75,6 +75,11 @@ $capabilities = array(
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array()
     ),
+    'local/schoolmanager:manage_deadlines_data_override' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array()
+    ),
     'local/schoolmanager:viewstudentstaffsummary' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,

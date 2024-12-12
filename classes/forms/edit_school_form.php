@@ -108,6 +108,7 @@ class edit_school_form extends \moodleform {
             $deadlines_json_data = $school->deadlinesdata;
             $activatedeadlinesconfig = 0;
             $deadlinesdata = null;
+            $canmanagedeadlinesdata = NED::has_capability('manage_deadlines_data_override');
 
             if ($deadlines_json_data){
                 $activatedeadlinesconfig = 1;
@@ -143,9 +144,17 @@ class edit_school_form extends \moodleform {
                     $mform->addHelpButton($name, $element['help'], NED::$PLUGIN_NAME);
                 }
 
-                $mform->hideIf($name, 'activatedeadlinesconfig', 'notchecked');
                 $mform->setDefault($name, $deadlinesdata?->$name ?? ($element['type'] === 'text' ? '' : 0));
                 $mform->setType($name, PARAM_INT);
+
+                if ($canmanagedeadlinesdata){
+                    $mform->hideIf($name, 'activatedeadlinesconfig', 'notchecked');
+                }
+            }
+
+            if (!$canmanagedeadlinesdata){
+                $mform->hardFreeze('activatedeadlinesconfig');
+                $mform->hardFreeze(array_keys($deadlineselements));
             }
         }
 

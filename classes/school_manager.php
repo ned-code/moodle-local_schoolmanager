@@ -793,27 +793,27 @@ class school_manager {
         $upd_school->note = $data->note ?? '';
         $upd_school->iptype = $data->iptype ?? null;
 
-        if (has_capability('local/schoolmanager:manage_extension_limit', $this->_ctx)) {
+        if (NED::has_capability('manage_extension_limit', $this->_ctx)) {
             $upd_school->extensionsallowed = $data->extensionsallowed ?? 3;
         }
 
-        $deadlinesdata = $deadlinesdata_keys = [];
-
-        if (NED::is_tt_exists()){
+        // Processing deadlines data
+        if (NED::is_tt_exists() && NED::has_capability('manage_deadlines_data_override', $this->_ctx)){
+            $deadlinesdata = [];
             $deadlinesdata_keys = [
                 TT::X_DAYS_BETWEEN_DL_QUIZ,
                 TT::X_DAYS_BETWEEN_DL_OTHER,
                 TT::X_DAYS_APPLY_TO_ALL,
             ];
-        }
 
-        foreach ($deadlinesdata_keys as $deadlinesdata_key){
-            if ($data->$deadlinesdata_key || $deadlinesdata_key === TT::X_DAYS_APPLY_TO_ALL){
-                $deadlinesdata[$deadlinesdata_key] = $data->$deadlinesdata_key;
+            foreach ($deadlinesdata_keys as $deadlinesdata_key){
+                if ($data->$deadlinesdata_key || $deadlinesdata_key === TT::X_DAYS_APPLY_TO_ALL){
+                    $deadlinesdata[$deadlinesdata_key] = $data->$deadlinesdata_key;
+                }
             }
-        }
 
-        $upd_school->deadlinesdata = (!empty($data->activatedeadlinesconfig) && !empty($deadlinesdata)) ? json_encode($deadlinesdata) : null;
+            $upd_school->deadlinesdata = (!empty($data->activatedeadlinesconfig) && !empty($deadlinesdata)) ? json_encode($deadlinesdata) : null;
+        }
 
         if ($can_manage_extra) {
             if (!empty($data->name)){

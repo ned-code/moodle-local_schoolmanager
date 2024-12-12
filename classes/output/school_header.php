@@ -60,7 +60,7 @@ class school_header implements \renderable, \templatable {
             $data->logourl = $logourl->out();
         } else {
             $name = $this->school->get('name');
-            if (($pos = strpos($name, '-')) !== false) {
+            if ($name && ($pos = strpos($name, '-')) !== false){
                 $data->shortname = trim(substr($name, $pos + 1 ));
             }
         }
@@ -76,7 +76,7 @@ class school_header implements \renderable, \templatable {
         $data->country = $this->school->get('country');
         $data->schoolwebsite = $this->school->get('url');
         $data->schoolwebsiteurl = $data->schoolwebsite;
-        if (!preg_match("@^htt?ps?://@", $data->schoolwebsiteurl)) {
+        if ($data->schoolwebsiteurl && !preg_match("@^htt?ps?://@", $data->schoolwebsiteurl)){
             $data->schoolwebsiteurl = "https://" . $data->schoolwebsiteurl;
         }
         $data->synctimezone = $this->school->get('synctimezone');
