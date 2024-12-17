@@ -58,5 +58,14 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         NED::upgrade_plugin_savepoint(2024112200);
     }
 
+    if ($oldversion < 2024121600) {
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('region', XMLDB_TYPE_CHAR, '120', null, null, null, null, 'country');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        NED::upgrade_plugin_savepoint(2024121600);
+    }
+
     return true;
 }

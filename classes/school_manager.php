@@ -786,6 +786,7 @@ class school_manager {
         $upd_school->url = $data->url ?? '';
         $upd_school->city = $data->city ?? '';
         $upd_school->country = $data->country ?? $this->_user->country ?? '';
+        $upd_school->region = $data->region ?? '';
         $upd_school->schoolyeartype = $data->schoolyeartype ?? 0;
         $upd_school->startdate = $data->startdate ?? time();
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);

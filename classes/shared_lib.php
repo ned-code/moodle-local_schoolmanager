@@ -275,6 +275,20 @@ class shared_lib extends \local_ned_controller\shared\base_class {
 
         return static::db()->count_records_sql($query['sql'], $query['params']);
     }
+
+
+    /**
+     * Retrieve a list of regions with their respective codes.
+     *
+     * @return string[] - An associative array where keys and values represent region codes and names.
+     */
+    public static function get_region_list() {
+        return [
+            'SM' => 'SM',
+            'China' =>'China',
+            'NA' => 'NA'
+        ];
+    }
 }
 
 shared_lib::init();
