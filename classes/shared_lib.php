@@ -287,6 +287,19 @@ class shared_lib extends \local_ned_controller\shared\base_class {
             \report_ghs\helper::has_capability_in_any_course('report/ghs:viewgroupenrollment');
 
     }
+
+    /**
+     * Retrieve a list of regions with their respective codes.
+     *
+     * @return string[] - An associative array where keys and values represent region codes and names.
+     */
+    public static function get_region_list() {
+        return [
+            'SM' => 'SM',
+            'China' =>'China',
+            'NA' => 'NA'
+        ];
+    }
 }
 
 shared_lib::init();

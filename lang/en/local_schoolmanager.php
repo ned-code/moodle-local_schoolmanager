@@ -243,3 +243,4 @@ $string['dynamic-down'] = 'gone down';
 $string['dynamic-same'] = 'remained the same';
 $string['epchecks'] = 'EP Checks';
 $string['epmarkers'] = 'EP Overview';
+$string['region'] = 'Region';

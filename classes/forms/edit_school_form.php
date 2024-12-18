@@ -93,6 +93,10 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('country', $SM->user->country);
         }
 
+        $regions = NED::get_region_list();
+        $regions = array('' => get_string('choose') . '...') + $regions;
+        $mform->addElement('select', 'region', NED::str('region'), $regions);
+
         if (!$this->_can_manage_extra){
             $mform->hardFreeze(['city', 'country']);
         }
