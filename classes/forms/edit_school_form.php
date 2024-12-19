@@ -61,22 +61,35 @@ class edit_school_form extends \moodleform {
         $mform->addElement('hidden', 'new', (int)$this->_new);
         $mform->setType('new', PARAM_INT);
 
+        $mform->addElement('html', NED::div_start('school-form-groups d-flex flex-wrap'));
+        // School details Group
+        // Start Section school details
+        $mform->addElement('html', NED::div_start('school-group-section school-details-group'));
+        $mform->addElement('html', NED::span(NED::str('schooldetails'), 'group-title'));
+        // Start school details form group
+        $mform->addElement('html', NED::div_start('school-form-group'));
         $mform->addElement('text', 'name', NED::str('schoolname'), []);
         $mform->setType('name', PARAM_TEXT);
         $mform->setDefault('name', $this->_school->name ?? '');
 
         if ($this->_can_manage_extra){
-            $mform->addElement('text', 'cohortname', NED::str('schoolcohortname'), []);
+            $cohortname = & $mform->createElement('text', 'cohortname', NED::str('schoolcohortname'), []);
             $mform->setType('cohortname', PARAM_TEXT);
             $mform->setDefault('cohortname', $this->_school->name ?? '');
-            $mform->hardFreeze('cohortname');
+            $cohortname->freeze('cohortname');
+
+            $schoolcode = & $mform->createElement('text', 'code', NED::str('schoolid'), ['class' => 'school-code']);
+            $schoolcode->freeze('code');
+            $mform->addGroup(
+                [$cohortname, $schoolcode], 'school_name', NED::str('schoolcohortname'),
+                null, false
+            );
         } else {
-            $mform->hardFreeze('name');
+            $mform->addElement('text', 'code', NED::str('schoolid'), []);
+            $mform->hardFreeze(['name', 'code']);
         }
 
-        $mform->addElement('text', 'code', NED::str('schoolid'), []);
         $mform->setType('code', PARAM_TEXT);
-        $mform->hardFreeze('code');
 
         $mform->addElement('text', 'url', NED::str('schoolwebsite'), []);
         $mform->setType('url', PARAM_URL);
@@ -101,10 +114,109 @@ class edit_school_form extends \moodleform {
             $mform->hardFreeze(['city', 'country']);
         }
 
+        // Timezone
+        $choices = \core_date::get_list_of_timezones($CFG->timezone, true);
+        $mform->addElement('select', 'timezone', get_string('timezone'), $choices);
+        $mform->setDefault('timezone', $CFG->timezone);
+
+        if ($this->_can_manage_extra) {
+            // Sync timezone
+            $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
+            $mform->setDefault('synctimezone', 0);
+        }
+
+        // Staff options.
+        $staffoptions = [];
+        if ($staffs = $SM->get_school_students($this->_schoolid, true, $SM::STAFF_ROLES, false)) {
+            foreach ($staffs as $staff) {
+                $staffoptions[$staff->id] = fullname($staff);
+            }
+            $staffoptions = [0 => get_string('choose')] + $staffoptions;
+        }
+
+        // School Administrator.
+        $administrator = $SM->get_school_admin($this->_schoolid);
+
+        // it doesn't save anywhere, just info
+        $mform->addElement('select', 'schooladministrator', NED::str('schooladministrator'), $staffoptions);
+        $mform->setDefault('schooladministrator', $administrator->id ?? 0);
+        $mform->hardFreeze('schooladministrator');
+
+        // ESL.
+        if ($this->_can_manage_extra){
+            $mform->addElement('selectyesno', 'esl', NED::str('esl'));
+            $mform->setDefault('esl', 0);
+        }
+
+        // School year.
+        $schoolyearoptions = [
+            NED::str('custom'),
+            NED::str('rosedaledefault', NED::get_format_school_year()),
+        ];
+        $mform->addElement('select', 'schoolyeartype', NED::str('schoolyear'), $schoolyearoptions);
+        $mform->setDefault('schoolyeartype', 0);
+
+        $mform->addElement('date_selector', 'startdate', NED::str('schoolyearstartdate'));
+        $mform->setType('startdate', PARAM_INT);
+        $mform->setDefault('startdate', time());
+        $mform->hideIf('startdate', 'schoolyeartype', 'eq', 1);
+
+        $mform->addElement('date_selector', 'enddate', NED::str('schoolyearenddate'));
+        $mform->setType('enddate', PARAM_INT);
+        $mform->setDefault('enddate', time() + YEARSECS);
+        $mform->hideIf('enddate', 'schoolyeartype', 'eq', 1);
+        $mform->addElement('html', NED::div_end()); // 'school-form-group'
+        // End school details form group
+        $mform->addElement('html', NED::div_end()); // 'school-group-section school-details-group'
+
+        // Academic Integrity Group
+        // start Academic Integrity section
+        $mform->addElement('html', NED::div_start('school-group-section academic-integrity-group'));
+        // start Academic Integrity group
+        $mform->addElement('html', NED::span(NED::str('aiv_title'), 'group-title'));
+        $mform->addElement('html', NED::div_start('school-form-group'));
+
+        if ($this->_can_manage_extra) {
+            // Force proxy submission window
+            $mform->addElement('select', 'forceproxysubmissionwindow', NED::str('forceproxysubmissionwindow'),
+                [0 => NED::str('activitysetting')] + NED::strings2menu(school::PROXY_SUBMISSION_WINDOWS));
+            $mform->setDefault('forceproxysubmissionwindow', 0);
+
+            // Enable TEM
+            $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
+            $mform->setDefault('enabletem', 0);
+        }
+
+        if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)) {
+            // Proctor Manager for tests/Exams.
+            $mform->addElement('select', 'proctormanager', NED::str('proctormanager'), $staffoptions);
+            $mform->setDefault('proctormanager', $administrator->id ?? 0);
+            // Academic Integrity Manager.
+            $mform->addElement('select', 'academicintegritymanager', NED::str('academicintegritymanager'), $staffoptions);
+            $mform->setDefault('academicintegritymanager', $administrator->id ?? 0);
+        }
+
+        // IP type
+        $mform->addElement('select', 'iptype', NED::str('iptype'), ['' => get_string('choose')] + NED::strings2menu(school::IP_TYPES));
+        $mform->addRule('iptype', null, 'required');
+        $mform->addHelpButton('iptype', 'iptype', NED::$PLUGIN_NAME);
+
+        // Extensions allowed per student per activity
         if (NED::has_capability('manage_extension_limit')){
-            $mform->addElement('select', 'extensionsallowed', NED::str('extensionsallowed'),
-                [0 => 0, 1 => 1, 2 => 2, 3 => 3]);
+            $mform->addElement(
+                'select',
+                'extensionsallowed',
+                NED::str('extensionsallowed'),
+                [0 => 0, 1 => 1, 2 => 2, 3 => 3]
+            );
             $mform->setDefault('extensionsallowed', 3);
+        }
+
+        // Extension manager
+        if ($this->_can_manage_extra){
+            $mform->addElement('select', 'extmanager', NED::str('extmanager'), NED::strings2menu(school::EXTENSION_MANAGER));
+            $mform->addHelpButton('extmanager', 'extmanager', NED::$PLUGIN_NAME);
+            $mform->setDefault('extmanager', school::EXT_MANAGE_CT);
         }
 
         // Options for Deadline Manager
@@ -119,7 +231,13 @@ class edit_school_form extends \moodleform {
                 $deadlinesdata = json_decode($deadlines_json_data);
             }
 
-            $mform->addElement('checkbox', 'activatedeadlinesconfig', NED::str('activatedeadlinesconfig'));
+            $mform->addElement(
+                'checkbox',
+                'activatedeadlinesconfig',
+                NED::str('activatedeadlinesconfig') ,
+                null,
+                ['class' => 'activatedeadlinesconfig-checkbox-field']
+            );
             $mform->setDefault('activatedeadlinesconfig', $activatedeadlinesconfig);
 
             $deadlineselements = [
@@ -162,98 +280,29 @@ class edit_school_form extends \moodleform {
             }
         }
 
-        // Timezone
-        $choices = \core_date::get_list_of_timezones($CFG->timezone, true);
-        $mform->addElement('select', 'timezone', get_string('timezone'), $choices);
-        $mform->setDefault('timezone', $CFG->timezone);
+        $mform->addElement('html', NED::div_end()); // 'school-form-group'
+        // End academic integrity form group
+        $mform->addElement('html', NED::div_end()); // 'school-group-section academic-integrity-group'
 
-        if ($this->_can_manage_extra) {
-            // Sync timezone
-            $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
-            $mform->setDefault('synctimezone', 0);
-
-            // Force proxy submission window
-            $mform->addElement('select', 'forceproxysubmissionwindow', NED::str('forceproxysubmissionwindow'),
-                [0 => NED::str('activitysetting')] + NED::strings2menu(school::PROXY_SUBMISSION_WINDOWS));
-            $mform->setDefault('forceproxysubmissionwindow', 0);
-
-            // Enable TEM
-            $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
-            $mform->setDefault('enabletem', 0);
-        }
-
-        // IP type
-        $mform->addElement('select', 'iptype', NED::str('iptype'), ['' => get_string('choose')] + NED::strings2menu(school::IP_TYPES));
-        $mform->addRule('iptype', null, 'required');
-        $mform->addHelpButton('iptype', 'iptype', NED::$PLUGIN_NAME);
-
-        // Staff options.
-        $staffoptions = [];
-        if ($staffs = $SM->get_school_students($this->_schoolid, true, $SM::STAFF_ROLES, false)) {
-            foreach ($staffs as $staff) {
-                $staffoptions[$staff->id] = fullname($staff);
-            }
-            $staffoptions = [0 => get_string('choose')] + $staffoptions;
-        }
-
-        // School Administrator.
-        $administrator = $SM->get_school_admin($this->_schoolid);
-
-        // it doesn't save anywhere, just info
-        $mform->addElement('select', 'schooladministrator', NED::str('schooladministrator'), $staffoptions);
-        $mform->setDefault('schooladministrator', $administrator->id ?? 0);
-        $mform->hardFreeze('schooladministrator');
-
-        if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)) {
-            // Proctor Manager for tests/Exams.
-            $mform->addElement('select', 'proctormanager', NED::str('proctormanager'), $staffoptions);
-            $mform->setDefault('proctormanager', $administrator->id ?? 0);
-            // Academic Integrity Manager.
-            $mform->addElement('select', 'academicintegritymanager', NED::str('academicintegritymanager'), $staffoptions);
-            $mform->setDefault('academicintegritymanager', $administrator->id ?? 0);
-        }
-
-        if ($this->_can_manage_extra){
-            $mform->addElement('select', 'extmanager', NED::str('extmanager'), NED::strings2menu(school::EXTENSION_MANAGER));
-            $mform->addHelpButton('extmanager', 'extmanager', NED::$PLUGIN_NAME);
-            $mform->setDefault('extmanager', school::EXT_MANAGE_CT);
-        }
-
-        // ESL.
-        if ($this->_can_manage_extra){
-            $mform->addElement('selectyesno', 'esl', NED::str('esl'));
-            $mform->setDefault('esl', 0);
-        }
-
+        // Logos and description group
+        $mform->addElement('html', NED::div_start('school-group-section logos-description-group'));
+        $mform->addElement('html', NED::span(NED::str('logosdescription'), 'group-title'));
+        $mform->addElement('html', NED::div_start('school-form-group'));
         // Logo
         if ($this->_can_manage_extra){
             $mform->addElement('filemanager', 'logo_filemanager', NED::str('logo'), null,
-                array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
-            //Compact Logo
+                ['accepted_types' => ['.png', '.jpg'], 'maxfiles' => 1]);
+            // Compact Logo
             $mform->addElement('filemanager', 'compact_logo_filemanager', NED::$C::str('compactlogo'), null,
-                array('accepted_types' => array('.png','.jpg'), 'maxfiles' => 1));
+                ['accepted_types' => ['.png', '.jpg'], 'maxfiles' => 1]);
         }
-
-        // School year.
-        $schoolyearoptions = [
-            NED::str('custom'),
-            NED::str('rosedaledefault', NED::get_format_school_year()),
-        ];
-        $mform->addElement('select', 'schoolyeartype', NED::str('schoolyear'), $schoolyearoptions);
-        $mform->setDefault('schoolyeartype', 0);
-
-        $mform->addElement('date_selector', 'startdate', NED::str('schoolyearstartdate'));
-        $mform->setType('startdate', PARAM_INT);
-        $mform->setDefault('startdate', time());
-        $mform->hideIf('startdate', 'schoolyeartype', 'eq', 1);
-
-        $mform->addElement('date_selector', 'enddate', NED::str('schoolyearenddate'));
-        $mform->setType('enddate', PARAM_INT);
-        $mform->setDefault('enddate', time() + YEARSECS);
-        $mform->hideIf('enddate', 'schoolyeartype', 'eq', 1);
 
         $mform->addElement('editor', 'note', NED::str('aboutschool'));
         $mform->setType('note', PARAM_RAW);
+        $mform->addElement('html', NED::div_end()); // 'school-form-group'
+        $mform->addElement('html', NED::div_end()); // 'school-group-section logos-description-group'
+        // End Logos and description group
+        $mform->addElement('html', NED::div_end()); // 'school-form-groups d-flex flex-wrap'
 
         $buttonarray = [];
         if ($this->_can_manage){
