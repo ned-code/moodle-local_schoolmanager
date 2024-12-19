@@ -67,5 +67,10 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         NED::upgrade_plugin_savepoint(2024121600);
     }
 
+    if ($oldversion < 2024121900) {
+        $DB->execute("UPDATE {local_schoolmanager_school} SET region = 'CN' WHERE region = 'China'");
+        NED::upgrade_plugin_savepoint(2024121900);
+    }
+
     return true;
 }

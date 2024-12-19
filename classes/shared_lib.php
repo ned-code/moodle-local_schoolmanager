@@ -296,7 +296,7 @@ class shared_lib extends \local_ned_controller\shared\base_class {
     public static function get_region_list() {
         return [
             'SM' => 'SM',
-            'China' =>'China',
+            'CN' =>'CN',
             'NA' => 'NA'
         ];
     }
