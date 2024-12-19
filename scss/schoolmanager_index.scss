@@ -1,0 +1,106 @@
+/**
+ * School index page
+ *
+ * @package    local_schoolmanager
+ * @subpackage scss/schoolmanager_index
+ * @copyright  2024 NED {@link http://ned.ca}
+ * @author     NED {@link http://ned.ca}
+ */
+
+//Edit School
+#page-local-schoolmanager-index{
+
+  #page-content {
+
+    .school .school-page {
+
+      form.mform {
+
+        .school-form-groups {
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 20px;
+          margin-bottom: 20px;
+
+          .school-group-section {
+            overflow: hidden;
+
+            .group-title {
+              font-size: larger;
+            }
+
+            .school-form-group {
+              padding: 20px;
+              border: 2px solid #9b9b9b;
+              background-color: #f0f0f0;
+              overflow-x: scroll;
+
+              .form-group {
+                flex-wrap: nowrap;
+
+                .form-inline {
+                  flex: 0 0 70%;
+                }
+
+                .col-form-label {
+                  flex: 0 0 30%;
+                  max-width: 30%;
+                }
+
+                &.school-code span[data-fieldtype="text"]{
+                  max-width: 45px;
+                }
+
+                &.activatedeadlinesconfig-checkbox-field .checkbox{
+                  max-width: 350px;
+                }
+              }
+            }
+
+            &.school-details-group, &.academic-integrity-group {
+              flex: 1;
+
+              @media screen and (max-width: 1033px){
+                flex-basis: 100%;
+              }
+            }
+
+            &.school-details-group {
+
+              .form-group {
+
+                .form-inline {
+                  flex: 0 0 80%;
+                }
+
+                .col-form-label {
+                  flex: 0 0 20%;
+                  max-width: 20%;
+                }
+              }
+            }
+
+            &.logos-description-group {
+              flex-basis: 100%;
+              flex-direction: column;
+              display: flex;
+
+              .form-group {
+
+                .col-form-label {
+                  max-width: 15%;
+                  flex: 0 0 15%;
+                }
+
+                .form-inline {
+                  max-width: 100%;
+                  flex: 0 0 85%;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
