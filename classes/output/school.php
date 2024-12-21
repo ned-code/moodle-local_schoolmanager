@@ -430,6 +430,12 @@ class school implements \renderable, \templatable {
                 $actionshtml[] = NED::O()->action_icon($action['url'], $action['icon'], null, $action['attributes']);
             }
             $school->actionlinks = NED::span($actionshtml, 'class-item-actions item-actions');
+
+            if ($logourl = SM\school_manager::get_logo_url($school->id)) {
+                $school->iconindicator = NED::fa('fa-picture-o m-0');
+            } else {
+                $school->iconindicator = NED::fa('fa-square-o m-0');
+            }
         }
         $this->_data->schools = array_values($schools);
         $this->_data->totalschools = count($schools);
