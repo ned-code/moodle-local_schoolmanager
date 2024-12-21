@@ -32,6 +32,7 @@
                 <th>{{#str}}name, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}city, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}country, local_schoolmanager{{/str}}</th>
+                <th>{{#str}}region, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}timezone, local_schoolmanager{{/str}}</th>
                 <th>{{#str}}students, local_schoolmanager{{/str}}</th>
                 <th class="border-left" data-toggle="tooltip" title="{{#str}}ctstooltip, local_schoolmanager{{/str}}">{{#str}}cts, local_schoolmanager{{/str}}</th>
@@ -40,7 +41,8 @@
                 <th class="border-left" data-toggle="tooltip" title="{{#str}}aivtooltip, local_schoolmanager{{/str}}">{{#str}}aiv, local_schoolmanager{{/str}}</th>
                 <th data-toggle="tooltip" title="{{#str}}aiv30tooltip, local_schoolmanager{{/str}}">{{#str}}aiv30, local_schoolmanager{{/str}}</th>
                 <th data-toggle="tooltip" title="{{#str}}aivatooltip, local_schoolmanager{{/str}}">{{#str}}aiva, local_schoolmanager{{/str}}</th>
-                <th class="border-left">{{#str}}schoolyear, local_schoolmanager{{/str}}</th>
+                <th class="border-left border-right">{{#str}}schoolyear, local_schoolmanager{{/str}}</th>
+                <th></th>
                 <th></th>
             </tr>
             </thead>
@@ -50,6 +52,7 @@
                     <td class="school-name- school-{{{id}}}"><a href="{{{schoolurl}}}">{{{cohortname}}}</a></td>
                     <td class="school-city">{{city}}</td>
                     <td class="school-country">{{country}}</td>
+                    <td class="school-region">{{region}}</td>
                     <td class="school-timezone">{{timezone}}{{#synctimezone}} <i class="fa fa-users" aria-hidden="true"></i>{{/synctimezone}}</td>
                     <td class="school-students text-center">{{numberofstudents}}</td>
                     <td class="school-cts border-left text-center">{{numberofcts}}</td>
@@ -58,7 +61,8 @@
                     <td class="school-schoolyear border-left text-center">{{aiv}}</td>
                     <td class="school-schoolyear text-center">{{aiv30}}</td>
                     <td class="school-schoolyear text-center">{{aivaverage}}</td>
-                    <td class="school-schoolyear border-left">{{schoolyear}}</td>
+                    <td class="school-schoolyear border-left border-right">{{schoolyear}}</td>
+                    <td class="school-schoolyear">{{{iconindicator}}}</td>
                     <td class="school-schoolyear">{{{actionlinks}}}</td>
                 </tr>
             {{/schools}}

@@ -106,10 +106,14 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('country', $SM->user->country);
         }
 
-        $regions = NED::get_region_list();
-        $regions = array('' => get_string('choose') . '...') + $regions;
-        $mform->addElement('select', 'region', NED::str('region'), $regions);
+        // School Administrator.
+        $administrator = $SM->get_school_admin($this->_schoolid);
 
+        if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)) {
+            $regions = NED::get_region_list();
+            $regions = array('' => get_string('choose') . '...') + $regions;
+            $mform->addElement('select', 'region', NED::str('region'), $regions);
+        }
         if (!$this->_can_manage_extra){
             $mform->hardFreeze(['city', 'country']);
         }
@@ -133,9 +137,6 @@ class edit_school_form extends \moodleform {
             }
             $staffoptions = [0 => get_string('choose')] + $staffoptions;
         }
-
-        // School Administrator.
-        $administrator = $SM->get_school_admin($this->_schoolid);
 
         // it doesn't save anywhere, just info
         $mform->addElement('select', 'schooladministrator', NED::str('schooladministrator'), $staffoptions);

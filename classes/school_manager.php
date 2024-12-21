@@ -783,11 +783,10 @@ class school_manager {
 
         if (empty($upd_school)) return false;
 
-        $administrator = $this->get_school_admin($school->id ?? null);
+        $administrator = $this->get_school_admin($upd_school->id ?? null);
         $upd_school->url = $data->url ?? '';
         $upd_school->city = $data->city ?? '';
         $upd_school->country = $data->country ?? $this->_user->country ?? '';
-        $upd_school->region = $data->region ?? '';
         $upd_school->schoolyeartype = $data->schoolyeartype ?? 0;
         $upd_school->startdate = $data->startdate ?? time();
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
@@ -838,6 +837,7 @@ class school_manager {
         }
 
         if ($can_manage_extra || ($administrator && $administrator->id == $USER->id)){
+            $upd_school->region = !empty($data->region) ? $data->region : 0;
             $upd_school->proctormanager = !empty($data->proctormanager) ? $data->proctormanager : 0;
             $upd_school->academicintegritymanager = !empty($data->academicintegritymanager) ? $data->academicintegritymanager : 0;
         }
