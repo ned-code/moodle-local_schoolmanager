@@ -300,6 +300,30 @@ class shared_lib extends \local_ned_controller\shared\base_class {
             'NA' => 'NA'
         ];
     }
+
+    /**
+     * Getting showall parameter from url or from user cache
+     *
+     * @return bool
+     */
+    public static function get_showallschools_param_value(){
+        $userscache = static::get_user_cache();
+        $showallschools = optional_param(static::PAR_SHOWALL, null, PARAM_BOOL);
+
+        if (!is_null($showallschools)){
+            $userscache->set(static::$C::CACHE_USERS_KEY_SHOWALLSCHOOLS, $showallschools);
+        } else {
+            $showallschools = false;
+            $prev_url = static::urL_get_prev_url();
+            if (static::is_schm_page($prev_url) || static::is_frontdashboard_page($prev_url)){
+                $showallschools = $userscache->get(static::$C::CACHE_USERS_KEY_SHOWALLSCHOOLS);
+            } else {
+                $userscache->delete(static::$C::CACHE_USERS_KEY_SHOWALLSCHOOLS);
+            }
+        }
+
+        return $showallschools;
+    }
 }
 
 shared_lib::init();

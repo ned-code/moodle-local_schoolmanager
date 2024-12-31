@@ -67,6 +67,11 @@ class school implements \renderable, \templatable {
                 }
                 redirect($url);
             }
+        } else {
+            $url = NED::page()->url;
+            $url->param('schoolid', $this->_schoolid);
+            $url->param(NED::PAR_VIEW, $this->_view);
+            NED::page()->set_url($url);
         }
         $this->_data = (object)[];
     }
@@ -358,10 +363,9 @@ class school implements \renderable, \templatable {
      * @return void - result saves in the $this->_data;
      */
     protected function _export_view_schools(){
-        $showall = optional_param('showall', false, PARAM_BOOL);
-
         $sh = SH::get_school_handler();
         $schools = $sh->get_schools();
+        $showall = NED::get_showallschools_param_value();
         $this->_data->showall = $showall;
         $this->_data->totalstudents = 0;
         $this->_data->totalcts = 0;
