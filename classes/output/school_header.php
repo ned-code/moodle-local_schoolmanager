@@ -75,6 +75,7 @@ class school_header implements \renderable, \templatable {
         $data->city = $this->school->get('city');
         $data->country = $this->school->get('country');
         $data->region = $this->school->get('region');
+        $data->schoolgroup = $this->school->get('schoolgroup');
         $data->schoolwebsite = $this->school->get('url');
         $data->schoolwebsiteurl = $data->schoolwebsite;
         if ($data->schoolwebsiteurl && !preg_match("@^htt?ps?://@", $data->schoolwebsiteurl)){

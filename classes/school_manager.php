@@ -838,6 +838,7 @@ class school_manager {
 
         if ($can_manage_extra || ($administrator && $administrator->id == $USER->id)){
             $upd_school->region = !empty($data->region) ? $data->region : 0;
+            $upd_school->schoolgroup = !empty($data->schoolgroup) ? $data->schoolgroup : 'None';
             $upd_school->proctormanager = !empty($data->proctormanager) ? $data->proctormanager : 0;
             $upd_school->academicintegritymanager = !empty($data->academicintegritymanager) ? $data->academicintegritymanager : 0;
         }

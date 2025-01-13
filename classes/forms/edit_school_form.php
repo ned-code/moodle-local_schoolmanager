@@ -113,6 +113,9 @@ class edit_school_form extends \moodleform {
             $regions = NED::get_region_list();
             $regions = array('' => get_string('choose') . '...') + $regions;
             $mform->addElement('select', 'region', NED::str('region'), $regions);
+
+            $schoolgroups = NED::get_schoolgroup_list();
+            $mform->addElement('select', 'schoolgroup', NED::str('schoolgroup'), $schoolgroups);
         }
         if (!$this->_can_manage_extra){
             $mform->hardFreeze(['city', 'country']);
@@ -145,7 +148,7 @@ class edit_school_form extends \moodleform {
 
         // ESL.
         if ($this->_can_manage_extra){
-            $mform->addElement('selectyesno', 'esl', NED::str('esl'));
+            $mform->addElement('selectyesno', 'esl', NED::str('eslschool'));
             $mform->setDefault('esl', 0);
         }
 

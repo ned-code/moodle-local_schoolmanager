@@ -72,5 +72,17 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         NED::upgrade_plugin_savepoint(2024121900);
     }
 
+    if ($oldversion < 2025011301) {
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('schoolgroup', XMLDB_TYPE_CHAR, '120', null, null, null, null, 'region');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $DB->execute("UPDATE {local_schoolmanager_school} SET schoolgroup = 'None'");
+
+        NED::upgrade_plugin_savepoint(2025011301);
+    }
+
     return true;
 }
