@@ -302,6 +302,22 @@ class shared_lib extends \local_ned_controller\shared\base_class {
     }
 
     /**
+     * Retrieves a list of school groups.
+     *
+     * @return array Associative array where keys are the school group codes and values are their corresponding names.
+     */
+    public static function get_schoolgroup_list() {
+        return [
+            'None' => 'None',
+            'New Oriental' => 'New Oriental',
+            'DEOU Group' =>'DEOU Group',
+            'Oakwood' => 'Oakwood',
+            'YesEdu' => 'YesEdu',
+            'Walton' => 'Walton'
+        ];
+    }
+
+    /**
      * Getting showall parameter from url or from user cache
      *
      * @return bool

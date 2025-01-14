@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property string city
  * @property string country
  * @property string region
+ * @property string schoolgroup
  * @property int    logo
  * @property int    compact_logo
  * @property int    schoolyeartype
@@ -150,6 +151,9 @@ class school extends \core\persistent implements \cacheable_object  {
                 'type' => PARAM_RAW,
             ),
             'region' => array(
+                'type' => PARAM_RAW,
+            ),
+            'schoolgroup' => array(
                 'type' => PARAM_RAW,
             ),
             'logo' => array(

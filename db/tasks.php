@@ -61,4 +61,13 @@ $tasks = array(
         'dayofweek' => '*',
         'month' => '*'
     ),
+    array(
+        'classname' => 'local_schoolmanager\task\sync_user_profile',
+        'blocking' => 0,
+        'minute' => 'R',
+        'hour' => '*/6',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    ),
 );
