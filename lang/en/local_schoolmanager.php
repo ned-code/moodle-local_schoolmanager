@@ -249,3 +249,4 @@ $string['epmarkers'] = 'OSSLT Report';
 $string['region'] = 'Region';
 $string['schoolgroup'] = 'School Group';
 $string['syncuserprofile'] = 'Sync user profile with school data';
+$string['videosubmissionrequired'] = 'Make TEM video submission mandatory';

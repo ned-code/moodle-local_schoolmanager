@@ -189,6 +189,10 @@ class edit_school_form extends \moodleform {
             // Enable TEM
             $mform->addElement('selectyesno', 'enabletem', NED::str('enabletem'));
             $mform->setDefault('enabletem', 0);
+
+            // Make TEM video submission mandatory.
+            $mform->addElement('selectyesno', 'videosubmissionrequired', NED::str('videosubmissionrequired'));
+            $mform->setDefault('videosubmissionrequired', 0);
         }
 
         if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)) {
