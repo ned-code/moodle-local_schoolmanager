@@ -822,6 +822,7 @@ class school_manager {
             $upd_school->synctimezone = $data->synctimezone ?? 0;
             $upd_school->forceproxysubmissionwindow = $data->forceproxysubmissionwindow ?? 0;
             $upd_school->enabletem = $data->enabletem ?? 0;
+            $upd_school->videosubmissionrequired = $data->videosubmissionrequired ?? 0;
             $upd_school->extmanager = $data->extmanager ?? 0;
             $upd_school->esl = $data->esl;
 

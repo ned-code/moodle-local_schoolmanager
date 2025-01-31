@@ -84,5 +84,15 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         NED::upgrade_plugin_savepoint(2025011301);
     }
 
+    if ($oldversion < 2025012801) {
+        $table = new xmldb_table('local_schoolmanager_school');
+        $field = new xmldb_field('videosubmissionrequired', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'enabletem');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        NED::upgrade_plugin_savepoint(2025012801);
+    }
+
     return true;
 }
