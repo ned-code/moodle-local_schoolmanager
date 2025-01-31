@@ -52,7 +52,6 @@ if (!NED::has_any_capability($caps, $ctx)){
 }
 
 $PAGE->set_context($ctx);
-$PAGE->set_pagelayout('schoolmanager');
 NED::page_set_title('pluginname', NED::url('~/view.php'));
 
 $renderable = new local_schoolmanager\output\school($schoolid, $view);

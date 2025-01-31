@@ -40,7 +40,6 @@ $PAGE->set_context($SM->ctx);
 $PAGE->set_url($SMR->get_my_url());
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
-$PAGE->set_pagelayout('schoolmanager');
 $PAGE->navbar->add($title, $SMR::get_url());
 switch($SMR->page){
     case $SMR::PAGE_CREW:

@@ -12,60 +12,14 @@ body#page-local-schoolmanager-view {
         max-width: 450px;
     }
 
-    .schoolmanager-header {
+    #region-main {
 
-        //school title start
-        .ned-single-autocomplete {
-            color: white;
-            font-size: 19px;
-            font-weight: bold;
+        .school .school-page {
 
-            .icon {
-                font-size: 19px;
-                text-align: center;
-                margin-right: 5px;
-                font-weight: normal;
-            }
-
-            ul.form-autocomplete-suggestions {
-                color:#1d2125;
-            }
-
-            .inplaceeditable {
-                margin-left: .5rem;
-                background-color: unset;
-
-                &:not(.inplaceeditingon) {
-                    border: unset;
-                }
-
-                &.inplaceeditingon {
-                    background-color: unset;
-
-                    input {
-                        width: unset;
-                    }
-                }
-
-                .quickediticon .icon {
-                    font-size: 19px;
-                    font-weight: normal;
-                }
-
-                li {
-                    font-size: 15px;
-                }
-
-                &.inplaceeditable-autocomplete {
-                    padding: 0;
-                }
+            .schools-section {
+                overflow-x: auto;
             }
         }
-
-        .form-autocomplete-downarrow {
-            top: 0;
-        }
-        //end school title
     }
 
     .badges {
