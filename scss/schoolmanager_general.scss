@@ -6,8 +6,8 @@
  * @copyright  2024 NED {@link http://ned.ca}
  * @author     NED {@link http://ned.ca}
  */
-body.pagelayout-schoolmanager {
-
+body#page-local-schoolmanager-view,
+body#page-local-schoolmanager-index {
   #region-main {
     overflow: visible;
     background-color: #ECEEEF;
@@ -46,20 +46,6 @@ body.pagelayout-schoolmanager {
 
   .control-panel {
     margin-top: 20px;
-  }
-
-  .schoolmanager-header {
-    margin: 0;
-    background-color: #0672b1;
-    padding: 10px 15px;
-
-    .school-title {
-      h4 {
-        color: #FFFFFF;
-        margin: 0;
-        font-size: 26px;
-      }
-    }
   }
 
   .container, .container-fluid, .container-sm, .container-md, .container-lg, .container-xl, div#region-main-box {
