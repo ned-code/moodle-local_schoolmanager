@@ -792,6 +792,7 @@ class school_manager {
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
         $upd_school->note = $data->note ?? '';
         $upd_school->iptype = $data->iptype ?? null;
+        $upd_school->showipchange = $data->showipchange ?? null;
 
         if (NED::has_capability('manage_extension_limit', $this->_ctx)) {
             $upd_school->extensionsallowed = $data->extensionsallowed ?? 3;

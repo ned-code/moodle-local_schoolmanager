@@ -209,6 +209,10 @@ class edit_school_form extends \moodleform {
         $mform->addRule('iptype', null, 'required');
         $mform->addHelpButton('iptype', 'iptype', NED::$PLUGIN_NAME);
 
+        // Show IP Address changes during quiz attempts.
+        $mform->addElement('selectyesno', 'showipchange', NED::str('showipchange'));
+        $mform->setDefault('showipchange', 0);
+
         // Extensions allowed per student per activity
         if (NED::has_capability('manage_extension_limit')){
             $mform->addElement(
