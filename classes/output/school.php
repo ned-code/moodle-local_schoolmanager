@@ -140,6 +140,14 @@ class school implements \renderable, \templatable {
                 $this->_data->class_report = $html;
 
                 break;
+            case SH::VIEW_FROZENACCOUNTS:
+                /** @var string $html - get it from /local/schoolmanager/frozen_accounts.php */
+                global $html;
+                $this->_data->show_output = true;
+                include_once(NED::$DIRROOT.'/local/schoolmanager/frozen_accounts.php');
+                $this->_data->class_report = $html;
+                $has_summary_blocks = false;
+                break;
         }
 
         if ($has_summary_blocks){

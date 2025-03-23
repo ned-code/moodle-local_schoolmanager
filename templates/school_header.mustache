@@ -40,6 +40,9 @@
             {{#canview_epc}}
                 <a class="btn {{#show_epc}}btn-primary{{/show_epc}}{{^show_epc}}btn-secondary{{/show_epc}}" href="{{btn_epc_url}}">{{#str}}epchecks, local_schoolmanager{{/str}}</a>
             {{/canview_epc}}
+            {{#canview_frozenaccounts}}
+                <a class="btn {{#show_frozenaccounts}}btn-primary{{/show_frozenaccounts}}{{^show_frozenaccounts}}btn-secondary{{/show_frozenaccounts}}" href="{{btn_frozenaccounts_url}}">{{#str}}ghsfrozenaccounts, report_ghs{{/str}}</a>
+            {{/canview_frozenaccounts}}
         </div>
         <div class="col-md-3 text-align-right">
             {{#downloadallgrades}}

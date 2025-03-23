@@ -30,6 +30,7 @@ class school_handler {
     const VIEW_SCHOOLS = 'schools';
     const VIEW_CLASSES = 'classes';
     const VIEW_EPC = 'epc';
+    const VIEW_FROZENACCOUNTS = 'frozenaccounts';
     /** @var static */
     static $self = null;
 

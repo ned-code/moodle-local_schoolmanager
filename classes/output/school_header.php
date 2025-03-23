@@ -110,6 +110,9 @@ class school_header implements \renderable, \templatable {
         if (NED::is_plugin_exists('local_epctracker') && NED::has_any_capability(['local/epctracker:viewownschool', 'local/epctracker:viewallschools'], $ctx)) {
             $data->{'canview_'.SH::VIEW_EPC} = 1;
         }
+        if (NED::is_plugin_exists('report_ghs') && NED::has_any_capability(['report/ghs:viewfrozenaccountsallschools', 'report/ghs:viewfrozenaccountsownschool'], $ctx)) {
+            $data->{'canview_'.SH::VIEW_FROZENACCOUNTS} = 1;
+        }
 
         $data->btn_students_url = clone $this->url;
         $data->btn_students_url->param('view', SH::VIEW_STUDENTS);
@@ -130,6 +133,10 @@ class school_header implements \renderable, \templatable {
         $data->btn_epc_url = clone $this->url;
         $data->btn_epc_url->param('view', SH::VIEW_EPC);
         $data->btn_epc_url = $data->btn_epc_url->out(false);
+
+        $data->btn_frozenaccounts_url = clone $this->url;
+        $data->btn_frozenaccounts_url->param('view', SH::VIEW_FROZENACCOUNTS);
+        $data->btn_frozenaccounts_url = $data->btn_frozenaccounts_url->out(false);
 
         $reportheader = (new \local_schoolmanager\output\reports_header($this->schoolid))->export_for_template($output);
         unset($reportheader->showheader);
