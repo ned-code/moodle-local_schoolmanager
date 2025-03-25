@@ -122,8 +122,6 @@ if (!empty($schoolid) && empty($schooloptions[$schoolid])) {
     asort($schooloptions);
 }
 
-$schooloptions = ['0' => get_string('all')] + $schooloptions;
-
 if ($schoolid) {
     $where .= " AND ".$datacolumns['schoolid']." = :schoolid";
     $params['schoolid'] = $schoolid ?? 0;
