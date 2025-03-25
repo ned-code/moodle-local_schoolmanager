@@ -94,7 +94,7 @@ $where = '';
 $schoolinsql = '';
 
 $multipleschools = true;
-if (!has_capability('report/ghs:viewfrozenaccountsallschools', $contextsystem)) {
+if (has_capability('report/ghs:viewfrozenaccountsallschools', $contextsystem)) {
     $sh = new SH();
     if (!$schools = $sh->get_schools()) {
         $where .= " AND 0=1";
@@ -112,9 +112,17 @@ if (!has_capability('report/ghs:viewfrozenaccountsallschools', $contextsystem)) 
 $sql = "SELECT DISTINCT r.schoolid, coh.name  school
           FROM {report_ghs_frozen_accounts} r
           JOIN {cohort} coh ON r.schoolid = coh.id
-         WHERE 0 = 0 $where
+         WHERE 0 = 0 
+               $where
       ORDER BY coh.name ASC";
-$schooloptions = ['0' => get_string('all')] + $DB->get_records_sql_menu($sql, $params);
+
+$schooloptions = $DB->get_records_sql_menu($sql, $params);
+if (!empty($schoolid) && empty($schooloptions[$schoolid])) {
+    $schooloptions[$schoolid] = $DB->get_field('cohort', 'name', ['id' => $schoolid]);
+    asort($schooloptions);
+}
+
+$schooloptions = ['0' => get_string('all')] + $schooloptions;
 
 if ($schoolid) {
     $where .= " AND ".$datacolumns['schoolid']." = :schoolid";
