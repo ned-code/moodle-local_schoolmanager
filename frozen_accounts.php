@@ -116,12 +116,6 @@ $sql = "SELECT DISTINCT r.schoolid, coh.name  school
                $where
       ORDER BY coh.name ASC";
 
-$schooloptions = $DB->get_records_sql_menu($sql, $params);
-if (!empty($schoolid) && empty($schooloptions[$schoolid])) {
-    $schooloptions[$schoolid] = $DB->get_field('cohort', 'name', ['id' => $schoolid]);
-    asort($schooloptions);
-}
-
 if ($schoolid) {
     $where .= " AND ".$datacolumns['schoolid']." = :schoolid";
     $params['schoolid'] = $schoolid ?? 0;
@@ -265,7 +259,6 @@ $searchform =
     html_writer::start_div('form-inline').
     html_writer::start_div('form-group').
 
-    (($multipleschools) ? NED::single_select($fullpageurl, 'schoolid', $schooloptions, $schoolid, get_string('school', 'report_ghs'), ['class' => 'mb-2 mr-sm-2']) : '').
     NED::single_select($fullpageurl, 'filterstatus', $statusoptions, $filterstatus, get_string('status', 'report_ghs'), ['class' => 'mb-2 mr-sm-2']).
     NED::single_select($fullpageurl, 'filterstudentid', $studentoptions, $filterstudentid, get_string('student', 'report_ghs'), ['class' => 'mb-2 mr-sm-2']).
     NED::single_select($fullpageurl, 'filterreason', $reasonoptions, $filterreason, get_string('reason', 'report_ghs'), ['class' => 'mb-2 mr-sm-2']).
