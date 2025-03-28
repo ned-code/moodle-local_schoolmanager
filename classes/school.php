@@ -39,7 +39,9 @@ defined('MOODLE_INTERNAL') || die();
  * @property bool   esl
  * @property int    extmanager
  * @property int    iptype
+ * @property int    reportipchange
  * @property int    showipchange
+ * @property int    reportiptem
  * @property int    proctormanager
  * @property int    academicintegritymanager
  * @property int    forceproxysubmissionwindow
@@ -185,7 +187,13 @@ class school extends \core\persistent implements \cacheable_object  {
             'iptype' => array(
                 'type' => PARAM_INT,
             ),
+            'reportipchange' => array(
+                'type' => PARAM_INT,
+            ),
             'showipchange' => array(
+                'type' => PARAM_INT,
+            ),
+            'reportiptem' => array(
                 'type' => PARAM_INT,
             ),
             'proctormanager' => array(
