@@ -200,6 +200,7 @@ class school_handler {
      */
     public static function get_user_number_of_dl_extensions($userids, $startime=0, $endtime=0, $courseids=null){
         if (!NED::is_tt_exists()) return null;
+        if (empty($userids)) return 0;
 
         $obj = DM::get_extensions_raw($userids, $courseids, null, null, null, $startime, $endtime, true);
         return $obj->{NED::PERIOD_TOTAL} ?? 0;
@@ -216,6 +217,7 @@ class school_handler {
      */
     public static function get_user_number_with_extensions20($userids, $startime=0, $endtime=0){
         if (!NED::is_tt_exists()) return null;
+        if (empty($userids)) return 0;
 
         $count = 0;
         $records = DM::get_extensions_raw($userids, null, null, null, null, $startime, $endtime, true, null, 'userid');
