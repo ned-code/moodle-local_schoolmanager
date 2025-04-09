@@ -108,8 +108,9 @@ class edit_school_form extends \moodleform {
 
         // School Administrator.
         $administrator = $SM->get_school_admin($this->_schoolid);
+        $issiteadmin = is_siteadmin();
 
-        if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)) {
+        if ($issiteadmin) {
             $regions = NED::get_region_list();
             $regions = array('' => get_string('choose') . '...') + $regions;
             $mform->addElement('select', 'region', NED::str('region'), $regions);
@@ -117,6 +118,7 @@ class edit_school_form extends \moodleform {
             $schoolgroups = NED::get_schoolgroup_list();
             $mform->addElement('select', 'schoolgroup', NED::str('schoolgroup'), $schoolgroups);
         }
+
         if (!$this->_can_manage_extra){
             $mform->hardFreeze(['city', 'country']);
         }
@@ -210,14 +212,19 @@ class edit_school_form extends \moodleform {
         $mform->addHelpButton('iptype', 'iptype', NED::$PLUGIN_NAME);
 
         // Report IP changes, Show IP block, Report IP changes in TEM
-        $fields = ['reportipchange', 'showipchange', 'reportiptem'];
+        if ($issiteadmin) {
+            $mform->addElement('selectyesno', 'reportipchange', NED::str('reportipchange'));
+        } else {
+            $mform->addElement('hidden', 'reportipchange');
+            $mform->setType('reportipchange', PARAM_INT);
+        }
+        $mform->setDefault('reportipchange', 0);
+
+        $fields = ['showipchange', 'reportiptem'];
         foreach ($fields as $field) {
             $mform->addElement('selectyesno', $field, NED::str($field));
             $mform->setDefault($field, 0);
-
-            if ($field != 'reportipchange') {
-                $mform->hideIf($field, 'reportipchange', NED::$form_element::COND_EQUAL, '0');
-            }
+            $mform->hideIf($field, 'reportipchange', NED::$form_element::COND_EQUAL, '0');
         }
 
         // Extensions allowed per student per activity
@@ -239,7 +246,7 @@ class edit_school_form extends \moodleform {
         }
 
         // Options for Deadline Manager
-        if (NED::is_tt_exists()){
+        if ($issiteadmin && NED::is_tt_exists()) {
             $deadlines_json_data = $school->deadlinesdata;
             $activatedeadlinesconfig = 0;
             $deadlinesdata = null;
@@ -297,6 +304,10 @@ class edit_school_form extends \moodleform {
                 $mform->hardFreeze('activatedeadlinesconfig');
                 $mform->hardFreeze(array_keys($deadlineselements));
             }
+        }
+
+        if ($issiteadmin) {
+            $mform->addElement('selectyesno', 'hidecompliancereport', NED::str('hidecompliancereport'));
         }
 
         $mform->addElement('html', NED::div_end()); // 'school-form-group'

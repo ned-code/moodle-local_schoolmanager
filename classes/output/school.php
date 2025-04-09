@@ -361,7 +361,9 @@ class school implements \renderable, \templatable {
         $this->_data->isadmin = is_siteadmin();
         $this->_data->viewschooldescription = NED::has_capability('viewschooldescription', NED::ctx());
 
-        $this->_data->compliance_report = $this->_get_compliance_report_data();
+        if (empty($this->_persistent->get('hidecompliancereport'))) {
+            $this->_data->compliance_report = $this->_get_compliance_report_data();
+        }
     }
 
     /**
