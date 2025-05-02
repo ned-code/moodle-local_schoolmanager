@@ -178,6 +178,7 @@ $string['studentaivreportstooltip'] = 'Total Academic Violations';
 $string['studentextensionstooltip'] = 'Deadline Extensions';
 $string['studentname'] = 'Student Name';
 $string['students'] = 'Students';
+$string['students_have_ip_violations'] = 'students have IP violations during at test';
 $string['students_no_submissions'] = 'students with no submissions';
 $string['submitted'] = 'have been submitted';
 $string['summary'] = 'Summary';

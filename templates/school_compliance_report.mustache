@@ -167,6 +167,31 @@
                                     {{proctorinwriting3}} {{#str}}tests_have_writing_sessions, local_schoolmanager, 3 or more{{/str}}
                                 </li>
                             {{/proctorinwriting3icon}}
+                            <br>
+                            <li>
+                                {{#pix}} {{ip_violationsicon}}, local_schoolmanager {{/pix}}
+                                {{#ip_violations_url}}
+                                    <a href="{{ip_violations_url}}">
+                                {{/ip_violations_url}}
+                                    {{ip_violations}}
+                                    {{#str}}students_have_ip_violations, local_schoolmanager{{/str}}
+                                    {{#str}}since_start_school_year, local_schoolmanager{{/str}}
+                                {{#ip_violations_link}}
+                                    </a>
+                                {{/ip_violations_link}}
+                            </li>
+                            <li>
+                                {{#pix}} {{ip_violations_last_30icon}}, local_schoolmanager {{/pix}}
+                                {{#ip_violations_last_30_url}}
+                                    <a href="{{ip_violations_last_30_url}}">
+                                {{/ip_violations_last_30_url}}
+                                    {{ip_violations_last_30}}
+                                    {{#str}}students_have_ip_violations, local_schoolmanager{{/str}}
+                                    {{#str}}in_last_30_days, local_schoolmanager{{/str}}
+                                {{#ip_violations_last_30_url}}
+                                    </a>
+                                {{/ip_violations_last_30_url}}
+                            </li>
                         </ul>
                     {{/tem_report}}
                 </ul>
