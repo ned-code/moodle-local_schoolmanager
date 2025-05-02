@@ -13,7 +13,8 @@ use local_academic_integrity\infraction;
 use local_schoolmanager as SM;
 use local_schoolmanager\school_handler as SH;
 use local_schoolmanager\shared_lib as NED;
-use local_tem\helper as TEM;
+use local_tem\helper as tem_help;
+use local_tem\tem as TEM;
 use report_ghs\helper as GHS;
 
 defined('MOODLE_INTERNAL') || die();
@@ -756,29 +757,56 @@ class school implements \renderable, \templatable {
 
         $res = (object)[];
         [$startdate, $enddate] = $this->get_school_year();
+        [$last_30_start, $last_30_end] = NED::time_process_period(NED::PERIOD_LAST_30);
+
 
         $res->proctoringurl = (new \moodle_url('/local/tem/sessions.php', [
             'schoolid' => $this->_schoolid,
         ]))->out(false);
         $res->title_help_obj = NED::get_help_icon('cr_tem_proctoring_help');
 
-        $res->proctoringsubmitted = TEM::count_school_submitted_reports($this->_schoolid, $startdate, $enddate);
+        $res->proctoringsubmitted = tem_help::count_school_submitted_reports($this->_schoolid, $startdate, $enddate);
         $res->proctoringsubmittedicon = $this->get_icon($res->proctoringsubmitted, static::ICON_HAPPY_SAD);
 
-        $res->proctoringmissing = TEM::count_school_missing_reports($this->_schoolid, $startdate, $enddate);
+        $res->proctoringmissing = tem_help::count_school_missing_reports($this->_schoolid, $startdate, $enddate);
         $res->proctoringmissingicon = $this->get_icon($res->proctoringmissing);
 
         $res->proctoringoverdue10days = NED::count_school_proctoring_reports($this->_schoolid, $startdate, $enddate,DAYSECS * 10);
         $res->proctoringoverdue10daysicon = $this->get_icon($res->proctoringoverdue10days, static::ICON_WARN_FALSE);
 
-        $res->proctorinwriting1 = TEM::count_school_writing_sessions($this->_schoolid, 1, $startdate, $enddate);
+        $res->proctorinwriting1 = tem_help::count_school_writing_sessions($this->_schoolid, 1, $startdate, $enddate);
         $res->proctorinwriting1icon = $this->get_icon($res->proctorinwriting1, static::ICON_HAPPY_SAD);
 
-        $res->proctorinwriting2 = TEM::count_school_writing_sessions($this->_schoolid, 2, $startdate, $enddate);
+        $res->proctorinwriting2 = tem_help::count_school_writing_sessions($this->_schoolid, 2, $startdate, $enddate);
         $res->proctorinwriting2icon = $this->get_icon($res->proctorinwriting2);
 
-        $res->proctorinwriting3 = TEM::count_school_writing_sessions($this->_schoolid, 3, $startdate, $enddate);
+        $res->proctorinwriting3 = tem_help::count_school_writing_sessions($this->_schoolid, 3, $startdate, $enddate);
         $res->proctorinwriting3icon = $this->get_icon($res->proctorinwriting3, static::ICON_WARN_FALSE);
+
+        $students = $this->get_students();
+        $students_ids = array_keys($students);
+
+        $res->ip_violations = tem_help::count_ip_violations_by_students($students_ids, $this->_schoolid, $startdate, $enddate);
+        $res->ip_violationsicon = $this->get_icon($res->ip_violations);
+
+        $res->ip_violations_last_30 = tem_help::count_ip_violations_by_students($students_ids, $this->_schoolid, $last_30_start, $last_30_end);
+        $res->ip_violations_last_30icon = $this->get_icon($res->ip_violations_last_30);
+
+        if (tem_help::can_view_sessions()) {
+            $violations_url = new \moodle_url(NED::$C::PAGE_TEM_VIOLATIONS);
+
+            $violations_url->params([
+                'school' => $this->_schoolid,
+                'irregularities' => NED::flag_set_arr_bitmask(TEM::VIOLATION_IPS_FLAGS),
+                NED::PAR_SCHOOL_YEAR => 0
+            ]);
+
+            $res->ip_violations_url = $violations_url->out(false);
+
+            $violations_url->params(['period' => NED::PERIOD_1MONTH]);
+            $res->ip_violations_last_30_url = $violations_url->out(false);
+        }
+
 
         return $res;
     }

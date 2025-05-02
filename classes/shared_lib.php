@@ -193,61 +193,64 @@ class shared_lib extends \local_ned_controller\shared\base_class {
     }
 
     /**
-     * TODO rebuild query
      *
      * @param int $schoolid
      * @param array $args
      *
-     * @return array
+     * @return array|{sql: string, params: array} - can be empty, if user can see nothing
      */
     public static function get_school_proctoring_sqlquery(int $schoolid, array $args): array {
-        if (!static::is_tem_exists() || empty($args['filter']) || !$schoolid) {
-            return [];
-        }
+        $where = [];
+        $params = [];
+
+        if (!static::is_tem_exists() || empty($args['filter']) || !$schoolid) return [];
+        if (!tem_helper::get_view_filter(null, $schoolid, $where, $params)) return [];
 
         $select = empty($args['fields']) ? 'COUNT(1)' : implode(',', $args['fields']);
-        $where = '';
-        [$filtersql, $params] = tem_helper::get_view_filter($schoolid);
 
-        if (!empty($args['overdue'])) {
-            $where .= " AND :overdue > (SELECT MAX(qa.timefinish) FROM {local_tem_attempt} a JOIN {quiz_attempts} qa ON a.attemptid = qa.id WHERE a.sessionid = s.id)";
-            $params['overdue'] = time() - $args['overdue'];
+        if (!empty($args['overdue'])){
+            static::sql_add_condition("s.timefinish", time() - $args['overdue'], $where, $params, static::SQL_COND_LT);
         }
+        static::sql_add_between("s.timestart", $args['starttime'] ?? 0, $args['endtime'] ?? 0,
+            $where, $params, true);
 
-        if (!empty($args['starttime'])) {
-            $where .= " AND s.timestart > :timestart";
-            $params['timestart'] = $args['starttime'];
-        }
-
-        if (!empty($args['endtime'])) {
-            $where .= " AND s.timestart < :endtime";
-            $params['endtime'] = $args['endtime'];
-        }
-
-        $filtersql .= match($args['filter']){
-            tem_helper::FILTER_ACTION_REQUIRED => ' AND (s.timescheduled  = 0 OR p.proctor IS NULL OR r.id IS NULL)',
-            tem_helper::FILTER_COMPLETED => ' AND (s.timescheduled  != 0 AND p.proctor IS NOT NULL AND r.id IS NOT NULL)',
+        $where[] = match($args['filter']){
+            tem_helper::FILTER_ACTION_REQUIRED => "(s.timescheduled  = 0 OR s.proctor = 0 OR r.id IS NULL)",
+            tem_helper::FILTER_COMPLETED => "(s.timescheduled  != 0 AND s.proctor <> 0 AND r.id IS NOT NULL)",
             default => ''
         };
-        $filtersql .= empty($args['show_disabled']) ? ' ' : ' AND sc.enabletem = 1 ';
+        if (empty($args['show_disabled'])){
+            $where[] = "sc.enabletem = 1";
+        }
 
-        $sql = "SELECT $select
-               FROM {local_tem_session} AS s
-          LEFT JOIN {local_tem_proctor} AS p ON s.id = p.sessionid
-          LEFT JOIN {local_tem_report} AS r ON s.id = r.sessionid
-          LEFT JOIN {user} AS u ON p.proctor = u.id
-          LEFT JOIN {local_schoolmanager_school} AS sc ON s.schoolid = sc.id
-               JOIN {course} AS c ON s.courseid = c.id
-               JOIN {groups} AS g ON s.groupid = g.id
-               JOIN {quiz} AS q ON s.quizid = q.id
-              WHERE s.quizid NOT IN (SELECT cm.instance 
-                                       FROM {tag_instance} ti
-                                       JOIN {tag} t ON  ti.tagid = t.id
-                                       JOIN {course_modules} cm ON ti.itemid = cm.id
-                                       JOIN {modules} m ON cm.module= m.id
-                                      WHERE ti.itemtype = 'course_modules' AND t.name = 'tem excluded' AND m.name = 'quiz')
-                    $filtersql
-                    $where";
+        $where[] = "
+            sg.quizid NOT IN (
+                   SELECT cm.instance 
+                   FROM {tag_instance} ti
+                   JOIN {tag} t ON  ti.tagid = t.id
+                   JOIN {course_modules} cm ON ti.itemid = cm.id
+                   JOIN {modules} m ON cm.module= m.id
+                  WHERE ti.itemtype = 'course_modules' AND t.name = 'tem excluded' AND m.name = 'quiz'
+            )
+        ";
+
+        $ss = \local_tem\tem::TABLE_SESSION;
+        $sg = \local_tem\tem::TABLE_SESSGROUP;
+        $tr = \local_tem\tem::TABLE_REPORT;
+        $t_school = \local_schoolmanager\school::TABLE;
+        $where_sql = static::sql_where($where);
+        $sql = "
+            SELECT $select
+            FROM {{$ss}} AS s
+            JOIN {{$sg}} sg ON sg.id = s.sessgroupid
+            LEFT JOIN {{$tr}} AS r ON s.id = r.sessionid
+            LEFT JOIN {user} AS u ON s.proctor = u.id
+            LEFT JOIN {{$t_school}} AS sc ON sg.schoolid = sc.id
+            JOIN {course} AS c ON sg.courseid = c.id
+            JOIN {groups} AS g ON sg.groupid = g.id
+            JOIN {quiz} AS q ON sg.quizid = q.id
+            $where_sql
+        ";
 
         return ['sql' => $sql, 'params' => $params];
     }
