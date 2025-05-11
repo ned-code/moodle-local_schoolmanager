@@ -47,6 +47,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property int    forceproxysubmissionwindow
  * @property int    extensionsallowed
  * @property string deadlinesdata
+ * @property int    hidecompliancereport
  * @property int    timecreated
  * @property int    timemodified
  */
@@ -221,6 +222,9 @@ class school extends \core\persistent implements \cacheable_object  {
                 'type' => PARAM_TEXT,
                 'null' => NULL_ALLOWED,
                 'default' => null
+            ),
+            'hidecompliancereport' => array(
+                'type' => PARAM_INT,
             ),
         );
     }
