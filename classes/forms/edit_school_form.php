@@ -135,12 +135,11 @@ class edit_school_form extends \moodleform {
         }
 
         // Staff options.
-        $staffoptions = [];
+        $staffoptions = [0 => get_string('choose')];
         if ($staffs = $SM->get_school_students($this->_schoolid, true, $SM::STAFF_ROLES, false)) {
             foreach ($staffs as $staff) {
                 $staffoptions[$staff->id] = fullname($staff);
             }
-            $staffoptions = [0 => get_string('choose')] + $staffoptions;
         }
 
         // it doesn't save anywhere, just info
@@ -247,7 +246,7 @@ class edit_school_form extends \moodleform {
 
         // Options for Deadline Manager
         if ($issiteadmin && NED::is_tt_exists()) {
-            $deadlines_json_data = $school->deadlinesdata;
+            $deadlines_json_data = $school->deadlinesdata ?? '';
             $activatedeadlinesconfig = 0;
             $deadlinesdata = null;
             $canmanagedeadlinesdata = NED::has_capability('manage_deadlines_data_override');

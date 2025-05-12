@@ -199,6 +199,7 @@ class school extends \core\persistent implements \cacheable_object  {
             ),
             'proctormanager' => array(
                 'type' => PARAM_INT,
+                'default' => 0
             ),
             'enabletem' => array(
                 'type' => PARAM_INT,
@@ -211,6 +212,7 @@ class school extends \core\persistent implements \cacheable_object  {
             ),
             'academicintegritymanager' => array(
                 'type' => PARAM_INT,
+                'default' => 0
             ),
             'forceproxysubmissionwindow' => array(
                 'type' => PARAM_INT,
