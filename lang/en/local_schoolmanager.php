@@ -254,3 +254,4 @@ $string['videosubmissionrequired'] = 'Make TEM video submission mandatory';
 $string['reportipchange'] = 'Report IP changes during quiz attempts';
 $string['showipchange'] = 'Show IP block during quiz attempts';
 $string['reportiptem'] = 'Report IP changes in TEM';
+$string['hidecompliancereport'] = 'Hide Compliance Report';

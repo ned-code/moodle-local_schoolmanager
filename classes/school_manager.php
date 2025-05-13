@@ -792,7 +792,10 @@ class school_manager {
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
         $upd_school->note = $data->note ?? '';
         $upd_school->iptype = $data->iptype ?? null;
-        $upd_school->reportipchange = $data->reportipchange ?? null;
+        if (is_siteadmin()) {
+            $upd_school->reportipchange = $data->reportipchange ?? null;
+            $upd_school->hidecompliancereport = $data->hidecompliancereport ?? 0;
+        }
         $upd_school->showipchange = $data->showipchange ?? null;
         $upd_school->reportiptem = $data->reportiptem ?? null;
 
@@ -801,7 +804,7 @@ class school_manager {
         }
 
         // Processing deadlines data
-        if (NED::is_tt_exists() && NED::has_capability('manage_deadlines_data_override', $this->_ctx)){
+        if (is_siteadmin() && NED::is_tt_exists() && NED::has_capability('manage_deadlines_data_override', $this->_ctx)){
             $deadlinesdata = [];
             $deadlinesdata_keys = [
                 TT::X_DAYS_BETWEEN_DL_QUIZ,
@@ -840,11 +843,14 @@ class school_manager {
             $upd_school->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
         }
 
+        if (is_siteadmin()) {
+            $upd_school->region = !empty($data->region) ? $data->region : 0;
+            $upd_school->schoolgroup = !empty($data->schoolgroup) ? $data->schoolgroup : 'None';
+        }
+
         if ($can_manage_extra || ($administrator && $administrator->id == $USER->id)){
             $upd_school->region = !empty($data->region) ? $data->region : 0;
             $upd_school->schoolgroup = !empty($data->schoolgroup) ? $data->schoolgroup : 'None';
-            $upd_school->proctormanager = !empty($data->proctormanager) ? $data->proctormanager : 0;
-            $upd_school->academicintegritymanager = !empty($data->academicintegritymanager) ? $data->academicintegritymanager : 0;
         }
 
         if ($new_school){

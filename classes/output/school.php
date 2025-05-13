@@ -362,7 +362,9 @@ class school implements \renderable, \templatable {
         $this->_data->isadmin = is_siteadmin();
         $this->_data->viewschooldescription = NED::has_capability('viewschooldescription', NED::ctx());
 
-        $this->_data->compliance_report = $this->_get_compliance_report_data();
+        if (empty($this->_persistent->get('hidecompliancereport'))) {
+            $this->_data->compliance_report = $this->_get_compliance_report_data();
+        }
     }
 
     /**
@@ -754,6 +756,9 @@ class school implements \renderable, \templatable {
      */
     protected function _get_proctoring_report() {
         if (!NED::is_tem_exists()) return null;
+
+        $tem_info = NED::get_plugin_info(NED::TEM);
+        if (empty($tem_info) || $tem_info->versiondb < 2025050100) return null;
 
         $res = (object)[];
         [$startdate, $enddate] = $this->get_school_year();
