@@ -757,6 +757,9 @@ class school implements \renderable, \templatable {
     protected function _get_proctoring_report() {
         if (!NED::is_tem_exists()) return null;
 
+        $tem_info = NED::get_plugin_info(NED::TEM);
+        if (empty($tem_info) || $tem_info->versiondb < 2025050100) return null;
+
         $res = (object)[];
         [$startdate, $enddate] = $this->get_school_year();
         [$last_30_start, $last_30_end] = NED::time_process_period(NED::PERIOD_LAST_30);
