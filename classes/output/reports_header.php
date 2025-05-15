@@ -85,6 +85,16 @@ class reports_header implements \renderable, \templatable {
             }
         }
 
+        if (has_any_capability(['report/ghs:viewschoolreportsallschools', 'report/ghs:viewschoolreportsownschool'], $contextsystem)) {
+            $data->btn_schoolreports_url = new \moodle_url('/report/ghs/ghs_school_reports.php');
+            if ($this->schoolid) {
+                $data->btn_schoolreports_url->param('schoolid', $this->schoolid);
+            }
+            if ($PAGE->url->get_path() == $data->btn_schoolreports_url->get_path()) {
+                $data->show_schoolreports = true;
+            }
+        }
+
         return $data;
     }
 }
