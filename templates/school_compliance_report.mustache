@@ -350,87 +350,25 @@
                         </ul>
                     {{/dm_report}}
                     {{#school_reports}}
-                        <li>
+                        <li class="mb-1">
                             <a target="_blank" href="{{srurl}}">
                                 {{#str}}schoolreportsandhighlights, local_schoolmanager{{/str}} <i class="fa fa-external-link" aria-hidden="true"></i>
                             </a>
                         </li>
-                        <div class="row px-4 py-2">
-                            <div class="col-md-6">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>{{#str}}type, local_schoolmanager{{/str}}</th>
-                                            <th>{{#str}}date, local_schoolmanager{{/str}}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {{#school_report_data}}
-                                            <tr>
-                                                <td>
-                                                    <a href="#" data-toggle="modal" data-target="#school-report-detail-{{id}}">
-                                                        {{reporttype}}
-                                                    </a>
-                                                </td>
-                                                <td>{{#userdate}} {{reportdate}}, {{#str}} strftimedate, core_langconfig {{/str}} {{/userdate}}</td>
-                                            </tr>
-                                        {{/school_report_data}}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
+                        <ul class="list-unstyled mb-3">
+                            {{#school_report_data}}
+                                <li>
+                                    <i class="fa fa-file-text icon" aria-hidden="true"></i>
+                                    <a href="#" data-toggle="modal" data-target="#school-report-detail-{{id}}">
+                                        {{reporttype}}
+                                    </a>
+                                    {{#userdate}} {{reportdate}}, {{#str}} strftimedate, core_langconfig {{/str}} {{/userdate}}
+                                </li>
+                            {{/school_report_data}}
+                        </ul>
                         {{#school_report_data}}
-                            <!-- Modal -->
-                            <div class="modal fade" id="school-report-detail-{{id}}" tabindex="-1" role="dialog" aria-labelledby="{{reporttype}}" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">{{reporttype}}</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row mb-1">
-                                                <div class="col-md-4">{{#str}}school, local_schoolmanager{{/str}}</div>
-                                                <div class="col-md-8">{{school_name}}</div>
-                                            </div>
-                                            <div class="row mb-1">
-                                                <div class="col-md-4">{{#str}}reporttype, report_ghs{{/str}}</div>
-                                                <div class="col-md-8">{{reporttype}}</div>
-                                            </div>
-                                            <div class="row mb-1">
-                                                <div class="col-md-4">{{#str}}date, report_ghs{{/str}}</div>
-                                                <div class="col-md-8">{{#userdate}} {{reportdate}}, {{#str}} strftimedate, core_langconfig {{/str}} {{/userdate}}</div>
-                                            </div>
-                                            <div class="row mb-1">
-                                                <div class="col-md-4">{{#str}}summary, report_ghs{{/str}}</div>
-                                                <div class="col-md-8">{{summary}}</div>
-                                            </div>
-                                            <div class="row mb-1">
-                                                <div class="col-md-4">{{#str}}files{{/str}}</div>
-                                                <div class="col-md-8">
-                                                    {{#files}}
-                                                        <div>{{{fileicon}}} <a href="{{fileurl}}">{{filename}}</a></div>
-                                                    {{/files}}
-                                                </div>
-                                            </div>
-                                            <div class="row mb-1">
-                                                <div class="col-md-4">{{#str}}visibility, report_ghs{{/str}}</div>
-                                                <div class="col-md-8">{{visibility}}</div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Modal -->
+                            {{>report_ghs/school_report_modal}}
                         {{/school_report_data}}
-
                     {{/school_reports}}
                 </ul>
             </div>
