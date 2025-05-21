@@ -280,7 +280,7 @@
         {{/osslt_report}}
         <div class="row">
             <div class="col-md-12">
-                <h6 class="text-success">Other</h6>
+                <h6 class="text-success">{{#str}}other, local_schoolmanager{{/str}}</h6>
                 <ul class="list-unstyled mb-3">
                     {{#login_report}}
                         <li>
@@ -349,6 +349,27 @@
                             </li>
                         </ul>
                     {{/dm_report}}
+                    {{#school_reports}}
+                        <li class="mb-1">
+                            <a target="_blank" href="{{srurl}}">
+                                {{#str}}schoolreportsandhighlights, local_schoolmanager{{/str}} <i class="fa fa-external-link" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <ul class="list-unstyled mb-3">
+                            {{#school_report_data}}
+                                <li>
+                                    <i class="fa fa-file-text icon school-report-icon" aria-hidden="true"></i>
+                                    <a href="#" data-toggle="modal" data-target="#school-report-detail-{{id}}">
+                                        {{reporttype}}
+                                    </a>
+                                    {{#userdate}} {{reportdate}}, {{#str}} strftimedate, core_langconfig {{/str}} {{/userdate}}
+                                </li>
+                            {{/school_report_data}}
+                        </ul>
+                        {{#school_report_data}}
+                            {{>report_ghs/school_report_modal}}
+                        {{/school_report_data}}
+                    {{/school_reports}}
                 </ul>
             </div>
         </div>

@@ -586,6 +586,29 @@ class school implements \renderable, \templatable {
         // Other - DM
         $res->dm_report = $this->_get_dm_report();
 
+        $res = $this->_get_schools_reports_data($res);
+
+        return $res;
+    }
+
+    protected function _get_schools_reports_data($res) {
+        if (!NED::is_plugin_exists('report_ghs') || !NED::has_any_capability([
+            'report/ghs:viewschoolreportsallschools',
+            'report/ghs:viewschoolreportsownschool'
+        ])) {
+            return $res;
+        }
+        if (!$reports = GHS::get_school_reports($this->_schoolid)) {
+            $res->school_reports = false;
+            return $res;
+        }
+        $res->school_reports = true;
+        $res->school_name = $this->_persistent->get('cohortname');
+        $res->school_report_data = array_values($reports);
+        $res->srurl = (new \moodle_url('/report/ghs/ghs_school_reports.php', [
+            'schoolid' => $this->_schoolid,
+        ]))->out(false);
+
         return $res;
     }
 
