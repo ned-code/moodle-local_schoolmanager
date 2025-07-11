@@ -260,3 +260,4 @@ $string['other'] = 'Other';
 $string['schoolreportsandhighlights'] = 'School Reports and Highlights';
 $string['type'] = 'Type';
 $string['date'] = 'Date';
+$string['frozenaccounts'] = 'Frozen accounts';

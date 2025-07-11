@@ -95,6 +95,16 @@ class reports_header implements \renderable, \templatable {
             }
         }
 
+        if (has_capability('report/ghs:viewfrozenaccountsallschools', $contextsystem)) {
+            $data->btn_rfrozenaccounts_url = new \moodle_url('/report/ghs/ghs_frozen_accounts.php');
+            if ($this->schoolid) {
+                $data->btn_rfrozenaccounts_url->param('schoolid', $this->schoolid);
+            }
+            if ($PAGE->url->get_path() == $data->btn_rfrozenaccounts_url->get_path()) {
+                $data->show_frozenaccounts = true;
+            }
+        }
+
         return $data;
     }
 }

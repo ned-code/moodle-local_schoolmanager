@@ -30,5 +30,5 @@ $plugin->release = '4.1.0.0.0';
 $plugin->component = 'local_schoolmanager';
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->dependencies = array(
-    'local_ned_controller' => 2025050100,
+    'local_ned_controller' => 2025071100,
 );
