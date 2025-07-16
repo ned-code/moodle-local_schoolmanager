@@ -245,7 +245,7 @@ class edit_school_form extends \moodleform {
         }
 
         // Options for Deadline Manager
-        if ($issiteadmin && NED::is_tt_exists()) {
+        if ($issiteadmin && NED::is_tt_exists()){
             $deadlines_json_data = $school->deadlinesdata ?? '';
             $activatedeadlinesconfig = 0;
             $deadlinesdata = null;
