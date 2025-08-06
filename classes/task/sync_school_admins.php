@@ -57,7 +57,7 @@ class sync_school_admins extends \core\task\scheduled_task {
      *
      * @return void
      */
-    static public function do_job($task_or_data=[]) {
+    public static function do_job($task_or_data=[]){
         $users = static::get_users_to_update(true);
         if (empty($users)){
             if (is_null($users)){
@@ -87,7 +87,7 @@ class sync_school_admins extends \core\task\scheduled_task {
      *
      * @return array|null
      */
-    static public function get_users_to_update($log=false){
+    public static function get_users_to_update($log=false){
         $config = NED::get_config();
         $school_field = $config->school_field_to_sync ?? 0;
         $schools_multi_field = $config->schools_field_to_sync ?? 0;
@@ -182,7 +182,7 @@ class sync_school_admins extends \core\task\scheduled_task {
      *
      * @return array ($add, $rem) - added and removed users
      */
-    static public function process_users($users, $log=false){
+    public static function process_users($users, $log=false){
         $add = 0;
         $rem = 0;
 
@@ -190,7 +190,7 @@ class sync_school_admins extends \core\task\scheduled_task {
             return [0, 0];
         }
 
-        $p = function($text) use (&$log) {
+        $p = function($text) use (&$log){
             if (!$log) return;
 
             static::print($text);

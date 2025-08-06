@@ -54,27 +54,27 @@ defined('MOODLE_INTERNAL') || die();
 class school extends \core\persistent implements \cacheable_object  {
 
     /** Table name for the \core\persistent. */
-    const TABLE = 'local_schoolmanager_school';
-    const TABLE_COHORT = 'cohort';
-    const TABLE_COHORT_MEMBERS = 'cohort_members';
+    public const TABLE = 'local_schoolmanager_school';
+    public const TABLE_COHORT = 'cohort';
+    public const TABLE_COHORT_MEMBERS = 'cohort_members';
 
-    const EXT_MANAGE_CT = 0;
-    const EXT_MANAGE_SA = 1;
-    const EXTENSION_MANAGER = [
+    public const EXT_MANAGE_CT = 0;
+    public const EXT_MANAGE_SA = 1;
+    public const EXTENSION_MANAGER = [
         self::EXT_MANAGE_CT => 'ct',
         self::EXT_MANAGE_SA => 'sa',
     ];
-    const IP_TYPE_STATIC = 1;
-    const IP_TYPE_DYNAMIC = 2;
-    const IP_TYPES = [
-        self::IP_TYPE_STATIC => 'static',
+    public const IP_TYPE_STATIC = 1;
+    public const IP_TYPE_DYNAMIC = 2;
+    public const IP_TYPES = [
+        self::IP_TYPE_STATIC  => 'static',
         self::IP_TYPE_DYNAMIC => 'dynamic',
     ];
-    const PROXY_SUBMISSION_WINDOW_5HOURS = 18000;
-    const PROXY_SUBMISSION_WINDOW_12HOURS = 43200;
-    const PROXY_SUBMISSION_WINDOW_24HOURS = 86400;
-    const PROXY_SUBMISSION_WINDOWS = [
-        self::PROXY_SUBMISSION_WINDOW_5HOURS => 'fivehours',
+    public const PROXY_SUBMISSION_WINDOW_5HOURS = 18000;
+    public const PROXY_SUBMISSION_WINDOW_12HOURS = 43200;
+    public const PROXY_SUBMISSION_WINDOW_24HOURS = 86400;
+    public const PROXY_SUBMISSION_WINDOWS = [
+        self::PROXY_SUBMISSION_WINDOW_5HOURS  => 'fivehours',
         self::PROXY_SUBMISSION_WINDOW_12HOURS => 'twelvehours',
         self::PROXY_SUBMISSION_WINDOW_24HOURS => 'twentyfourhours',
     ];
@@ -89,7 +89,7 @@ class school extends \core\persistent implements \cacheable_object  {
      * @param int            $id     If set, this is the id of an existing record, used to load the data.
      * @param \stdClass|null $record If set will be passed to {@see self::from_record()}.
      */
-    public function __construct(int $id = 0, \stdClass $record = null) {
+    public function __construct(int $id = 0, \stdClass $record = null){
         parent::__construct($id, $record);
     }
 
@@ -135,100 +135,100 @@ class school extends \core\persistent implements \cacheable_object  {
      *
      * @return array
      */
-    protected static function define_properties() {
-        return array(
-            'cohortname' => array(
+    protected static function define_properties(){
+        return [
+            'cohortname' => [
                 'type' => PARAM_RAW,
-            ),
-            'name' => array(
+            ],
+            'name' => [
                 'type' => PARAM_RAW,
-            ),
-            'code' => array(
+            ],
+            'code' => [
                 'type' => PARAM_RAW,
-            ),
-            'url' => array(
+            ],
+            'url' => [
                 'type' => PARAM_RAW,
-            ),
-            'city' => array(
+            ],
+            'city' => [
                 'type' => PARAM_RAW,
-            ),
-            'country' => array(
+            ],
+            'country' => [
                 'type' => PARAM_RAW,
-            ),
-            'region' => array(
+            ],
+            'region' => [
                 'type' => PARAM_RAW,
-            ),
-            'schoolgroup' => array(
+            ],
+            'schoolgroup' => [
                 'type' => PARAM_RAW,
-            ),
-            'logo' => array(
+            ],
+            'logo' => [
                 'type' => PARAM_INT,
-            ),
-            'compact_logo' => array(
+            ],
+            'compact_logo' => [
                 'type' => PARAM_INT,
-            ),
-            'schoolyeartype' => array(
+            ],
+            'schoolyeartype' => [
                 'type' => PARAM_INT,
-            ),
-            'startdate' => array(
+            ],
+            'startdate' => [
                 'type' => PARAM_INT,
-            ),
-            'enddate' => array(
+            ],
+            'enddate' => [
                 'type' => PARAM_INT,
-            ),
-            'note' => array(
+            ],
+            'note' => [
                 'type' => PARAM_RAW,
-            ),
-            'synctimezone' => array(
+            ],
+            'synctimezone' => [
                 'type' => PARAM_INT,
-            ),
-            'extmanager' => array(
+            ],
+            'extmanager' => [
                 'type' => PARAM_INT,
-            ),
-            'iptype' => array(
+            ],
+            'iptype' => [
                 'type' => PARAM_INT,
-            ),
-            'reportipchange' => array(
+            ],
+            'reportipchange' => [
                 'type' => PARAM_INT,
-            ),
-            'showipchange' => array(
+            ],
+            'showipchange' => [
                 'type' => PARAM_INT,
-            ),
-            'reportiptem' => array(
+            ],
+            'reportiptem' => [
                 'type' => PARAM_INT,
-            ),
-            'proctormanager' => array(
+            ],
+            'proctormanager' => [
                 'type' => PARAM_INT,
                 'default' => 0
-            ),
-            'enabletem' => array(
+            ],
+            'enabletem' => [
                 'type' => PARAM_INT,
-            ),
-            'videosubmissionrequired' => array(
+            ],
+            'videosubmissionrequired' => [
                 'type' => PARAM_INT,
-            ),
-            'esl' => array(
+            ],
+            'esl' => [
                 'type' => PARAM_INT,
-            ),
-            'academicintegritymanager' => array(
+            ],
+            'academicintegritymanager' => [
                 'type' => PARAM_INT,
                 'default' => 0
-            ),
-            'forceproxysubmissionwindow' => array(
+            ],
+            'forceproxysubmissionwindow' => [
                 'type' => PARAM_INT,
-            ),
-            'extensionsallowed' => array(
+            ],
+            'extensionsallowed' => [
                 'type' => PARAM_INT,
-            ),
-            'deadlinesdata' => array(
+            ],
+            'deadlinesdata' => [
                 'type' => PARAM_TEXT,
                 'null' => NULL_ALLOWED,
                 'default' => null
-            ),
-            'hidecompliancereport' => array(
+            ],
+            'hidecompliancereport' => [
                 'type' => PARAM_INT,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -237,7 +237,7 @@ class school extends \core\persistent implements \cacheable_object  {
      * @return object The data to cache, can be anything except a class that implements the \cacheable_object... that would
      *      be dumb.
      */
-    public function prepare_to_cache() {
+    public function prepare_to_cache(){
         return $this->to_record();
     }
 
@@ -247,7 +247,7 @@ class school extends \core\persistent implements \cacheable_object  {
      * @param mixed $data
      * @return object The instance for the given data.
      */
-    public static function wake_from_cache($data) {
+    public static function wake_from_cache($data){
         return new static(0, $data);
     }
 
@@ -277,7 +277,7 @@ class school extends \core\persistent implements \cacheable_object  {
      *
      * @return object|false
      */
-    public function get_cohort() {
+    public function get_cohort(){
         if (is_null($this->_cohort)){
             $this->_cohort = NED::db()->get_record('cohort', ['id' => $this->id]);
         }
@@ -288,22 +288,22 @@ class school extends \core\persistent implements \cacheable_object  {
     /**
      * @return mixed
      */
-    public function get_timezone() {
+    public function get_timezone(){
         return $this->get_cohort()->timezone ?? 99;
     }
 
     /**
      * @return string
      */
-    public function get_localtime() {
+    public function get_localtime(){
         return NED::ned_date(time(), '-', null, NED::DT_FORMAT_TIME12, $this->get_timezone());
     }
 
     /**
      * @return string
      */
-    public function _get_startdate() {
-        if ($this->get('schoolyeartype')) {
+    public function _get_startdate(){
+        if ($this->get('schoolyeartype')){
             return NED::get_default_school_year_start();
         } else {
             return $this->get('startdate') ?? 0;
@@ -313,8 +313,8 @@ class school extends \core\persistent implements \cacheable_object  {
     /**
      * @return string
      */
-    public function _get_enddate() {
-        if ($this->get('schoolyeartype')) {
+    public function _get_enddate(){
+        if ($this->get('schoolyeartype')){
             return NED::get_default_school_year_end();
         } else {
             return $this->get('enddate') ?? 0;
@@ -326,7 +326,7 @@ class school extends \core\persistent implements \cacheable_object  {
      *
      * @return string
      */
-    public function get_schoolyear() {
+    public function get_schoolyear(){
         return NED::get_format_school_year($this->_get_startdate(), $this->_get_enddate());
     }
 
@@ -344,13 +344,13 @@ class school extends \core\persistent implements \cacheable_object  {
     /**
      * @throws \dml_exception
      */
-    public function reset_time_zone() {
+    public function reset_time_zone(){
         $sql = "SELECT u.id, u.timezone
                   FROM {".static::TABLE_COHORT_MEMBERS."} cm
                   JOIN {user} u ON cm.userid = u.id
                  WHERE cm.cohortid = ?";
-        if ($users = NED::db()->get_records_sql($sql, [$this->id])) {
-            foreach ($users as $user) {
+        if ($users = NED::db()->get_records_sql($sql, [$this->id])){
+            foreach ($users as $user){
                 $user->timezone = $this->get_timezone();
                 NED::db()->update_record('user', $user);
             }
@@ -362,7 +362,7 @@ class school extends \core\persistent implements \cacheable_object  {
      *
      * @return static|false
      */
-    static public function get_school_by_id($id){
+    public static function get_school_by_id($id){
         if (!static::record_exists($id)) return false;
         return new static($id);
     }
@@ -372,7 +372,7 @@ class school extends \core\persistent implements \cacheable_object  {
      *
      * @return static
      */
-    static public function create_school_from_data($data=null){
+    public static function create_school_from_data($data=null){
         return new static(0, $data);
     }
 }

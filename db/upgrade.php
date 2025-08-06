@@ -27,7 +27,7 @@ use local_schoolmanager\shared_lib as NED;
 
 require_once(__DIR__ . '/upgradelib.php');
 
-function xmldb_local_schoolmanager_upgrade($oldversion) {
+function xmldb_local_schoolmanager_upgrade($oldversion){
     global $DB;
     $dbman = $DB->get_manager();
 
@@ -35,10 +35,10 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         local_schoolmanager_moodle3_upgrades($oldversion);
     }
 
-    if ($oldversion < 2024100400) {
+    if ($oldversion < 2024100400){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('cohortname', XMLDB_TYPE_CHAR, '255', null, null, null, NULL, 'id');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
 
             /** @noinspection SqlWithoutWhere */
@@ -48,34 +48,34 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         NED::upgrade_plugin_savepoint(2024100400);
     }
 
-    if ($oldversion < 2024121100) {
+    if ($oldversion < 2024121100){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('deadlinesdata', XMLDB_TYPE_TEXT, null,null, null, null, null, 'forceproxysubmissionwindow');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
         }
 
         NED::upgrade_plugin_savepoint(2024121100);
     }
 
-    if ($oldversion < 2024121600) {
+    if ($oldversion < 2024121600){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('region', XMLDB_TYPE_CHAR, '120', null, null, null, null, 'country');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
         }
         NED::upgrade_plugin_savepoint(2024121600);
     }
 
-    if ($oldversion < 2024121900) {
+    if ($oldversion < 2024121900){
         $DB->execute("UPDATE {local_schoolmanager_school} SET region = 'CN' WHERE region = 'China'");
         NED::upgrade_plugin_savepoint(2024121900);
     }
 
-    if ($oldversion < 2025011301) {
+    if ($oldversion < 2025011301){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('schoolgroup', XMLDB_TYPE_CHAR, '120', null, null, null, null, 'region');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
         }
 
@@ -84,31 +84,31 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         NED::upgrade_plugin_savepoint(2025011301);
     }
 
-    if ($oldversion < 2025012801) {
+    if ($oldversion < 2025012801){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('videosubmissionrequired', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'enabletem');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
         }
 
         NED::upgrade_plugin_savepoint(2025012801);
     }
 
-    if ($oldversion < 2025021500) {
+    if ($oldversion < 2025021500){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('showipchange', XMLDB_TYPE_INTEGER, '2', null, null, null, '0', 'iptype');
 
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
         }
 
         NED::upgrade_plugin_savepoint(2025021500);
     }
 
-    if ($oldversion < 2025032700) {
+    if ($oldversion < 2025032700){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('reportipchange', XMLDB_TYPE_INTEGER, '2', null, null, null, '0', 'iptype');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
 
             /** @noinspection SqlWithoutWhere */
@@ -116,17 +116,17 @@ function xmldb_local_schoolmanager_upgrade($oldversion) {
         }
 
         $field = new xmldb_field('reportiptem', XMLDB_TYPE_INTEGER, '2', null, null, null, '0', 'showipchange');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
         }
 
         NED::upgrade_plugin_savepoint(2025032700);
     }
 
-    if ($oldversion < 2025071600) {
+    if ($oldversion < 2025071600){
         $table = new xmldb_table('local_schoolmanager_school');
         $field = new xmldb_field('hidecompliancereport', XMLDB_TYPE_INTEGER, '2', null, null, null, '0', 'forceproxysubmissionwindow');
-        if (!$dbman->field_exists($table, $field)) {
+        if (!$dbman->field_exists($table, $field)){
             $dbman->add_field($table, $field);
         }
 

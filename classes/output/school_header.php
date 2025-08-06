@@ -31,16 +31,16 @@ class school_header implements \renderable, \templatable {
     private $sm;
     private \moodle_url $url;
 
-    public function __construct($schoolid, $view) {
+    public function __construct($schoolid, $view){
         $this->schoolid = $schoolid;
         $this->school = new SM\school($schoolid);
         $this->sm = new SM\school_manager();
         $this->view = $view;
         $this->url = SH::get_url();
-        if (!$this->schoolid) {
+        if (!$this->schoolid){
             $sh = SH::get_school_handler();
             $schools = $sh->get_schools();
-            if (count($schools) == 1) {
+            if (count($schools) == 1){
                 $this->url->param('schoolid', reset($schools)->id);
                 redirect($this->url);
             }
@@ -53,10 +53,10 @@ class school_header implements \renderable, \templatable {
      * @param \renderer_base $output
      * @return \stdClass
      */
-    public function export_for_template(\renderer_base $output) {
+    public function export_for_template(\renderer_base $output){
         $data = new \stdClass();
 
-        if ($logourl = SM\school_manager::get_logo_url($this->schoolid)) {
+        if ($logourl = SM\school_manager::get_logo_url($this->schoolid)){
             $data->logourl = $logourl->out();
         } else {
             $name = $this->school->get('name');
@@ -64,7 +64,7 @@ class school_header implements \renderable, \templatable {
                 $data->shortname = trim(substr($name, $pos + 1 ));
             }
         }
-        if ($this->school->get_cohort()) {
+        if ($this->school->get_cohort()){
             $data->showheader = true;
             $data->timezone = $this->school->get_timezone();
             $data->localtime = $this->school->get_localtime();
@@ -84,7 +84,7 @@ class school_header implements \renderable, \templatable {
         $data->synctimezone = $this->school->get('synctimezone');
 
         $data->schoolyear = $this->school->get_schoolyear();
-        if ($administrator = $this->sm->get_school_students($this->schoolid, true, $this->sm::SCHOOL_ADMINISTRATOR_ROLE, false)) {
+        if ($administrator = $this->sm->get_school_students($this->schoolid, true, $this->sm::SCHOOL_ADMINISTRATOR_ROLE, false)){
             $administrator = reset($administrator);
             $data->administrator = fullname($administrator);
         }
@@ -92,7 +92,7 @@ class school_header implements \renderable, \templatable {
         $data->{'btn'.$this->view.'csl'} = 'btn-primary';
         $data->{'show_'.$this->view} = 1;
 
-        if ($this->view == SH::VIEW_CLASSES && has_capability('report/ghs:downloadgradesbulk', \context_system::instance())) {
+        if ($this->view == SH::VIEW_CLASSES && has_capability('report/ghs:downloadgradesbulk', \context_system::instance())){
             $name = NED::str('downloadallgrades', null, 'local_schoolmanager');
             $downloadallgradesurl = clone $this->url;
             $downloadallgradesurl->param('view', SH::VIEW_CLASSES);
@@ -100,17 +100,17 @@ class school_header implements \renderable, \templatable {
             $data->downloadallgrades = NED::link($downloadallgradesurl, NED::fa('fa-download') . $name, 'float-right');
         }
         $ctx = NED::ctx();
-        if ($viewstudentstaffsummary = NED::has_capability('viewstudentstaffsummary', $ctx)) {
+        if ($viewstudentstaffsummary = NED::has_capability('viewstudentstaffsummary', $ctx)){
             $data->{'canview_'.SH::VIEW_STUDENTS} = 1;
             $data->{'canview_'.SH::VIEW_STAFF} = 1;
         }
-        if (NED::can_view_class_enrollment_report()) {
+        if (NED::can_view_class_enrollment_report()){
             $data->{'canview_'.SH::VIEW_CLASSES} = 1;
         }
-        if (NED::is_plugin_exists('local_epctracker') && NED::has_any_capability(['local/epctracker:viewownschool', 'local/epctracker:viewallschools'], $ctx)) {
+        if (NED::is_plugin_exists('local_epctracker') && NED::has_any_capability(['local/epctracker:viewownschool', 'local/epctracker:viewallschools'], $ctx)){
             $data->{'canview_'.SH::VIEW_EPC} = 1;
         }
-        if (NED::is_plugin_exists('report_ghs') && NED::has_any_capability(['report/ghs:viewfrozenaccountsallschools', 'report/ghs:viewfrozenaccountsownschool'], $ctx)) {
+        if (NED::is_plugin_exists('report_ghs') && NED::has_any_capability(['report/ghs:viewfrozenaccountsallschools', 'report/ghs:viewfrozenaccountsownschool'], $ctx)){
             $data->{'canview_'.SH::VIEW_FROZENACCOUNTS} = 1;
         }
 
@@ -141,8 +141,6 @@ class school_header implements \renderable, \templatable {
         $reportheader = (new \local_schoolmanager\output\reports_header($this->schoolid))->export_for_template($output);
         unset($reportheader->showheader);
 
-        $data = NED::object_merge($data, $reportheader);
-
-        return $data;
+        return NED::object_merge($data, $reportheader);
     }
 }

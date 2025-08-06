@@ -21,18 +21,18 @@ require_once($CFG->dirroot . '/cohort/lib.php');
 require_once($CFG->dirroot . '/theme/ned_boost/classes/output/frontdashboard.php');
 
 class school_handler {
-    const CAP_CANT_SEE_SCHOOL = 0;
-    const CAP_SEE_OWN_SCHOOL = 1;
-    const CAP_SEE_ALL_SCHOOLS = 2;
-    const VIEW_STUDENTS = 'students';
-    const VIEW_STAFF = 'staff';
-    const VIEW_SCHOOL = 'school';
-    const VIEW_SCHOOLS = 'schools';
-    const VIEW_CLASSES = 'classes';
-    const VIEW_EPC = 'epc';
-    const VIEW_FROZENACCOUNTS = 'frozenaccounts';
+    public const CAP_CANT_SEE_SCHOOL = 0;
+    public const CAP_SEE_OWN_SCHOOL = 1;
+    public const CAP_SEE_ALL_SCHOOLS = 2;
+    public const VIEW_STUDENTS = 'students';
+    public const VIEW_STAFF = 'staff';
+    public const VIEW_SCHOOL = 'school';
+    public const VIEW_SCHOOLS = 'schools';
+    public const VIEW_CLASSES = 'classes';
+    public const VIEW_EPC = 'epc';
+    public const VIEW_FROZENACCOUNTS = 'frozenaccounts';
     /** @var static */
-    static $self = null;
+    public static $self = null;
 
     protected $user;
     protected $ctx;
@@ -42,7 +42,7 @@ class school_handler {
     /**
      * Use {@see static::get_school_handler()} instead of raw __construct() method
      */
-    public function __construct() {
+    public function __construct(){
         global $USER;
 
         $this->user = $USER;
@@ -58,7 +58,7 @@ class school_handler {
      *
      * @return static
      */
-    static public function get_school_handler(){
+    public static function get_school_handler(){
         if (empty(static::$self)){
             static::$self = new static();
         }
@@ -74,7 +74,7 @@ class school_handler {
      *
      * @return int
      */
-    static public function get_capability($ctx=null){
+    public static function get_capability($ctx=null){
         $ctx = $ctx ?? \context_system::instance();
         if (NED::has_capability('viewallschooldashboards', $ctx)){
             return static::CAP_SEE_ALL_SCHOOLS;
@@ -88,15 +88,15 @@ class school_handler {
     /**
      * @return mixed
      */
-    public function get_schools() {
+    public function get_schools(){
         return $this->schools;
     }
 
     /**
      * load all possible fot current user schools from cohorts
      */
-    protected function set_schools() {
-        if ($this->capability >= static::CAP_SEE_ALL_SCHOOLS) {
+    protected function set_schools(){
+        if ($this->capability >= static::CAP_SEE_ALL_SCHOOLS){
             $cohort_data = cohort_get_all_cohorts(0, 0);
             $cohorts = $cohort_data['cohorts'] ?? [];
         } else {
@@ -111,11 +111,11 @@ class school_handler {
      *
      * @return array
      */
-    static public function get_schools_by_cohorts($cohorts=[]){
-        global $DB;
+    public static function get_schools_by_cohorts($cohorts=[]){
+        if (empty($cohorts)) return [];
 
-        [$sql_cohorts, $params] = $DB->get_in_or_equal(array_keys($cohorts), SQL_PARAMS_NAMED);
-        return $DB->get_records_select('local_schoolmanager_school', 'id '.$sql_cohorts, $params, 'name');
+        [$sql_cohorts, $params] = NED::db()->get_in_or_equal(array_keys($cohorts), SQL_PARAMS_NAMED);
+        return NED::db()->get_records_select('local_schoolmanager_school', 'id '.$sql_cohorts, $params, 'name');
     }
 
     /**
@@ -123,13 +123,13 @@ class school_handler {
      *
      * @return string
      */
-    public function get_control_form($schoolid = 0, $url = null, $hidetemdisabled = false, $hideschoolswithoutstudent = false) {
-        if (empty($this->schools) || $this->capability <= static::CAP_SEE_OWN_SCHOOL) {
+    public function get_control_form($schoolid = 0, $url = null, $hidetemdisabled = false, $hideschoolswithoutstudent = false){
+        if (empty($this->schools) || $this->capability <= static::CAP_SEE_OWN_SCHOOL){
             return '';
         }
 
         $form = [];
-        if (!$url) {
+        if (!$url){
             $url = static::get_url();
         }
 
@@ -144,15 +144,15 @@ class school_handler {
             $attr['disabled'] = 'disabled';
         }
 
-        if ($hideschoolswithoutstudent) {
+        if ($hideschoolswithoutstudent){
             $SM = new SM\school_manager();
         }
 
         foreach ($this->schools as $school){
-            if ($hidetemdisabled && !$school->enabletem) {
+            if ($hidetemdisabled && !$school->enabletem){
                 continue;
             }
-            if ($hideschoolswithoutstudent && !$students = $SM->get_school_students($school->id, true, $SM::DEF_MEMBER_ROLE, false)) {
+            if ($hideschoolswithoutstudent && !$students = $SM->get_school_students($school->id, true, $SM::DEF_MEMBER_ROLE, false)){
                 continue;
             }
             $school_opts[$school->id] = $school->cohortname;
@@ -167,15 +167,15 @@ class school_handler {
      *
      * @return \moodle_url
      */
-    public static function get_url() {
+    public static function get_url(){
         $params = [];
-        $params['schoolid'] = optional_param('schoolid', 0, PARAM_INT);;
+        $params['schoolid'] = optional_param('schoolid', 0, PARAM_INT);
         $params['view'] = optional_param('view', static::VIEW_STUDENTS, PARAM_ALPHA);
         return new \moodle_url('/local/schoolmanager/view.php', $params);
     }
 
-    public static function get_user_lastaccess($user) {
-        if ($user->lastaccess ?? false) {
+    public static function get_user_lastaccess($user){
+        if ($user->lastaccess ?? false){
             $t = time() - $user->lastaccess;
             if ($t > 0){
                 $lastlogin = get_string('ago', 'message', format_time($t));
@@ -233,9 +233,9 @@ class school_handler {
      *
      * @return float|int|null
      */
-    public static function get_user_gpa($user_or_id, $courses=null) {
+    public static function get_user_gpa($user_or_id, $courses=null){
         $userid = NED::get_id($user_or_id);
-        if (is_null($courses)) {
+        if (is_null($courses)){
             $courses = enrol_get_users_courses($userid);
         } elseif (empty($courses)){
             return null;
@@ -244,33 +244,33 @@ class school_handler {
         }
 
         $courseaverages = [];
-        foreach ($courses as $course) {
+        foreach ($courses as $course){
             $courseaverage = NED::get_course_grade($course->id, $userid, false, false, null);
-            if (!is_null($courseaverage)) {
+            if (!is_null($courseaverage)){
                 $courseaverages[] = $courseaverage;
             }
         }
 
-        if ($courseaverages) {
+        if ($courseaverages){
             return round(array_sum($courseaverages) / count($courseaverages), 2);
         }
 
         return 0;
     }
 
-    public static function get_user_ppa($user, $courses = null) {
-        if (empty($courses)) {
+    public static function get_user_ppa($user, $courses = null){
+        if (empty($courses)){
             $courses = enrol_get_users_courses($user->id);
         }
-        if ($courses) {
+        if ($courses){
             $pps = [];
-            foreach ($courses as $course) {
+            foreach ($courses as $course){
                 $_course = new \theme_ned_boost\output\course($course);
-                if ($pp = $_course->get_participation_power($user->id)) {
+                if ($pp = $_course->get_participation_power($user->id)){
                     $pps[] = $pp;
                 }
             }
-            if ($pps) {
+            if ($pps){
                 return  round(array_sum($pps) / count($pps), 2);
             }
         }
@@ -295,7 +295,7 @@ class school_handler {
         return NED::ai_get_users_aiv_count($users_or_ids, $courseid, $startdate, $enddate, $lastdays, $count_hidden);
     }
 
-    public static function get_classes($user, $schoolid, $courses = null) {
+    public static function get_classes($user, $schoolid, $courses = null){
         global $DB, $CFG, $USER;
 
         require_once($CFG->dirroot . '/course/lib.php');
@@ -304,11 +304,11 @@ class school_handler {
         $courseparams = [];
         $filtersql = '0=0';
 
-        if (empty($courses)) {
+        if (empty($courses)){
             $courses = enrol_get_users_courses($user->id);
         }
 
-        if (!$courses) {
+        if (!$courses){
             return null;
         }
 
@@ -316,14 +316,14 @@ class school_handler {
         $filter[] = "g.courseid {$coursewhere}";
 
 
-        if (!empty($filter)) {
+        if (!empty($filter)){
             $filtersql = implode(' AND ', $filter);
         }
 
         $schools = cohort_get_user_cohorts($user->id);
         $school = $schools[$schoolid] ?? null;
 
-        if (empty($school)) {
+        if (empty($school)){
             return null;
         }
 
@@ -367,8 +367,8 @@ class school_handler {
         $courseparams['cohortid'] = $school->id;
 
         $rs = $DB->get_recordset_sql($sql, $courseparams);
-        foreach ($rs as $data) {
-            if (!isset($classdata[$data->id])) {
+        foreach ($rs as $data){
+            if (!isset($classdata[$data->id])){
                 $classurl = new \moodle_url('/blocks/ned_teacher_tools/progress_report.php', [
                     'courseid' => $data->courseid,
                     'group' => $data->id,
@@ -376,11 +376,11 @@ class school_handler {
 
                 $coursefinalgrade = null;
                 $coursefinalgrademax = null;
-                if ($coursegrade = $DB->get_record_sql($sqlgrade, [$data->courseid, $data->userid])) {
-                    if (!is_null($coursegrade->finalgrade)) {
+                if ($coursegrade = $DB->get_record_sql($sqlgrade, [$data->courseid, $data->userid])){
+                    if (!is_null($coursegrade->finalgrade)){
                         $coursefinalgrade = round($coursegrade->finalgrade);
                     }
-                    if (!is_null($coursegrade->rawgrademax)) {
+                    if (!is_null($coursegrade->rawgrademax)){
                         $coursefinalgrademax = round($coursegrade->rawgrademax);
                     }
                 }
@@ -425,14 +425,14 @@ class school_handler {
         return array_values($classdata);
     }
 
-    public static function get_timezone() {}
+    public static function get_timezone(){}
 
     /**
      * @param $cohort
      * @return bool
      * @throws \dml_exception
      */
-    public static function has_different_timezone_users_in_school($cohort) {
+    public static function has_different_timezone_users_in_school($cohort){
         global $DB;
 
         $sql = "SELECT cm.id, cm.userid, u.firstname, u.lastname,u.timezone
@@ -450,13 +450,13 @@ class school_handler {
      *
      * @return bool
      */
-    public static function has_certificate_badge($userid, $type) {
+    public static function has_certificate_badge($userid, $type){
         $config = get_config('local_schoolmanager');
         $badgeid = $config->{$type."_cert_badge"} ?? 0;
-        if ($badgeid) {
-            if ($badges = badges_get_user_badges($userid)) {
-                foreach ($badges as $badge) {
-                    if ($badge->id == $badgeid) {
+        if ($badgeid){
+            if ($badges = badges_get_user_badges($userid)){
+                foreach ($badges as $badge){
+                    if ($badge->id == $badgeid){
                         return true;
                     }
                 }

@@ -70,11 +70,11 @@ if (empty($task_records)){
 
         $next_run = $task->get_next_run_time();
         $plugininfo = core_plugin_manager::instance()->get_plugin_info($task->get_component());
-        if ($plugininfo && $plugininfo->is_enabled() === false && !$task->get_run_if_component_disabled()) {
+        if ($plugininfo && $plugininfo->is_enabled() === false && !$task->get_run_if_component_disabled()){
             $cell = $str('plugindisabled');
-        } else if ($task->get_disabled()) {
+        } elseif ($task->get_disabled()){
             $cell = $str('taskdisabled');
-        } else if ($next_run > $now) {
+        } elseif ($next_run > $now){
             $cell = NED::cell(
                 NED::$C::str('after_x', NED::time_diff_to_str_max($next_run, $now, 2)),
                 '', ['title' => NED::ned_date($next_run)]);
@@ -83,7 +83,7 @@ if (empty($task_records)){
         }
         $row->cells[] = $cell;
 
-        if (empty($CFG->preventscheduledtaskchanges) && !$task->is_overridden()) {
+        if (empty($CFG->preventscheduledtaskchanges) && !$task->is_overridden()){
             $editlink = NED::link(NED::url('/admin/tool/task/scheduledtasks.php', ['action' => 'edit', 'task' => $classname]),
                 NED::fa('fa-cog m-0', '', $str('edittaskschedule', $t_name)), 'flex-center');
         } else {
@@ -92,7 +92,7 @@ if (empty($task_records)){
         $row->cells[] = NED::cell($editlink, 'vertical-align-middle');
 
         $loglink = '';
-        if ($showloglink) {
+        if ($showloglink){
             $loglink = NED::link(\core\task\logmanager::get_url_for_task_class($classname),
                 NED::fa('fa-file-text m-0', '', $str('viewlogs', $t_name)), 'flex-center');
         }

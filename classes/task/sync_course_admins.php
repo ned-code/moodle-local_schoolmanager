@@ -55,7 +55,7 @@ class sync_course_admins extends \core\task\scheduled_task {
      *
      * @return void
      */
-    static public function do_job($task_or_data=[]) {
+    public static function do_job($task_or_data=[]){
         $users = static::get_users_to_update(true);
         if (empty($users)){
             if (is_null($users)){
@@ -68,7 +68,7 @@ class sync_course_admins extends \core\task\scheduled_task {
 
         $c = count($users);
         static::print("There are $c users-courses to process...");
-        list($add_enrol, $rem_enrol, $add_group, $rem_group) = static::process_users($users, true);
+        [$add_enrol, $rem_enrol, $add_group, $rem_group] = static::process_users($users, true);
         if ($add_enrol){
             static::print("There are $add_enrol users-courses have been enrolled");
         }
@@ -90,7 +90,7 @@ class sync_course_admins extends \core\task\scheduled_task {
      *
      * @return array
      */
-    static public function get_users_to_update($log=false){
+    public static function get_users_to_update($log=false){
         $params = [];
         $params['syscontextid'] = SYSCONTEXTID;
         $params['school_code_length'] = NED::SCHOOL_CODE_LENGTH;
@@ -128,7 +128,7 @@ class sync_course_admins extends \core\task\scheduled_task {
         $t_school = school_manager::TABLE_SCHOOL;
         $t_member = school_manager::TABLE_MEMBERS;
 
-        list($rolename_where, $rolename_params) = NED::db()->get_in_or_equal([NED::ROLE_SSA, NED::ROLE_SDA], SQL_PARAMS_NAMED);
+        [$rolename_where, $rolename_params] = NED::db()->get_in_or_equal([NED::ROLE_SSA, NED::ROLE_SDA], SQL_PARAMS_NAMED);
         $all_params[] = $rolename_params;
 
         $from = ["
@@ -205,7 +205,7 @@ class sync_course_admins extends \core\task\scheduled_task {
      *
      * @return array ($add_enrol, $rem_enrol, $add_group, $rem_group) - enrolled, suspended, added to group, removed from group users,
      */
-    static public function process_users($users, $log=false){
+    public static function process_users($users, $log=false){
         $add_enrol = 0;
         $rem_enrol = 0;
         $add_group = 0;
@@ -216,19 +216,19 @@ class sync_course_admins extends \core\task\scheduled_task {
         }
 
         $now = time();
-        $p = function($text) use (&$log) {
+        $p = function($text) use (&$log){
           if (!$log) return;
 
           static::print($text);
         };
         $enrol_plugin = null;
-        if (enrol_is_enabled('manual')) {
+        if (enrol_is_enabled('manual')){
             $enrol_plugin = enrol_get_plugin('manual');
         }
 
         $enrol_component = NED::$PLUGIN_NAME;
         $role_names = [NED::ROLE_SDA, NED::ROLE_SSA, NED::ROLE_RDA, NED::ROLE_RSA];
-        list($role_sql, $params) = NED::db()->get_in_or_equal($role_names, SQL_PARAMS_NAMED);
+        [$role_sql, $params] = NED::db()->get_in_or_equal($role_names, SQL_PARAMS_NAMED);
         $roles = NED::db()->get_records_select_menu('role', "shortname $role_sql", $params, '', 'shortname, id');
         $set_roles = [];
         if (!empty($roles[NED::ROLE_SDA]) && !empty($roles[NED::ROLE_RDA])){
@@ -258,7 +258,7 @@ class sync_course_admins extends \core\task\scheduled_task {
                             $set_roleid = $set_roles[$have_role] ?? 0;
                             if (!$set_roleid) continue;
 
-                            if ($enrol_plugin->roles_protected()) {
+                            if ($enrol_plugin->roles_protected()){
                                 role_assign($set_roleid, $user->userid, $context->id, $enrol_component, $e_instance->id);
                             } else {
                                 role_assign($set_roleid, $user->userid, $context->id);

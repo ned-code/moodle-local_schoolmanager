@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-function xmldb_local_schoolmanager_uninstall() {
+function xmldb_local_schoolmanager_uninstall(){
 
     global $DB;
 
@@ -33,7 +33,7 @@ function xmldb_local_schoolmanager_uninstall() {
     // subcohort members
     $table = new xmldb_table('cohort_members');
     $field = new xmldb_field('crewid');
-    if ($dbman->field_exists($table, $field)) {
+    if ($dbman->field_exists($table, $field)){
         $key = new xmldb_key('crewid', XMLDB_KEY_FOREIGN, ['crewid'], 'local_schoolmanager_crew', ['id']);
         $dbman->drop_key($table, $key);
         $dbman->drop_field($table, $field);

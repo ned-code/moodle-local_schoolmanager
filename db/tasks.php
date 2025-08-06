@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = array(
-    array(
+$tasks = [
+    [
         'classname' => 'local_schoolmanager\task\sync_timezones',
         'blocking' => 0,
         'minute' => '0',
@@ -33,8 +33,8 @@ $tasks = array(
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*'
-    ),
-    array(
+    ],
+    [
         'classname' => 'local_schoolmanager\task\sync_school_admins',
         'blocking' => 0,
         'minute' => 'R',
@@ -42,8 +42,8 @@ $tasks = array(
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*'
-    ),
-    array(
+    ],
+    [
         'classname' => 'local_schoolmanager\task\sync_course_admins',
         'blocking' => 0,
         'minute' => 'R',
@@ -51,8 +51,8 @@ $tasks = array(
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*'
-    ),
-    array(
+    ],
+    [
         'classname' => 'local_schoolmanager\task\sync_groups',
         'blocking' => 0,
         'minute' => 'R',
@@ -60,8 +60,8 @@ $tasks = array(
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*'
-    ),
-    array(
+    ],
+    [
         'classname' => 'local_schoolmanager\task\sync_user_profile',
         'blocking' => 0,
         'minute' => 'R',
@@ -69,5 +69,5 @@ $tasks = array(
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*'
-    ),
-);
+    ],
+];

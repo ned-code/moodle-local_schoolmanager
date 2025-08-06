@@ -21,9 +21,11 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 /**
  * choose_potential_school_form
  */
-class choose_potential_school_form extends \moodleform
-{
-
+class choose_potential_school_form extends \moodleform {
+    /**
+     * Form definition
+     * @noinspection PhpOverridingMethodVisibilityInspection
+     */
     public function definition(){
         $mform = $this->_form;
         $cancel_link = $this->_customdata['cancel'] ?? false;
@@ -33,10 +35,7 @@ class choose_potential_school_form extends \moodleform
             NED::print_module_error('nopermissions', 'error', '', 'There are no potential schools for the form!');
         }
 
-        $ps_list = [];
-        foreach ($ps as $id => $cohort){
-            $ps_list[$id] = $cohort->name . ' - ' . $cohort->idnumber;
-        }
+        $ps_list = array_map(function($cohort){ return $cohort->name.' - '.$cohort->idnumber; }, $ps);
         asort($ps_list);
         $mform->addElement('autocomplete', 'cohortid', NED::str('selectcohort'), $ps_list);
 

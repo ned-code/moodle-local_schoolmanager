@@ -36,36 +36,36 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
  * @property-read array $crew_users = [];
  */
 class school_manager {
-    const TABLE_SCHOOL = school::TABLE;
-    const TABLE_CREW = 'local_schoolmanager_crew';
-    const TABLE_COHORT = school::TABLE_COHORT;
-    const TABLE_MEMBERS = school::TABLE_COHORT_MEMBERS;
+    public const TABLE_SCHOOL = school::TABLE;
+    public const TABLE_CREW = 'local_schoolmanager_crew';
+    public const TABLE_COHORT = school::TABLE_COHORT;
+    public const TABLE_MEMBERS = school::TABLE_COHORT_MEMBERS;
 
-    const CAP_CANT_VIEW_SM = 0;
-    const CAP_SEE_OWN_SM = 1;
-    const CAP_SEE_ALL_SM = 2;
+    public const CAP_CANT_VIEW_SM = 0;
+    public const CAP_SEE_OWN_SM = 1;
+    public const CAP_SEE_ALL_SM = 2;
 
-    const CAP_CANT_EDIT = 0;
-    const CAP_CAN_EDIT = 1;
+    public const CAP_CANT_EDIT = 0;
+    public const CAP_CAN_EDIT = 1;
 
-    const FIELD_ROLE = NED::FIELD_DEFAULT_ROLE;
-    const DEF_MEMBER_ROLE = NED::DEFAULT_ROLE_STUDENT;
-    const STAFF_ROLES = [
+    public const FIELD_ROLE = NED::FIELD_DEFAULT_ROLE;
+    public const DEF_MEMBER_ROLE = NED::DEFAULT_ROLE_STUDENT;
+    public const STAFF_ROLES = [
         NED::DEFAULT_ROLE_CT, NED::DEFAULT_ROLE_OT,
         NED::DEFAULT_ROLE_SCHOOL_ADMINISTRATOR, NED::DEFAULT_ROLE_CA, NED::DEFAULT_ROLE_GC, NED::DEFAULT_ROLE_DA,
     ];
-    const SCHOOL_ADMINISTRATOR_ROLE = NED::DEFAULT_ROLE_SCHOOL_ADMINISTRATOR;
-    const SCHOOL_CT_ROLE = NED::DEFAULT_ROLE_CT;
+    public const SCHOOL_ADMINISTRATOR_ROLE = NED::DEFAULT_ROLE_SCHOOL_ADMINISTRATOR;
+    public const SCHOOL_CT_ROLE = NED::DEFAULT_ROLE_CT;
 
-    static protected $_school_managers = [];
+    protected static $_school_managers = [];
     /**@var school[] */
-    static protected $_schools_data = [];
-    static protected $_all_schools_data_was_loaded = false;
-    static protected $_called_crews = [];
-    static protected $_called_crew_schoolids = [];
+    protected static $_schools_data = [];
+    protected static $_all_schools_data_was_loaded = false;
+    protected static $_called_crews = [];
+    protected static $_called_crew_schoolids = [];
 
-    static protected $_default_role_field_id = null;
-    static protected $_default_role_default_value = null;
+    protected static $_default_role_field_id = null;
+    protected static $_default_role_default_value = null;
 
     protected $_view = self::CAP_CANT_VIEW_SM;
     protected $_manage_schools = self::CAP_CANT_EDIT;
@@ -140,7 +140,7 @@ class school_manager {
     /**
      * @return school_manager
      */
-    static public function get_school_manager(){
+    public static function get_school_manager(){
         global $USER;
         $userid = $USER->id;
 
@@ -188,7 +188,7 @@ class school_manager {
      *
      * @return array|school[]|school|object|false
      */
-    static protected function _get_school_by_ids($ids, $only_one=false){
+    protected static function _get_school_by_ids($ids, $only_one=false){
         global $DB;
         if (empty($ids)){
             return $only_one ? false : [];
@@ -792,14 +792,14 @@ class school_manager {
         $upd_school->enddate = $data->enddate ?? (time() + 365*24*3600);
         $upd_school->note = $data->note ?? '';
         $upd_school->iptype = $data->iptype ?? null;
-        if (is_siteadmin()) {
+        if (is_siteadmin()){
             $upd_school->reportipchange = $data->reportipchange ?? null;
             $upd_school->hidecompliancereport = $data->hidecompliancereport ?? 0;
         }
         $upd_school->showipchange = $data->showipchange ?? null;
         $upd_school->reportiptem = $data->reportiptem ?? null;
 
-        if (NED::has_capability('manage_extension_limit', $this->_ctx)) {
+        if (NED::has_capability('manage_extension_limit', $this->_ctx)){
             $upd_school->extensionsallowed = $data->extensionsallowed ?? 3;
         }
 
@@ -821,7 +821,7 @@ class school_manager {
             $upd_school->deadlinesdata = (!empty($data->activatedeadlinesconfig) && !empty($deadlinesdata)) ? json_encode($deadlinesdata) : null;
         }
 
-        if ($can_manage_extra) {
+        if ($can_manage_extra){
             if (!empty($data->name)){
                 $upd_school->name = $data->name;
             }
@@ -843,7 +843,7 @@ class school_manager {
             $upd_school->compact_logo = !empty($data->compact_logo) ? $data->compact_logo_filemanager : 0;
         }
 
-        if (is_siteadmin()) {
+        if (is_siteadmin()){
             $upd_school->region = !empty($data->region) ? $data->region : 0;
             $upd_school->schoolgroup = !empty($data->schoolgroup) ? $data->schoolgroup : 'None';
         }
@@ -936,7 +936,7 @@ class school_manager {
             }
         }
 
-        if (empty($code)) {
+        if (empty($code)){
             $count = $DB->count_records(static::TABLE_CREW, ['schoolid' => $up_data->schoolid]) + 1;
             $count = $count > 9 ? $count : ('0' . $count);
             $code = $school_code . '-' . $count;
@@ -1046,7 +1046,7 @@ class school_manager {
      *
      * @return \moodle_url|false
      */
-    static public function get_logo_url($schoolid){
+    public static function get_logo_url($schoolid){
         static $_data = [];
         if (!$schoolid){
             return false;
@@ -1058,7 +1058,7 @@ class school_manager {
                 "itemid, filepath, filename", false);
             $logourl = false;
 
-            foreach ($files as $file) {
+            foreach ($files as $file){
                 $logourl = NED::file_get_pluginfile_url($file);
                 break;
             }
@@ -1076,7 +1076,7 @@ class school_manager {
      *
      * @return \moodle_url|false
      */
-    static public function get_compact_logo_url($schoolid){
+    public static function get_compact_logo_url($schoolid){
         static $_data = [];
         if (!$schoolid){
             return false;
@@ -1088,7 +1088,7 @@ class school_manager {
                 "itemid, filepath, filename", false);
             $logourl = false;
 
-            foreach ($files as $file) {
+            foreach ($files as $file){
                 $logourl = NED::file_get_pluginfile_url($file);
                 break;
             }
@@ -1104,7 +1104,7 @@ class school_manager {
      * @return array
      * @throws \dml_exception
      */
-    public static function get_school_classes($schoolid) {
+    public static function get_school_classes($schoolid){
         global $DB;
 
         $school = school::get_school_by_id($schoolid);

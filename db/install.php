@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-function xmldb_local_schoolmanager_install() {
+function xmldb_local_schoolmanager_install(){
     global $DB;
 
     $dbman = $DB->get_manager();
@@ -32,7 +32,7 @@ function xmldb_local_schoolmanager_install() {
     // subcohort members
     $table = new xmldb_table('cohort_members');
     $field = new xmldb_field('crewid', XMLDB_TYPE_INTEGER, '10', null, false, null, null);
-    if (!$dbman->field_exists($table, $field)) {
+    if (!$dbman->field_exists($table, $field)){
         $dbman->add_field($table, $field);
         $key = new xmldb_key('crewid', XMLDB_KEY_FOREIGN, ['crewid'], 'local_schoolmanager_crew', ['id']);
         $dbman->add_key($table, $key);

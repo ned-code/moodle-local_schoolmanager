@@ -24,75 +24,75 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
-    'local/schoolmanager:viewownschooldashboard' => array(
+$capabilities = [
+    'local/schoolmanager:viewownschooldashboard' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:viewallschooldashboards' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:viewallschooldashboards' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:manage_schools' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:manage_schools' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:manage_schools_extra' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:manage_schools_extra' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:delete_schools' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:delete_schools' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:manage_crews' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:manage_crews' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:manage_members' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:manage_members' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:view_ps_compliance_report' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:view_ps_compliance_report' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:manage_extension_limit' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:manage_extension_limit' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:manage_extension_limit_override' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:manage_extension_limit_override' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:manage_deadlines_data_override' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:manage_deadlines_data_override' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:viewstudentstaffsummary' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:viewstudentstaffsummary' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:viewschooldescription' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:viewschooldescription' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-    'local/schoolmanager:viewschoolprofile' => array(
+        'archetypes' => []
+    ],
+    'local/schoolmanager:viewschoolprofile' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array()
-    ),
-);
+        'archetypes' => []
+    ],
+];

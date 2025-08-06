@@ -34,10 +34,10 @@ $schoolid = optional_param('schoolid', 0, PARAM_INT);
 $view = optional_param('view', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_TEXT);
 
-if (!$schoolid) {
+if (!$schoolid){
     $view = SH::VIEW_SCHOOLS;
 } else {
-    if ($action == 'resettimezone' && is_siteadmin()) {
+    if ($action == 'resettimezone' && is_siteadmin()){
         $school = new local_schoolmanager\school($schoolid);
         $school->reset_time_zone();
     }

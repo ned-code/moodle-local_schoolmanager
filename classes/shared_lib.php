@@ -24,16 +24,17 @@ class shared_lib extends \local_ned_controller\shared\base_class {
     /**
      * @var string|\local_schoolmanager\school_manager
      */
-    static $SM = '\\local_schoolmanager\\school_manager';
+    public static $SM = '\\local_schoolmanager\\school_manager';
 
     /**
      * @param $users
      * @param $lastdays
+     *
      * @return int
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    static function count_logged_user($users, $lastdays) {
+    public static function count_logged_user($users, $lastdays){
         global $DB;
 
         [$insql, $params] = $DB->get_in_or_equal($users);
@@ -49,7 +50,7 @@ class shared_lib extends \local_ned_controller\shared\base_class {
         return $DB->count_records_sql($sql, $params);
     }
 
-    static function count_not_logged_user($users, $lastdays) {
+    public static function count_not_logged_user($users, $lastdays){
         global $DB;
 
         [$insql, $params] = $DB->get_in_or_equal($users);
@@ -69,12 +70,12 @@ class shared_lib extends \local_ned_controller\shared\base_class {
      * Get $complete/$incomplete statistics by school groups
      *
      * @param string $school_code
-     * @param int $startdate - UNIX time
-     * @param int $enddate - UNIX time
+     * @param int    $startdate - UNIX time
+     * @param int    $enddate   - UNIX time
      *
      * @return int[] - [$complete, $incomplete, $classes, $completeended, $incompleteended]
      */
-    static function count_dm_schedule($school_code, $startdate=0, $enddate=0) {
+    public static function count_dm_schedule($school_code, $startdate = 0, $enddate = 0){
         $complete = 0;
         $incomplete = 0;
         $classes = 0;
@@ -108,19 +109,19 @@ class shared_lib extends \local_ned_controller\shared\base_class {
         $sql = static::sql_generate("g.*", $joins, "groups", "g", $where);
         $groups = static::db()->get_records_sql($sql, $params);
         $now = time();
-        foreach ($groups as $group) {
+        foreach ($groups as $group){
             if (!$group->schedule) continue;
 
             $deadlinemanager = new \block_ned_teacher_tools\deadline_manager($group->courseid);
             $classes++;
             if ($deadlinemanager->has_missed_schedule($group->id)){
                 $incomplete++;
-                if ($group->enddate < $now) {
+                if ($group->enddate < $now){
                     $incompleteended++;
                 }
-            } else {
+            } else{
                 $complete++;
-                if ($group->enddate < $now) {
+                if ($group->enddate < $now){
                     $completeended++;
                 }
             }
@@ -132,14 +133,14 @@ class shared_lib extends \local_ned_controller\shared\base_class {
     /**
      * @return int - UNIX timestamp
      */
-    static public function get_default_school_year_start(){
+    public static function get_default_school_year_start(){
         return strtotime(get_config('local_schoolmanager', 'defaultschoolyearstart'));
     }
 
     /**
      * @return int - UNIX timestamp
      */
-    static public function get_default_school_year_end(){
+    public static function get_default_school_year_end(){
         return strtotime(get_config('local_schoolmanager', 'defaultschoolyearend'));
     }
 
@@ -147,12 +148,13 @@ class shared_lib extends \local_ned_controller\shared\base_class {
      * Return formatted school year dates
      *
      * @param int|null $school_year_start - UNIX time or null (uses default school year start)
-     * @param int|null $school_year_end - UNIX time or null (uses default school year end)
-     * @param string $format - string format for dates
+     * @param int|null $school_year_end   - UNIX time or null (uses default school year end)
+     * @param string   $format            - string format for dates
      *
      * @return string
      */
-    static public function get_format_school_year($school_year_start=null, $school_year_end=null, $format=self::DT_FORMAT_DATE) {
+    public static function get_format_school_year($school_year_start = null, $school_year_end = null,
+        $format = self::DT_FORMAT_DATE){
         $school_year_start = $school_year_start ?? static::get_default_school_year_start();
         $school_year_end = $school_year_end ?? static::get_default_school_year_end();
         return
@@ -169,7 +171,7 @@ class shared_lib extends \local_ned_controller\shared\base_class {
      *
      * @return int
      */
-    public static function count_school_classes_enddate_extensions($school_code, $startdate=0, $enddate=0, $last_days=0) {
+    public static function count_school_classes_enddate_extensions($school_code, $startdate = 0, $enddate = 0, $last_days = 0){
         if (!static::is_tt_exists() || empty($school_code)) return 0;
 
         $where = [static::db()->sql_like('g.name', ':code', false, false)];
@@ -194,12 +196,12 @@ class shared_lib extends \local_ned_controller\shared\base_class {
 
     /**
      *
-     * @param int $schoolid
+     * @param int   $schoolid
      * @param array $args
      *
      * @return array|{sql: string, params: array} - can be empty, if user can see nothing
      */
-    public static function get_school_proctoring_sqlquery(int $schoolid, array $args): array {
+    public static function get_school_proctoring_sqlquery(int $schoolid, array $args): array{
         $where = [];
         $params = [];
 
@@ -214,7 +216,7 @@ class shared_lib extends \local_ned_controller\shared\base_class {
         static::sql_add_between("s.timestart", $args['starttime'] ?? 0, $args['endtime'] ?? 0,
             $where, $params, true);
 
-        $where[] = match($args['filter']){
+        $where[] = match ($args['filter']) {
             tem_helper::FILTER_ACTION_REQUIRED => "(s.timescheduled  = 0 OR s.proctor = 0 OR r.id IS NULL)",
             tem_helper::FILTER_COMPLETED => "(s.timescheduled  != 0 AND s.proctor <> 0 AND r.id IS NOT NULL)",
             default => ''
@@ -267,10 +269,10 @@ class shared_lib extends \local_ned_controller\shared\base_class {
         if (!static::is_tem_exists() || empty($schoolid)) return 0;
 
         $args = [
-            'filter' => tem_helper::FILTER_ACTION_REQUIRED,
-            'overdue' => $overdue,
+            'filter'    => tem_helper::FILTER_ACTION_REQUIRED,
+            'overdue'   => $overdue,
             'starttime' => $starttime,
-            'endtime' => $endtime
+            'endtime'   => $endtime,
         ];
 
         $query = static::get_school_proctoring_sqlquery($schoolid, $args);
@@ -284,7 +286,7 @@ class shared_lib extends \local_ned_controller\shared\base_class {
      *
      * @return bool True if the user has the capability to view the report, false otherwise
      */
-    public static function can_view_class_enrollment_report() {
+    public static function can_view_class_enrollment_report(){
         $contextsystem = \context_system::instance();
         return has_capability('report/ghs:viewgroupenrollment', $contextsystem) ||
             \report_ghs\helper::has_capability_in_any_course('report/ghs:viewgroupenrollment');
@@ -296,11 +298,11 @@ class shared_lib extends \local_ned_controller\shared\base_class {
      *
      * @return string[] - An associative array where keys and values represent region codes and names.
      */
-    public static function get_region_list() {
+    public static function get_region_list(){
         return [
             'SM' => 'SM',
-            'CN' =>'CN',
-            'NA' => 'NA'
+            'CN' => 'CN',
+            'NA' => 'NA',
         ];
     }
 
@@ -309,14 +311,14 @@ class shared_lib extends \local_ned_controller\shared\base_class {
      *
      * @return array Associative array where keys are the school group codes and values are their corresponding names.
      */
-    public static function get_schoolgroup_list() {
+    public static function get_schoolgroup_list(){
         return [
-            'None' => 'None',
+            'None'         => 'None',
             'New Oriental' => 'New Oriental',
-            'DEOU Group' =>'DEOU Group',
-            'Oakwood' => 'Oakwood',
-            'YesEdu' => 'YesEdu',
-            'Walton' => 'Walton'
+            'DEOU Group'   => 'DEOU Group',
+            'Oakwood'      => 'Oakwood',
+            'YesEdu'       => 'YesEdu',
+            'Walton'       => 'Walton',
         ];
     }
 
@@ -331,12 +333,12 @@ class shared_lib extends \local_ned_controller\shared\base_class {
 
         if (!is_null($showallschools)){
             $userscache->set(static::$C::CACHE_USERS_KEY_SHOWALLSCHOOLS, $showallschools);
-        } else {
+        } else{
             $showallschools = false;
             $prev_url = static::urL_get_prev_url();
             if (static::is_schm_page($prev_url) || static::is_frontdashboard_page($prev_url)){
                 $showallschools = $userscache->get(static::$C::CACHE_USERS_KEY_SHOWALLSCHOOLS);
-            } else {
+            } else{
                 $userscache->delete(static::$C::CACHE_USERS_KEY_SHOWALLSCHOOLS);
             }
         }

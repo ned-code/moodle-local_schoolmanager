@@ -24,6 +24,10 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
  * edit_users_form
  */
 class edit_users_form extends \moodleform {
+    /**
+     * Form definition
+     * @noinspection PhpOverridingMethodVisibilityInspection
+     */
     public function definition(){
         $mform = $this->_form;
         $schoolid = $this->_customdata['schoolid'] ?? 0;
@@ -54,7 +58,7 @@ class edit_users_form extends \moodleform {
      *
      * @return object submitted data; NULL if not valid or not submitted or cancelled
      */
-    function get_data(){
+    public function get_data(){
         global $_POST;
         $data = parent::get_data();
         if ($data){
@@ -68,11 +72,11 @@ class edit_users_form extends \moodleform {
      *
      * @return void
      */
-    function set_prehtml($text){
+    public function set_prehtml($text){
         $mform = $this->_form;
 
-        /** @var \HTML_QuickForm_group | \HTML_QuickForm_select | \HTML_QuickForm_html | \HTML_QuickForm_element  $elem */
-        foreach ($mform->_elements as &$elem){
+        /** @var \HTML_QuickForm_group | \HTML_QuickForm_select | \HTML_QuickForm_html | \HTML_QuickForm_element $elem */
+        foreach ($mform->_elements as $elem){
             $type = $elem->getType();
             $t = $elem->toHtml();
             if ($type == 'html' && $elem->toHtml() === ''){
@@ -86,9 +90,10 @@ class edit_users_form extends \moodleform {
      * Render & return form as html
      *
      * @param null $def_data
+     *
      * @return string
      */
-    public function draw($def_data=null){
+    public function draw($def_data = null){
         //finalize the form definition if not yet done
         if (!$this->_definition_finalized){
             $this->_definition_finalized = true;

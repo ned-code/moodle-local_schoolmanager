@@ -46,17 +46,17 @@ class external extends \external_api {
      *
      * @return \external_function_parameters
      */
-    public static function get_classes_parameters() {
+    public static function get_classes_parameters(){
         return new \external_function_parameters(
-            array(
+            [
                 'courseids' => new \external_multiple_structure(
-                    new \external_value(PARAM_INT, 'user ID'), 'An array of course IDs', VALUE_DEFAULT, array()
+                    new \external_value(PARAM_INT, 'user ID'), 'An array of course IDs', VALUE_DEFAULT, []
                 ),
-            )
+            ]
         );
     }
 
-    public static function get_classes($courseids) {
+    public static function get_classes($courseids){
         global $DB, $CFG, $USER;
 
         require_once($CFG->dirroot . '/course/lib.php');
@@ -69,19 +69,19 @@ class external extends \external_api {
         $courseparams = [];
         $filtersql = '0=0';
 
-        if ($params['courseids']) {
+        if ($params['courseids']){
             list($coursewhere, $courseparams) = $DB->get_in_or_equal($params['courseids'], SQL_PARAMS_NAMED, 'cor');
             $filter[] = "g.courseid {$coursewhere}";
         }
 
-        if (!empty($filter)) {
+        if (!empty($filter)){
             $filtersql = implode(' AND ', $filter);
         }
 
         $schools = cohort_get_user_cohorts($USER->id);
         $school = reset($schools);
 
-        if (empty($school)) {
+        if (empty($school)){
             return null;
         }
 
@@ -121,8 +121,8 @@ class external extends \external_api {
         $courseparams['cohortid'] = $school->id;
 
         $rs = $DB->get_recordset_sql($sql, $courseparams);
-        foreach ($rs as $data) {
-            if (!isset($classdata[$data->id])) {
+        foreach ($rs as $data){
+            if (!isset($classdata[$data->id])){
                 $classurl = new \moodle_url('/blocks/ned_teacher_tools/progress_report.php', [
                     'courseid' => $data->courseid,
                     'group' => $data->id,
@@ -130,11 +130,11 @@ class external extends \external_api {
 
                 $coursefinalgrade = '';
                 $coursefinalgrademax = '';
-                if ($coursegrade = $DB->get_record_sql($sqlgrade, [$data->courseid, $data->userid])) {
-                    if (!is_null($coursegrade->finalgrade)) {
+                if ($coursegrade = $DB->get_record_sql($sqlgrade, [$data->courseid, $data->userid])){
+                    if (!is_null($coursegrade->finalgrade)){
                         $coursefinalgrade = round($coursegrade->finalgrade);
                     }
-                    if (!is_null($coursegrade->rawgrademax)) {
+                    if (!is_null($coursegrade->rawgrademax)){
                         $coursefinalgrademax = round($coursegrade->rawgrademax);
                     }
                 }
@@ -188,7 +188,7 @@ class external extends \external_api {
      *
      * @return \external_description
      */
-    public static function get_classes_returns() {
+    public static function get_classes_returns(){
         return new \external_multiple_structure(
             new \external_single_structure([
                 'courseid'    => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
@@ -200,7 +200,7 @@ class external extends \external_api {
                 'dmduedate'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'users' => new \external_multiple_structure(
                     new \external_single_structure(
-                        array(
+                        [
                             'id' => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
                             'firstname' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                             'lastname' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
@@ -208,14 +208,14 @@ class external extends \external_api {
                             'coursegrademax' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                             'roles' => new \external_multiple_structure(
                                 new \external_single_structure(
-                                    array(
+                                    [
                                         'id' => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
                                         'name' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                                         'shortname' => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
-                                    )
+                                    ]
                                 )
                             )
-                        )
+                        ]
                     ), '', VALUE_OPTIONAL
                 ),
             ])
@@ -227,18 +227,18 @@ class external extends \external_api {
      *
      * @return \external_function_parameters
      */
-    public static function get_student_activities_parameters() {
+    public static function get_student_activities_parameters(){
         return new \external_function_parameters(
             [
                 'studentid' => new \external_value(PARAM_INT, '', VALUE_DEFAULT, 0),
                 'courseids' => new \external_multiple_structure(
-                    new \external_value(PARAM_INT, 'Course ID'), 'An array of Course IDs', VALUE_DEFAULT, array()
+                    new \external_value(PARAM_INT, 'Course ID'), 'An array of Course IDs', VALUE_DEFAULT, []
                 ),
             ]
         );
     }
 
-    public static function get_student_activities($studentid, $courseids) {
+    public static function get_student_activities($studentid, $courseids){
         global $DB, $CFG, $USER;
 
         require_once($CFG->dirroot . '/course/lib.php');
@@ -250,28 +250,28 @@ class external extends \external_api {
         $context = \context_user::instance($USER->id);
         self::validate_context($context);
 
-        if (!$params['studentid']) {
+        if (!$params['studentid']){
             return [];
         }
 
-        if (!$user = $DB->get_record('user', ['id' => $params['studentid'], 'deleted' => 0])) {
+        if (!$user = $DB->get_record('user', ['id' => $params['studentid'], 'deleted' => 0])){
             return [];
         }
 
-        if ($params['courseids']) {
+        if ($params['courseids']){
             list($coursefilter, $courseparams) = $DB->get_in_or_equal($params['courseids']);
             $courses = $DB->get_records_select('course', "id {$coursefilter}", $courseparams);
         } else {
             $courses = enrol_get_users_courses($params['studentid'], true, null, null);
         }
 
-        if (!$courses) {
+        if (!$courses){
             return [];
         }
 
         $return = [];
 
-        foreach ($courses as $course) {
+        foreach ($courses as $course){
             // Retrieve course_module data for all modules in the course
             $kica = NED::get_kica($course->id);
             $activities = NED::get_important_activities($course, $user->id);
@@ -282,34 +282,34 @@ class external extends \external_api {
             } else {
                 $kicaavg = null;
             }
-            foreach ($activities as $mod) {
+            foreach ($activities as $mod){
                 $data = [];
                 $data['studentid'] = $user->id;
 
-                if (!$mod->uservisible) {
+                if (!$mod->uservisible){
                     continue;
                 }
 
-                if (!in_array($mod->modname, ['assign', 'quiz'])) {
+                if (!in_array($mod->modname, ['assign', 'quiz'])){
                     continue;
                 }
 
                 $issummative = false;
                 $isformative = false;
 
-                if ($tags = \core_tag_tag::get_item_tags_array('core', 'course_modules', $mod->id)) {
-                    if (in_array('Summative', $tags) || in_array('summative', $tags)) {
+                if ($tags = \core_tag_tag::get_item_tags_array('core', 'course_modules', $mod->id)){
+                    if (in_array('Summative', $tags) || in_array('summative', $tags)){
                         $issummative = true;
                     }
 
-                    if (in_array('Formative', $tags) || in_array('formative', $tags)) {
+                    if (in_array('Formative', $tags) || in_array('formative', $tags)){
                         $isformative = true;
                     }
                 }
 
                 $duedate = NED::get_deadline_by_cm($mod);
 
-                if ($kica) {
+                if ($kica){
                     $kicaitem = NED::ki_get_by_cm($mod);
                     $kicagrade = NED::kg_get_by_userid_itemid($user, $kicaitem);
                 } else {
@@ -321,9 +321,9 @@ class external extends \external_api {
                     $finalgrade = $kicagrade->get_finalgrade(true);
                     $activitymaxgrade = $kicaitem->get_grademax();
                 } else {
-                    if ($gradeitem = NED::get_grade_item($mod)) {
+                    if ($gradeitem = NED::get_grade_item($mod)){
                         $activitymaxgrade = $gradeitem->grademax;
-                        if ($grade = NED::get_grade_grade($mod, $user, false)) {
+                        if ($grade = NED::get_grade_grade($mod, $user, false)){
                             $finalgrade = $grade->finalgrade ?? '';
                         }
                     }
@@ -333,11 +333,11 @@ class external extends \external_api {
                 $completion = new \completion_info($course);
                 $cm_completion = $completion->get_data($mod, true, $user->id, NED::get_fast_modinfo($course));
                 $submissionstatus = 'notcompleted';
-                if (($cm_completion->completionstate ?? 0) > 1) {
+                if (($cm_completion->completionstate ?? 0) > 1){
                     $submissionstatus = 'completed';
                 }
 
-                if ($mod->modname == 'assign') {
+                if ($mod->modname == 'assign'){
                     $sql = "SELECT su.*,
                                        ag.grade,
                                        ac.commenttext, ac.commentformat
@@ -353,14 +353,14 @@ class external extends \external_api {
                                    AND su.latest = 1
                                    AND su.status = ?";
 
-                    if ($submission = $DB->get_record_sql($sql, [$instance->id, $user->id, ASSIGN_SUBMISSION_STATUS_SUBMITTED], IGNORE_MULTIPLE)) {
-                        if ($submission->grade == -1 || is_null($submission->grade)) {
+                    if ($submission = $DB->get_record_sql($sql, [$instance->id, $user->id, ASSIGN_SUBMISSION_STATUS_SUBMITTED], IGNORE_MULTIPLE)){
+                        if ($submission->grade == -1 || is_null($submission->grade)){
                             $submissionstatus = 'waitingforgrade';
                         }
                     }
-                } else if ($mod->modname == 'quiz') {
+                } elseif ($mod->modname == 'quiz'){
                     $sql = "SELECT * FROM {quiz_attempts} qa WHERE qa.quiz = ? AND qa.userid = ? AND qa.state = 'finished' AND qa.sumgrades IS NULL";
-                    if ($DB->record_exists_sql($sql, [$instance->id, $user->id])) {
+                    if ($DB->record_exists_sql($sql, [$instance->id, $user->id])){
                         $submissionstatus = 'waitingforgrade';
                     }
                 }
@@ -376,10 +376,10 @@ class external extends \external_api {
                 $data['activitymaxgrade'] = $activitymaxgrade;
                 $data['coursegrade'] = $kicaavg;
                 $data['tags'] = [];
-                if ($isformative) {
+                if ($isformative){
                     $data['tags'][] = 'Formative';
                 }
-                if ($issummative) {
+                if ($issummative){
                     $data['tags'][] = 'Summative';
                 }
 
@@ -397,7 +397,7 @@ class external extends \external_api {
      *
      * @return \external_description
      */
-    public static function get_student_activities_returns() {
+    public static function get_student_activities_returns(){
         return new \external_multiple_structure(
             new \external_single_structure([
                 'studentid'    => new \external_value(PARAM_INT, '', VALUE_OPTIONAL),
@@ -411,7 +411,7 @@ class external extends \external_api {
                 'activitygrade'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'activitymaxgrade'    => new \external_value(PARAM_TEXT, '', VALUE_OPTIONAL),
                 'tags' => new \external_multiple_structure(
-                    new \external_value(PARAM_TEXT, 'Tag name'), 'An array of tagname', VALUE_DEFAULT, array()
+                    new \external_value(PARAM_TEXT, 'Tag name'), 'An array of tagname', VALUE_DEFAULT, []
                 ),
             ])
         );

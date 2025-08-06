@@ -21,21 +21,21 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$functions = array(
-    'local_schoolmanager_get_classes' => array(
+$functions = [
+    'local_schoolmanager_get_classes' => [
         'classname' => 'local_schoolmanager\external',
         'methodname' => 'get_classes',
         'classpath' => '',
         'description' => '',
         'type' => 'read',
         'ajax' => true
-    ),
-    'local_schoolmanager_get_student_activities' => array(
+    ],
+    'local_schoolmanager_get_student_activities' => [
         'classname' => 'local_schoolmanager\external',
         'methodname' => 'get_student_activities',
         'classpath' => '',
         'description' => '',
         'type' => 'read',
         'ajax' => true
-    ),
-);
+    ],
+];

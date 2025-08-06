@@ -38,12 +38,12 @@ defined('MOODLE_INTERNAL') || die();
  * @param array $options additional options affecting the file serving
  * @return null|false if file not found, does not return if found - just send the file
  */
-function local_schoolmanager_pluginfile($course, $cm, context $context, $filearea, $args, $forcedownload, array $options = array()) {
+function local_schoolmanager_pluginfile($course, $cm, context $context, $filearea, $args, $forcedownload, array $options = []){
     $relativepath = implode('/', $args);
     $fullpath = "/{$context->id}/local_schoolmanager/$filearea/$relativepath";
 
     $fs = get_file_storage();
-    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()){
         return false;
     }
     send_stored_file($file, 0, 0, $forcedownload, $options);

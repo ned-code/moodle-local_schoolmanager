@@ -24,39 +24,39 @@
 
 namespace local_schoolmanager\task;
 
+global $CFG;
 require_once($CFG->dirroot.'/user/profile/lib.php');
 
-use core_plugin_manager;
 use core_user;
 
 defined('MOODLE_INTERNAL') || die();
 
 class sync_user_profile extends \core\task\scheduled_task {
 
-    public function get_name() {
+    public function get_name(){
         return get_string('syncuserprofile', 'local_schoolmanager');
     }
 
-    public function execute() {
+    public function execute(){
         global $DB;
 
         $rs = $DB->get_recordset('local_schoolmanager_school', ['synctimezone' => 1]);
-        foreach ($rs as $school) {
-            if (!$cohort = $DB->get_record('cohort', ['id' => $school->id, 'visible' => 1])) {
+        foreach ($rs as $school){
+            if (!$cohort = $DB->get_record('cohort', ['id' => $school->id, 'visible' => 1])){
                 continue;
             }
 
-            if (!$cohortmembers = $DB->get_records('cohort_members', ['cohortid' => $school->id], '', 'userid')) {
+            if (!$cohortmembers = $DB->get_records('cohort_members', ['cohortid' => $school->id], '', 'userid')){
                 continue;
             }
 
-            foreach ($cohortmembers as $cohortmember) {
+            foreach ($cohortmembers as $cohortmember){
                 $user = core_user::get_user($cohortmember->userid, '*', MUST_EXIST);
                 profile_load_data($user);
-                if (!empty($school->region)) {
+                if (!empty($school->region)){
                     $user->profile_field_region = $school->region;
                 }
-                if (!empty($school->schoolgroup)) {
+                if (!empty($school->schoolgroup)){
                     $user->profile_field_school_group = $school->schoolgroup;
                 }
                 $user->profile_field_ESL = $school->esl == 1 ? 'Yes' : 'No';

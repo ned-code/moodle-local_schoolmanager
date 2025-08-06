@@ -28,9 +28,11 @@ class edit_crew_form extends \moodleform {
     protected $_crewid;
     protected $_crew;
 
-
-    public function definition()
-    {
+    /**
+     * Form definition
+     * @noinspection PhpOverridingMethodVisibilityInspection
+     */
+    public function definition(){
         $mform = $this->_form;
         $cancel_link = $this->_customdata['cancel'] ?? false;
         $schoolid = $this->_customdata['schoolid'] ?? 0;

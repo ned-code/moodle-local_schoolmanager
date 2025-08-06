@@ -27,13 +27,13 @@ require_once($CFG->dirroot . '/badges/renderer.php');
  */
 class school implements \renderable, \templatable {
     /** the same keys, as object properties from {@see \local_ned_controller\ned_grade_controller::get_students_ngc_records_count()}*/
-    const NGC_KEYS = ['wrong_submissions', 'late_submissions', 'missed_deadlines'];
+    public const NGC_KEYS = ['wrong_submissions', 'late_submissions', 'missed_deadlines'];
 
-    const ICON_SAD_HAPPY = 1;
-    const ICON_HAPPY_SAD = 2;
-    const ICON_SAD_FALSE = 3;
-    const ICON_WARN_FALSE = 4;
-    const ICON_WARN_SAD_HAPPY = 5;
+    public const ICON_SAD_HAPPY = 1;
+    public const ICON_HAPPY_SAD = 2;
+    public const ICON_SAD_FALSE = 3;
+    public const ICON_WARN_FALSE = 4;
+    public const ICON_WARN_SAD_HAPPY = 5;
 
     protected int $_schoolid;
     protected SM\school $_persistent;
@@ -52,18 +52,18 @@ class school implements \renderable, \templatable {
      * @param $schoolid
      * @param $view
      */
-    public function __construct($schoolid, $view) {
+    public function __construct($schoolid, $view){
         $this->_schoolid = $schoolid;
         $this->_persistent = new SM\school($schoolid);
         $this->_sm = new SM\school_manager();
         $this->_view = $view;
         $url = SH::get_url();
-        if (!$this->_schoolid) {
+        if (!$this->_schoolid){
             $sh = SH::get_school_handler();
             $schools = $sh->get_schools();
-            if (count($schools) == 1) {
+            if (count($schools) == 1){
                 $url->param('schoolid', reset($schools)->id);
-                if (NED::has_capability('viewschooldescription')) {
+                if (NED::has_capability('viewschooldescription')){
                     $url->param('view', SH::VIEW_SCHOOL);
                 }
                 redirect($url);
@@ -83,7 +83,7 @@ class school implements \renderable, \templatable {
      * @param \renderer_base $output
      * @return \stdClass
      */
-    public function export_for_template(\renderer_base $output) {
+    public function export_for_template(\renderer_base $output){
         $header = new school_header($this->_schoolid, $this->_view);
         $this->_data = NED::object_merge($this->_data, $header->export_for_template($output));
         $this->_data->show_prev_30 = false;
@@ -93,13 +93,13 @@ class school implements \renderable, \templatable {
 
         switch ($this->_view){
             case SH::VIEW_STUDENTS:
-                if (NED::has_capability('viewstudentstaffsummary', $context)) {
+                if (NED::has_capability('viewstudentstaffsummary', $context)){
                     $this->_export_view_students();
                     $this->_data->viewstudents = 1;
                 }
                 break;
             case SH::VIEW_STAFF:
-                if (NED::has_capability('viewstudentstaffsummary', $context)) {
+                if (NED::has_capability('viewstudentstaffsummary', $context)){
                     $this->_export_view_staff();
                     $this->_data->viewsstaff = 1;
                 }
@@ -130,7 +130,7 @@ class school implements \renderable, \templatable {
                 }
 
                 $students = $this->get_students();
-                if (empty($students)) {
+                if (empty($students)){
                     $this->_data->class_report = NED::notification('nostudents', NED::NOTIFY_WARNING, false);
                     break;
                 }
@@ -179,8 +179,8 @@ class school implements \renderable, \templatable {
      *
      * @return string
      */
-    public function percentage_format($number, $totalnumber) {
-        if (empty($totalnumber)) {
+    public function percentage_format($number, $totalnumber){
+        if (empty($totalnumber)){
             return '';
         }
 
@@ -196,8 +196,8 @@ class school implements \renderable, \templatable {
      *
      * @return false|string
      */
-    static public function get_icon($val0, $type=null, $val1=0){
-        switch ($type) {
+    public static function get_icon($val0, $type=null, $val1=0){
+        switch ($type){
             default:
             case static::ICON_SAD_HAPPY:
                 return ($val0 > $val1) ? 'sad' : 'happy';
@@ -256,24 +256,24 @@ class school implements \renderable, \templatable {
         $students_ngc = NED::$ned_grade_controller::get_students_ngc_records_count(array_keys($students), $startdate, $enddate);
 
         $badgerenderer = new \core_badges_renderer(NED::page(), '');
-        foreach ($students as $sid => $student) {
+        foreach ($students as $sid => $student){
             $user_link = NED::link(['/my/index.php', ['userid' => $sid]], fullname($student), 'student');
             $student->username = NED::get_profile_with_menu_flag($sid, null, $user_link, true);
             $student->lastaccess = SH::get_user_lastaccess($student);
             $student->deadlineextensions = SH::get_user_number_of_dl_extensions([$student->id], $startdate, $enddate);
             /*$student->gpa = SH::get_user_gpa($student, $courses);
-            if (!is_null($student->gpa)) {
+            if (!is_null($student->gpa)){
                 $gpas[] = $student->gpa;
             }*/
             /*$participationpower = SH::get_user_ppa($student, $courses); // TODO: It slows down the page loading.
             $student->ppa = NED::str('pp-'.\theme_ned_boost\output\course::get_participation_power_status_by_power($participationpower),null,'local_ned_controller');
-            if (!is_null($participationpower)) {
+            if (!is_null($participationpower)){
                 $ppas[] = $participationpower;
             }*/
             $student->aiv = SH::get_users_aiv($student, $startdate, $enddate);
             $student->aiv30 = SH::get_users_aiv($student, $startdate, $enddate, 30);
 
-            if ($records = badges_get_user_badges($sid, 0, null, null, null, true)) {
+            if ($records = badges_get_user_badges($sid, 0, null, null, null, true)){
                 $student->badges = $badgerenderer->print_badges_list($records, $sid, true);
             }
 
@@ -296,7 +296,7 @@ class school implements \renderable, \templatable {
         $staffs = $this->get_staffs();
         $badgerenderer = new \core_badges_renderer(NED::page(), '');
 
-        foreach ($staffs as $staff) {
+        foreach ($staffs as $staff){
             $staff->username = NED::q_user_link($staff);
             $staff->role = $staff->def_role ?? '';
             $staff->deadlineextensions = '';
@@ -305,11 +305,11 @@ class school implements \renderable, \templatable {
             $staff->ctgc = false;
             $staff->ctac = false;
 
-            if ($records = badges_get_user_badges($staff->id, 0, null, null, null, true)) {
+            if ($records = badges_get_user_badges($staff->id, 0, null, null, null, true)){
                 $staff->badges = $badgerenderer->print_badges_list($records, $staff->id, true);
             }
 
-            if ($staff->role === SM\school_manager::SCHOOL_CT_ROLE) {
+            if ($staff->role === SM\school_manager::SCHOOL_CT_ROLE){
                 $staffstudents = [];
                 $classes = SH::get_classes($staff, $this->_schoolid);
                 $staff->students = 0;
@@ -320,7 +320,7 @@ class school implements \renderable, \templatable {
                 $staff->ctgc = SH::has_certificate_badge($staff->id, 'general');
                 $staff->ctac = SH::has_certificate_badge($staff->id, 'advanced');
 
-                foreach ($classes as $class) {
+                foreach ($classes as $class){
                     $courseid = $class['courseid'];
                     foreach ($class['users'] as $user){
                         $userid = $user['id'];
@@ -362,7 +362,7 @@ class school implements \renderable, \templatable {
         $this->_data->isadmin = is_siteadmin();
         $this->_data->viewschooldescription = NED::has_capability('viewschooldescription', NED::ctx());
 
-        if (empty($this->_persistent->get('hidecompliancereport'))) {
+        if (empty($this->_persistent->get('hidecompliancereport'))){
             $this->_data->compliance_report = $this->_get_compliance_report_data();
         }
     }
@@ -384,7 +384,7 @@ class school implements \renderable, \templatable {
         $this->_data->totalctac = 0;
         $this->_data->totalaiv = 0;
         $this->_data->totalaiv30 = 0;
-        foreach ($schools as $index => $school) {
+        foreach ($schools as $index => $school){
             $school->persistent = new SM\school($school->id);
             $school->schoolurl = (NED::url('~/view.php', ['view' => SH::VIEW_SCHOOL, 'schoolid' => $school->id]))->out(false);
             $school->timezone = $school->persistent->get_timezone();
@@ -397,7 +397,7 @@ class school implements \renderable, \templatable {
             $school->aivreports = 0;
             $school->aiv = 0;
             $school->aiv30 = 0;
-            if ($students = $this->_sm->get_school_students($school->id, true, $this->_sm::DEF_MEMBER_ROLE, false)) {
+            if ($students = $this->_sm->get_school_students($school->id, true, $this->_sm::DEF_MEMBER_ROLE, false)){
                 $school->numberofstudents = count($students);
                 $students_ids = array_keys($students);
                 $school->aiv += SH::get_users_aiv($students_ids, $startdate, $enddate);
@@ -408,21 +408,21 @@ class school implements \renderable, \templatable {
                 $this->_data->totalaiv30 += $school->aiv30;
                 $school->aivaverage = round(($school->aiv /  $school->numberofstudents), 1);
             } else {
-                if (!$showall) {
+                if (!$showall){
                     unset($schools[$index]);
                     continue;
                 }
             }
 
             $school->numberofcts = 0;
-            if ($cts = $this->_sm->get_school_students($school->id, true, NED::DEFAULT_ROLE_CT, false)) {
+            if ($cts = $this->_sm->get_school_students($school->id, true, NED::DEFAULT_ROLE_CT, false)){
                 $school->numberofcts = count($cts);
                 $this->_data->totalcts += $school->numberofcts;
-                foreach ($cts as $ct) {
-                    if (SH::has_certificate_badge($ct->id, 'general')) {
+                foreach ($cts as $ct){
+                    if (SH::has_certificate_badge($ct->id, 'general')){
                         $school->ctgc++;
                     }
-                    if (SH::has_certificate_badge($ct->id, 'advanced')) {
+                    if (SH::has_certificate_badge($ct->id, 'advanced')){
                         $school->ctac++;
                     }
                 }
@@ -440,13 +440,13 @@ class school implements \renderable, \templatable {
             }
 
             $actionshtml = [];
-            foreach ($actions as $action) {
+            foreach ($actions as $action){
                 $action['attributes']['role'] = 'button';
                 $actionshtml[] = NED::O()->action_icon($action['url'], $action['icon'], null, $action['attributes']);
             }
             $school->actionlinks = NED::span($actionshtml, 'class-item-actions item-actions');
 
-            if ($logourl = SM\school_manager::get_logo_url($school->id)) {
+            if ($logourl = SM\school_manager::get_logo_url($school->id)){
                 $school->iconindicator = NED::fa('fa-picture-o m-0');
             } else {
                 $school->iconindicator = NED::fa('fa-square-o m-0');
@@ -455,7 +455,7 @@ class school implements \renderable, \templatable {
         $this->_data->schools = array_values($schools);
         $this->_data->totalschools = count($schools);
 
-        if ($this->_data->totalcts > 0) {
+        if ($this->_data->totalcts > 0){
             // Note: next lines are not the same :)
             $this->_data->ctgcrate = round((($this->_data->totalctgc / $this->_data->totalcts) * 100), 0);
             $this->_data->ctacrate = round((($this->_data->totalctac / $this->_data->totalcts) * 100), 0);
@@ -468,7 +468,7 @@ class school implements \renderable, \templatable {
      * @return void
      */
     protected function _export_summary_blocks(){
-        if (NED::has_capability('viewstudentstaffsummary', NED::ctx())) {
+        if (NED::has_capability('viewstudentstaffsummary', NED::ctx())){
             $this->_data->student_summary = $this->_get_student_summary_block_data();
             $this->_data->staff_summary = $this->_get_staff_summary_block_data();
         }
@@ -522,7 +522,7 @@ class school implements \renderable, \templatable {
         $admins = [];
 
         foreach ($staffs as $staff){
-            if (SH::has_certificate_badge($staff->id, 'proctor')) {
+            if (SH::has_certificate_badge($staff->id, 'proctor')){
                 $res->certifiedproctors++;
             }
 
@@ -554,7 +554,7 @@ class school implements \renderable, \templatable {
             }
         }
 
-        if (!empty($admins)) {
+        if (!empty($admins)){
             $admin = reset($admins);
             $res->schooladministrator = NED::q_user_link($admin);
 
@@ -586,19 +586,17 @@ class school implements \renderable, \templatable {
         // Other - DM
         $res->dm_report = $this->_get_dm_report();
 
-        $res = $this->_get_schools_reports_data($res);
-
-        return $res;
+        return $this->_get_schools_reports_data($res);
     }
 
-    protected function _get_schools_reports_data($res) {
+    protected function _get_schools_reports_data($res){
         if (!NED::is_plugin_exists('report_ghs') || !NED::has_any_capability([
             'report/ghs:viewschoolreportsallschools',
             'report/ghs:viewschoolreportsownschool'
-        ])) {
+        ])){
             return $res;
         }
-        if (!$reports = GHS::get_school_reports($this->_schoolid)) {
+        if (!$reports = GHS::get_school_reports($this->_schoolid)){
             $res->school_reports = false;
             return $res;
         }
@@ -641,7 +639,7 @@ class school implements \renderable, \templatable {
 
         $res->aivstartdate = NED::ned_date($startdate, '', null, NED::DT_FORMAT_DATE);
         $res->aivschoolyear = $aivschoolyear;
-        $res->aivicon = $this->get_icon($aivschoolyear);
+        $res->aivicon = static::get_icon($aivschoolyear);
         $aiv30schoolyear = 0;
         $aiv_prev_30 = 0;
 
@@ -660,9 +658,9 @@ class school implements \renderable, \templatable {
             }
 
             $res->majorplagiarism = $this->percentage_format($majorplagiarism, $aivschoolyear);
-            $res->majorplagiarismicon = $this->get_icon($majorplagiarism);
+            $res->majorplagiarismicon = static::get_icon($majorplagiarism);
             $res->cheating = $this->percentage_format($cheating, $aivschoolyear);
-            $res->cheatingicon = $this->get_icon($cheating);
+            $res->cheatingicon = static::get_icon($cheating);
 
             $aiv30schoolyear = SH::get_users_aiv($students_ids, $startdate, $enddate, 30);
 
@@ -673,11 +671,11 @@ class school implements \renderable, \templatable {
 
         $res->aiv30schoolyear = $aiv30schoolyear;
         $res->aiv_prev_30 = $aiv_prev_30;
-        $res->aiv30schoolyearicon = $this->get_icon($aiv30schoolyear);
+        $res->aiv30schoolyearicon = static::get_icon($aiv30schoolyear);
 
         if ($res->show_prev30){
-            $res->aiv_prev_30icon = $this->get_icon($aiv_prev_30);
-            $res->aiv30_dynamic_icon = $this->get_icon($aiv30schoolyear, static::ICON_WARN_SAD_HAPPY, $aiv_prev_30);
+            $res->aiv_prev_30icon = static::get_icon($aiv_prev_30);
+            $res->aiv30_dynamic_icon = static::get_icon($aiv30schoolyear, static::ICON_WARN_SAD_HAPPY, $aiv_prev_30);
             $res->aiv30_dynamic_state = $this->get_dynamic($aiv30schoolyear, $aiv_prev_30);
         }
 
@@ -732,8 +730,8 @@ class school implements \renderable, \templatable {
             $res->missed_deadlines_last_30 = $ngc_data->{"missed_deadlines_".NED::PERIOD_LAST_30} ?? 0;
             $res->missed_deadlines_prev_30 = $ngc_data->{"missed_deadlines_".NED::PERIOD_PREV_30} ?? 0;
 
-            $res->missed_deadlinesicon = $this->get_icon($res->missed_deadlines);
-            $res->missed_deadlines_last_30_icon = $this->get_icon($res->missed_deadlines_last_30);
+            $res->missed_deadlinesicon = static::get_icon($res->missed_deadlines);
+            $res->missed_deadlines_last_30_icon = static::get_icon($res->missed_deadlines_last_30);
         }
 
         $res->deadlineextensions = $this->_data->student_summary->deadlineextensions ?? $this->_data->deadlineextensions ?? null;
@@ -742,30 +740,30 @@ class school implements \renderable, \templatable {
         }
 
         $res->deadlineextensionsaverage = 0;
-        if ($students_count > 0) {
+        if ($students_count > 0){
             $res->deadlineextensionsaverage = round(($res->deadlineextensions / $students_count), 1);
         }
-        $res->deadlineextensionsicon = $this->get_icon($res->deadlineextensions);
+        $res->deadlineextensionsicon = static::get_icon($res->deadlineextensions);
 
         $res->deadlineextensions_last_30 = SH::get_user_number_of_dl_extensions($students_ids, $last_30_start, $last_30_end);
-        $res->deadlineextensionsicon_last_30 = $this->get_icon($res->deadlineextensions_last_30);
+        $res->deadlineextensionsicon_last_30 = static::get_icon($res->deadlineextensions_last_30);
 
         $res->deadlineextensions20 = SH::get_user_number_with_extensions20($students_ids, $startdate, $enddate);
-        $res->deadlineextensions20icon = $this->get_icon($res->deadlineextensions20, static::ICON_WARN_FALSE);
+        $res->deadlineextensions20icon = static::get_icon($res->deadlineextensions20, static::ICON_WARN_FALSE);
 
         if ($res->show_prev30){
             if ($res->show_missed_deadlines){
-                $res->missed_deadlines_prev_30_icon = $this->get_icon($res->missed_deadlines_prev_30);
+                $res->missed_deadlines_prev_30_icon = static::get_icon($res->missed_deadlines_prev_30);
                 $res->missed_deadlines_30_dynamic_icon =
-                    $this->get_icon($res->missed_deadlines_last_30, static::ICON_WARN_SAD_HAPPY, $res->missed_deadlines_prev_30);
+                    static::get_icon($res->missed_deadlines_last_30, static::ICON_WARN_SAD_HAPPY, $res->missed_deadlines_prev_30);
                 $res->missed_deadlines_30_dynamic_state = $this->get_dynamic($res->missed_deadlines_last_30, $res->missed_deadlines_prev_30);
             }
 
             $res->deadlineextensions_prev_30 = SH::get_user_number_of_dl_extensions($students_ids, $prev_30_start, $prev_30_end);
-            $res->deadlineextensions_prev_30_icon = $this->get_icon($res->deadlineextensions_prev_30);
+            $res->deadlineextensions_prev_30_icon = static::get_icon($res->deadlineextensions_prev_30);
 
             $res->deadlineextensions30_dynamic_icon =
-                $this->get_icon($res->deadlineextensions_last_30, static::ICON_WARN_SAD_HAPPY, $res->deadlineextensions_prev_30);
+                static::get_icon($res->deadlineextensions_last_30, static::ICON_WARN_SAD_HAPPY, $res->deadlineextensions_prev_30);
             $res->deadlineextensions30_dynamic_state = $this->get_dynamic($res->deadlineextensions_last_30, $res->deadlineextensions_prev_30);
         }
 
@@ -777,7 +775,7 @@ class school implements \renderable, \templatable {
      *
      * @return object|null
      */
-    protected function _get_proctoring_report() {
+    protected function _get_proctoring_report(){
         if (!NED::is_tem_exists()) return null;
 
         $tem_info = NED::get_plugin_info(NED::TEM);
@@ -794,33 +792,33 @@ class school implements \renderable, \templatable {
         $res->title_help_obj = NED::get_help_icon('cr_tem_proctoring_help');
 
         $res->proctoringsubmitted = tem_help::count_school_submitted_reports($this->_schoolid, $startdate, $enddate);
-        $res->proctoringsubmittedicon = $this->get_icon($res->proctoringsubmitted, static::ICON_HAPPY_SAD);
+        $res->proctoringsubmittedicon = static::get_icon($res->proctoringsubmitted, static::ICON_HAPPY_SAD);
 
         $res->proctoringmissing = tem_help::count_school_missing_reports($this->_schoolid, $startdate, $enddate);
-        $res->proctoringmissingicon = $this->get_icon($res->proctoringmissing);
+        $res->proctoringmissingicon = static::get_icon($res->proctoringmissing);
 
         $res->proctoringoverdue10days = NED::count_school_proctoring_reports($this->_schoolid, $startdate, $enddate,DAYSECS * 10);
-        $res->proctoringoverdue10daysicon = $this->get_icon($res->proctoringoverdue10days, static::ICON_WARN_FALSE);
+        $res->proctoringoverdue10daysicon = static::get_icon($res->proctoringoverdue10days, static::ICON_WARN_FALSE);
 
         $res->proctorinwriting1 = tem_help::count_school_writing_sessions($this->_schoolid, 1, $startdate, $enddate);
-        $res->proctorinwriting1icon = $this->get_icon($res->proctorinwriting1, static::ICON_HAPPY_SAD);
+        $res->proctorinwriting1icon = static::get_icon($res->proctorinwriting1, static::ICON_HAPPY_SAD);
 
         $res->proctorinwriting2 = tem_help::count_school_writing_sessions($this->_schoolid, 2, $startdate, $enddate);
-        $res->proctorinwriting2icon = $this->get_icon($res->proctorinwriting2);
+        $res->proctorinwriting2icon = static::get_icon($res->proctorinwriting2);
 
         $res->proctorinwriting3 = tem_help::count_school_writing_sessions($this->_schoolid, 3, $startdate, $enddate);
-        $res->proctorinwriting3icon = $this->get_icon($res->proctorinwriting3, static::ICON_WARN_FALSE);
+        $res->proctorinwriting3icon = static::get_icon($res->proctorinwriting3, static::ICON_WARN_FALSE);
 
         $students = $this->get_students();
         $students_ids = array_keys($students);
 
         $res->ip_violations = tem_help::count_ip_violations_by_students($students_ids, $this->_schoolid, $startdate, $enddate);
-        $res->ip_violationsicon = $this->get_icon($res->ip_violations);
+        $res->ip_violationsicon = static::get_icon($res->ip_violations);
 
         $res->ip_violations_last_30 = tem_help::count_ip_violations_by_students($students_ids, $this->_schoolid, $last_30_start, $last_30_end);
-        $res->ip_violations_last_30icon = $this->get_icon($res->ip_violations_last_30);
+        $res->ip_violations_last_30icon = static::get_icon($res->ip_violations_last_30);
 
-        if (tem_help::can_view_sessions()) {
+        if (tem_help::can_view_sessions()){
             $violations_url = new \moodle_url(NED::$C::PAGE_TEM_VIOLATIONS);
 
             $violations_url->params([
@@ -863,23 +861,23 @@ class school implements \renderable, \templatable {
         if ($res->show_current_year){
             $wroteosslt = GHS::count_osslt($school_code, [NED::OSSLT_STATUS_PASS, NED::OSSLT_STATUS_FAIL]);
             $res->showpassfailosslt = $wroteosslt;
-            $res->wroteosslticon = $this->get_icon($wroteosslt, static::ICON_HAPPY_SAD);
+            $res->wroteosslticon = static::get_icon($wroteosslt, static::ICON_HAPPY_SAD);
             $res->wroteosslt = $this->percentage_format($wroteosslt, $activestudents);
 
             $notwroteosslt = $activestudents - $wroteosslt;
-            $res->notwroteosslticon = $this->get_icon($notwroteosslt);
+            $res->notwroteosslticon = static::get_icon($notwroteosslt);
             $res->notwroteosslt = $this->percentage_format($notwroteosslt, $activestudents);
 
             $passedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_PASS);
-            $res->passedosslticon = $this->get_icon($passedosslt, static::ICON_HAPPY_SAD);
+            $res->passedosslticon = static::get_icon($passedosslt, static::ICON_HAPPY_SAD);
             $res->passedosslt = $this->percentage_format($passedosslt, $wroteosslt);
 
             $failedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_FAIL);
-            $res->failedosslticon = $this->get_icon($failedosslt);
+            $res->failedosslticon = static::get_icon($failedosslt);
             $res->failedosslt = $this->percentage_format($failedosslt, $wroteosslt);
 
             $failedossltover75 = GHS::count_osslt_failed_over75($school_code);
-            $res->failedossltover75icon = $this->get_icon($failedossltover75, static::ICON_WARN_FALSE);
+            $res->failedossltover75icon = static::get_icon($failedossltover75, static::ICON_WARN_FALSE);
             $res->failedossltover75 = $this->percentage_format($failedossltover75, $wroteosslt);
         }
 
@@ -894,19 +892,19 @@ class school implements \renderable, \templatable {
         if ($res->show_prev_year){
             $prevwroteosslt = GHS::count_osslt($school_code, [NED::OSSLT_STATUS_PASS, NED::OSSLT_STATUS_FAIL], true);
             $res->showprevpassfailosslt = $prevwroteosslt;
-            $res->prevwroteosslticon = $this->get_icon($prevwroteosslt, static::ICON_HAPPY_SAD);
+            $res->prevwroteosslticon = static::get_icon($prevwroteosslt, static::ICON_HAPPY_SAD);
             $res->prevwroteosslt = $prevwroteosslt;
 
             $prevpassedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_PASS, true);
-            $res->prevpassedosslticon = $this->get_icon($prevpassedosslt, static::ICON_HAPPY_SAD);
+            $res->prevpassedosslticon = static::get_icon($prevpassedosslt, static::ICON_HAPPY_SAD);
             $res->prevpassedosslt = $this->percentage_format($prevpassedosslt, $prevwroteosslt);
 
             $prevfailedosslt = GHS::count_osslt($school_code, NED::OSSLT_STATUS_FAIL, true);
-            $res->prevfailedosslticon = $this->get_icon($prevfailedosslt);
+            $res->prevfailedosslticon = static::get_icon($prevfailedosslt);
             $res->prevfailedosslt = $this->percentage_format($prevfailedosslt, $prevwroteosslt);
 
             $prevfailedossltover75 = GHS::count_osslt_failed_over75($school_code, true);
-            $res->prevfailedossltover75icon = $this->get_icon($prevfailedossltover75, static::ICON_WARN_FALSE);
+            $res->prevfailedossltover75icon = static::get_icon($prevfailedossltover75, static::ICON_WARN_FALSE);
             $res->prevfailedossltover75 = $this->percentage_format($prevfailedossltover75, $prevwroteosslt);
         }
 
@@ -953,21 +951,21 @@ class school implements \renderable, \templatable {
 
         if (isset($loggedusers3)){
             $res->show_loggedusers3 = true;
-            $res->loggedusers3icon = $this->get_icon($loggedusers3, static::ICON_HAPPY_SAD);
+            $res->loggedusers3icon = static::get_icon($loggedusers3, static::ICON_HAPPY_SAD);
             $res->loggedusers3 = $this->percentage_format($loggedusers3, $students_count);
         }
         if (isset($loggedusers7)){
             $res->show_loggedusers7 = true;
-            $res->loggedusers7icon = $this->get_icon($loggedusers7, static::ICON_HAPPY_SAD);
+            $res->loggedusers7icon = static::get_icon($loggedusers7, static::ICON_HAPPY_SAD);
             $res->loggedusers7 = $this->percentage_format($loggedusers7, $students_count);
         }
         if (isset($notloggedusers8)){
-            $res->notloggedusers8icon = $this->get_icon($notloggedusers8, static::ICON_SAD_FALSE);
+            $res->notloggedusers8icon = static::get_icon($notloggedusers8, static::ICON_SAD_FALSE);
             $res->notloggedusers8 = $this->percentage_format($notloggedusers8, $students_count);
             $res->show_notloggedusers8 = (bool)$res->notloggedusers8icon;
         }
         if (isset($notloggedstaff10)){
-            $res->notloggedstaff10icon = $this->get_icon($notloggedstaff10, static::ICON_SAD_FALSE);
+            $res->notloggedstaff10icon = static::get_icon($notloggedstaff10, static::ICON_SAD_FALSE);
             $res->notloggedstaff10 = $this->percentage_format($notloggedstaff10, $staffs_count);
             $res->show_notloggedstaff10 = (bool)$res->notloggedstaff10icon;
         }
@@ -994,16 +992,16 @@ class school implements \renderable, \templatable {
 
         [$res->dmcomplete, $res->dmincomplete, $res->dmclasses, $res->dmcompleteended, $res->dmincompleteended] =
             NED::count_dm_schedule($school_code, $startdate, $enddate);
-        $res->dmcompleteicon = $this->get_icon($res->dmcomplete, static::ICON_HAPPY_SAD);
-        $res->dmincompleteicon = $this->get_icon($res->dmincomplete);
-        $res->dmcompleteendedicon = $this->get_icon($res->dmcompleteended, static::ICON_HAPPY_SAD);
-        $res->dmincompleteendedicon = $this->get_icon($res->dmincompleteended);
+        $res->dmcompleteicon = static::get_icon($res->dmcomplete, static::ICON_HAPPY_SAD);
+        $res->dmincompleteicon = static::get_icon($res->dmincomplete);
+        $res->dmcompleteendedicon = static::get_icon($res->dmcompleteended, static::ICON_HAPPY_SAD);
+        $res->dmincompleteendedicon = static::get_icon($res->dmincompleteended);
 
         $res->classenddateextesion = NED::count_school_classes_enddate_extensions($school_code, $startdate, $enddate);
-        $res->classenddateextesionicon = $this->get_icon($res->classenddateextesion);
+        $res->classenddateextesionicon = static::get_icon($res->classenddateextesion);
         $res->classenddateextesion_last_30days =
             NED::count_school_classes_enddate_extensions($school_code, $startdate, $enddate, 30);
-        $res->classenddateextesionicon_last_30days = $this->get_icon($res->classenddateextesion_last_30days);
+        $res->classenddateextesionicon_last_30days = static::get_icon($res->classenddateextesion_last_30days);
 
         return $res;
     }

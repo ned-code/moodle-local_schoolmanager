@@ -27,18 +27,18 @@ require_once($CFG->dirroot . '/local/schoolmanager/lib.php');
 class school_manager_render implements \renderable, \templatable{
     use \local_ned_controller\base_empty_class;
 
-    const URL = '~/index.php';
-    const PAR_SCHOOL = 'schoolid';
-    const PAR_CREW = 'crewid';
-    const PAR_PAGE = 'page';
+    public const URL = '~/index.php';
+    public const PAR_SCHOOL = 'schoolid';
+    public const PAR_CREW = 'crewid';
+    public const PAR_PAGE = 'page';
 
-    const PAGE_SCHOOL = 0;
-    const PAGE_CREW = 1;
-    const PAGE_USER = 2;
+    public const PAGE_SCHOOL = 0;
+    public const PAGE_CREW = 1;
+    public const PAGE_USER = 2;
 
-    const PAGES = [self::PAGE_SCHOOL, self::PAGE_CREW, self::PAGE_USER];
+    public const PAGES = [self::PAGE_SCHOOL, self::PAGE_CREW, self::PAGE_USER];
 
-    const FORM_USERS_TO_CHANGE = 'users_to_change';
+    public const FORM_USERS_TO_CHANGE = 'users_to_change';
 
     /** @var \core_renderer $_o */
     protected $_o;
@@ -169,7 +169,7 @@ class school_manager_render implements \renderable, \templatable{
      *
      * @return \moodle_url
      */
-    static public function get_url($schoolid=null, $crewid=null, $page=null, $params=[]){
+    public static function get_url($schoolid=null, $crewid=null, $page=null, $params=[]){
         $args = [self::PAR_SCHOOL => $schoolid, self::PAR_CREW => $crewid, self::PAR_PAGE => $page];
         $params = $params ?: [];
         foreach ($args as $key => $arg){
@@ -183,7 +183,7 @@ class school_manager_render implements \renderable, \templatable{
     /**
      * @return string
      */
-    static public function get_title(){
+    public static function get_title(){
         return NED::str('pluginname');
     }
 
@@ -329,7 +329,7 @@ class school_manager_render implements \renderable, \templatable{
      *
      * @return \html_table
      */
-    static public function user_edit_table($school, $crews, $users, $output, $can_manage=false){
+    public static function user_edit_table($school, $crews, $users, $output, $can_manage=false){
         global $PAGE;
         $table = NED::html_table();
         $schoolcode = $school->code ?? '';

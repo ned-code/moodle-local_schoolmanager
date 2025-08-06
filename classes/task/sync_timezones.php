@@ -24,30 +24,28 @@
 
 namespace local_schoolmanager\task;
 
-use core_plugin_manager;
-
 defined('MOODLE_INTERNAL') || die();
 
 class sync_timezones extends \core\task\scheduled_task {
 
-    public function get_name() {
+    public function get_name(){
         return get_string('synctimezone', 'local_schoolmanager');
     }
 
-    public function execute() {
+    public function execute(){
         global $DB;
 
         $rs = $DB->get_recordset('local_schoolmanager_school', ['synctimezone' => 1]);
-        foreach ($rs as $school) {
-            if (!$cohort = $DB->get_record('cohort', ['id' => $school->id, 'visible' => 1])) {
+        foreach ($rs as $school){
+            if (!$cohort = $DB->get_record('cohort', ['id' => $school->id, 'visible' => 1])){
                 continue;
             }
 
-            if (!$cohortmembers = $DB->get_records('cohort_members', ['cohortid' => $school->id], '', 'userid')) {
+            if (!$cohortmembers = $DB->get_records('cohort_members', ['cohortid' => $school->id], '', 'userid')){
                 continue;
             }
 
-            if ($cohort->timezone) {
+            if ($cohort->timezone){
                 list($insql, $params) = $DB->get_in_or_equal(array_keys($cohortmembers));
                 $params = array_merge([$cohort->timezone], $params);
                 $DB->execute("UPDATE {user} SET timezone=? WHERE id $insql", $params);

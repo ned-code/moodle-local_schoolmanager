@@ -35,8 +35,6 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use local_schoolmanager\shared_lib as NED;
-use local_kica as kica;
-use local_kica\output\menu_bar as KMB;
 
 // Paging options.
 $page      = optional_param('page', 0, PARAM_INT);
@@ -71,7 +69,7 @@ $contextsystem = context_system::instance();
 $isot = report_ghs\helper::is_ot($USER->id);
 
 // Permission.
-if (!NED::can_view_class_enrollment_report()) {
+if (!NED::can_view_class_enrollment_report()){
     throw new required_capability_exception($contextsystem, 'report/ghs:viewgroupenrollment', 'nopermissions', '');
 }
 
@@ -94,7 +92,7 @@ $name = get_string('ghsgroupenrollment', 'report_ghs');
 $title = get_string('ghsgroupenrollment', 'report_ghs');
 $heading = $SITE->fullname;
 
-$datacolumns = array(
+$datacolumns = [
     'activestudents' => 'r.activestudents',
     'cohortid' => 'r.cohortid',
     'course' => 'c.fullname',
@@ -125,19 +123,19 @@ $datacolumns = array(
     'subject' => 'r.subject',
     'suspendedstudents' => 'r.suspendedstudents',
     'totaldays' => '(CEIL((g.enddate - g.startdate) / 86400))',
-);
+];
 
 $params = [];
 
 // Filter.
 $where = '';
-if ($isot) {
+if ($isot){
     $where .= " AND ".$datacolumns['otid']." = :otid";
     $params['otid'] = $USER->id;
 }
 
-if ($schoolid) {
-    if ($schoolid > 0) {
+if ($schoolid){
+    if ($schoolid > 0){
         $where .= " AND " . $datacolumns['cohortid'] . " = :school";
         $params['school'] = $schoolid;
     } else {
@@ -145,23 +143,23 @@ if ($schoolid) {
         $params['school'] = -$schoolid;
     }
 }
-if ($classid) {
+if ($classid){
     $where .= " AND " . $datacolumns['classid'] . " = :classid";
     $params['classid'] = $classid;
 }
-if ($courseid) {
+if ($courseid){
     $where .= " AND " . $datacolumns['courseid'] . " = :courseid";
     $params['courseid'] = $courseid;
 }
 
 
-if ($filterdepartment) {
+if ($filterdepartment){
     $where .= " AND ".$datacolumns['department']." = :department";
     $params['department'] = $filterdepartment;
 }
-if (isset($filteractivestudents) && $filteractivestudents != '') {
+if (isset($filteractivestudents) && $filteractivestudents != ''){
     $where .= " AND ".$datacolumns['activestudents']." != 0";
-    switch ($filteractivestudents) {
+    switch ($filteractivestudents){
         case '0':
             $where .= " AND {$datacolumns['activestudents']} = 0";
             break;
@@ -176,8 +174,8 @@ if (isset($filteractivestudents) && $filteractivestudents != '') {
             break;
     }
 }
-if ($filterstartdate) {
-    switch ($filterstartdate) {
+if ($filterstartdate){
+    switch ($filterstartdate){
         case 1: // None.
             $where .= " AND ({$datacolumns['startdate']} = 0 OR {$datacolumns['startdate']} IS NULL)";
             break;
@@ -185,42 +183,42 @@ if ($filterstartdate) {
             $where .= " AND ".$datacolumns['startdate']." < " .time() . " AND ({$datacolumns['startdate']} != 0 AND {$datacolumns['startdate']} IS NOT NULL)";
             break;
         case 3: // Future
-            $where .= " AND ".$datacolumns['startdate']." > " .time() . " AND ({$datacolumns['startdate']} != 0 AND {$datacolumns['startdate']} IS NOT NULL)";;
+            $where .= " AND ".$datacolumns['startdate']." > " .time() . " AND ({$datacolumns['startdate']} != 0 AND {$datacolumns['startdate']} IS NOT NULL)";
             break;
     }
 }
-if ($filterenddate) {
-    switch ($filterenddate) {
+if ($filterenddate){
+    switch ($filterenddate){
         case 1: // None.
             $where .= " AND ({$datacolumns['enddate']} = 0 OR {$datacolumns['enddate']} IS NULL)";
             break;
         case 2: // Past.
-            $where .= " AND ".$datacolumns['enddate']." < " .time() . " AND ({$datacolumns['enddate']} != 0 AND {$datacolumns['enddate']} IS NOT NULL)";;
+            $where .= " AND ".$datacolumns['enddate']." < " .time() . " AND ({$datacolumns['enddate']} != 0 AND {$datacolumns['enddate']} IS NOT NULL)";
             break;
         case 3: // Future
-            $where .= " AND ".$datacolumns['enddate']." > " .time() . " AND ({$datacolumns['enddate']} != 0 AND {$datacolumns['enddate']} IS NOT NULL)";;
+            $where .= " AND ".$datacolumns['enddate']." > " .time() . " AND ({$datacolumns['enddate']} != 0 AND {$datacolumns['enddate']} IS NOT NULL)";
             break;
     }
 }
-if (!$filterincludeclassesnotactive) {
+if (!$filterincludeclassesnotactive){
     $time = time();
     $where .= " AND ({$datacolumns['startdate']} < :time1 AND :time2 < {$datacolumns['enddate']})";
     $params['time1'] = $time;
     $params['time2'] = $time;
 }
-if (!$filterincludenoncreditcourses) {
+if (!$filterincludenoncreditcourses){
     $where .= " AND {$datacolumns['path']} NOT LIKE '/110/%'";
 }
 
 // Sort.
 $order = '';
-if ($sort) {
+if ($sort){
     $order = " ORDER BY $datacolumns[$sort] $dir";
 } else {
     $order = " ORDER BY timecheck DESC, {$datacolumns['enddate']} ASC";
 }
 
-$pageparams = array();
+$pageparams = [];
 
 // Filter by capabilies.
 \report_ghs\helper::report_filter($where, $params, $report, 'report/ghs:viewgroupenrollment');
@@ -240,7 +238,7 @@ LEFT OUTER JOIN {cohort} coh ON r.cohortid = coh.id
 $totalcount = $DB->count_records_sql($countsql, $params);
 
 // Table columns.
-$columns = array(
+$columns = [
     'course',
     'coursecode',
     //'subject',
@@ -259,8 +257,8 @@ $columns = array(
     'totaldays',
     //'dmrequired',
     'dmstatus'
-);
-$columnsexport = array(
+];
+$columnsexport = [
     'rowcount',
     'course',
     'coursecode',
@@ -284,7 +282,7 @@ $columnsexport = array(
     'totaldays',
     'dmrequired',
     'dmstatus'
-);
+];
 
 $sql = "SELECT r.id,
                c.fullname course,
@@ -328,13 +326,13 @@ LEFT OUTER JOIN {cohort} coh ON r.cohortid = coh.id
                $where
                $order";
 
-if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)) {
+if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)){
     ob_start();
     set_time_limit(300);
 
     raise_memory_limit(MEMORY_EXTRA);
 
-    if (ob_get_length()) {
+    if (ob_get_length()){
         ob_end_clean();
     }
 
@@ -346,32 +344,32 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
     $exportdata = [];
 
     $rs = $DB->get_recordset_sql($sql, $params);
-    foreach ($rs as $tablerow) {
-        $group = $DB->get_record("groups", array('id' => $tablerow->groupid));
+    foreach ($rs as $tablerow){
+        $group = $DB->get_record("groups", ['id' => $tablerow->groupid]);
 
         $coursecontext = \context_course::instance($group->courseid);
         $activestudents = get_enrolled_users($coursecontext, 'mod/assign:submit', $group->id, 'u.*', 'u.id', 0, 0, true);
 
-        foreach ($activestudents as $index => $activestudent) {
-            if ($activestudent->suspended == 1) {
+        foreach ($activestudents as $index => $activestudent){
+            if ($activestudent->suspended == 1){
                 unset($activestudents[$index]);
             } else {
                 $activestudent->group = $group;
             }
         }
 
-        list($head, $data) = $renderer->export_users_grades($group->courseid, $activestudents, $group, true);
+        [$head, $data] = $renderer->export_users_grades($group->courseid, $activestudents, $group, true);
 
-        foreach ($data as $datum) {
-            array_push($exportdata, $datum);
+        foreach ($data as $datum){
+            $exportdata[] = $datum;
         }
     }
 
     $rs->close();
     $filename = $school->code . '_grades_' . date('jMY');
-    NED::export_to_xlsx($head, $exportdata, $filename);
+    NED::download_excel_data($filename, $head, $exportdata);
     exit;
-} else if ($action == 'excel') {
+} elseif ($action == 'excel'){
     ob_start();
     set_time_limit(300);
     raise_memory_limit(MEMORY_EXTRA);
@@ -393,10 +391,10 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
 
     $numberofcolumns = count($table->head);
 
-    $gradecolumns = array('coursegrade', 'kicaavg', 'kica70', 'kica30');
+    $gradecolumns = ['coursegrade', 'kicaavg', 'kica70', 'kica30'];
 
     // Header row.
-    foreach ($table->head as $key => $heading) {
+    foreach ($table->head as $key => $heading){
         $cell = Coordinate::stringFromColumnIndex($key + 1) . '1'; // A1 cell address.
         $myxls->setCellValue($cell, str_replace("\n", ' ', htmlspecialchars_decode(strip_tags(nl2br(get_string($heading, 'report_ghs'))))));
     }
@@ -404,11 +402,11 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
     // Data rows.
     $rs = $DB->get_recordset_sql($sql, $params);
     $rownum = 2;
-    foreach ($rs as $tablerow) {
-        $row = array();
+    foreach ($rs as $tablerow){
+        $row = [];
         $columnum = 1;
         $col = [];
-        foreach ($table->head as $column) {
+        foreach ($table->head as $column){
             $_data = \report_ghs\helper::group_enrollment_data($tablerow, $column, $counter, $pageparams, true);
             $col[$column] = ['index' => $columnum, 'value' => $_data];
 
@@ -418,7 +416,7 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
             }
 
             $cell = Coordinate::stringFromColumnIndex($columnum) . $rownum; // A2 cell address.
-            if (preg_match("/^[fh]tt?ps?:\/\//", $_data)) {
+            if (preg_match("/^[fh]tt?ps?:\/\//", $_data)){
                 $linktext = \report_ghs\helper::group_enrollment_data($tablerow, $column.'_txt', $counter, $pageparams, true);
                 $myxls->setCellValue($cell, $linktext);
                 $myxls->getCell($cell)->getHyperlink()->setUrl($_data);
@@ -426,7 +424,7 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
                 $myxls->setCellValue($cell, $_data);
             }
 
-            if ($lowgrade) {
+            if ($lowgrade){
                 $myxls->getStyle($cell)->getFill()->setFillType(Fill::FILL_SOLID);
                 $myxls->getStyle($cell)->getFill()->getStartColor()->setARGB('FFFCC7CE');
                 $myxls->getStyle($cell)->getFont()->getColor()->setARGB('FF9C0006');
@@ -435,8 +433,8 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
             $columnum++;
         }
 
-        if (is_numeric($col['coursegrade']['value']) && is_numeric($col['kica70']['value'])) {
-            if ($col['coursegrade']['value'] > 50 && $col['kica70']['value'] < 50) {
+        if (is_numeric($col['coursegrade']['value']) && is_numeric($col['kica70']['value'])){
+            if ($col['coursegrade']['value'] > 50 && $col['kica70']['value'] < 50){
                 $cell = Coordinate::stringFromColumnIndex($col['coursegrade']['index']) . $rownum;
                 $myxls->getStyle($cell)->getFill()->setFillType(Fill::FILL_SOLID);
                 $myxls->getStyle($cell)->getFill()->getStartColor()->setARGB('FFC0514D');
@@ -462,22 +460,22 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
     );
 
     // Auto column width calculation.
-    foreach (range('A', $myxls->getHighestDataColumn()) as $col) {
+    foreach (range('A', $myxls->getHighestDataColumn()) as $col){
         $myxls->getColumnDimension($col)->setAutoSize(true);
     }
 
     // Header format.
-    $styleArray = array(
-        'font' => array(
+    $styleArray = [
+        'font' => [
             'bold' => true,
-        ),
-        'fill' => array(
+        ],
+        'fill' => [
             'fillType' => Fill::FILL_SOLID,
-            'color' => array(
+            'color' => [
                 'argb' => 'FFFFF000',
-            ),
-        ),
-    );
+            ],
+        ],
+    ];
     $myxls->getStyle('A1:'.Coordinate::stringFromColumnIndex($numberofcolumns).'1')->applyFromArray($styleArray);
 
     // Rename worksheet
@@ -488,7 +486,7 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
 
     $objWriter = new Xlsx($workbook);
 
-    if (ob_get_length()) {
+    if (ob_get_length()){
         ob_end_clean();
     }
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -498,7 +496,7 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
     ob_end_clean();
     $objWriter->save('php://output');
     exit;
-} else if ($action == 'csv') {
+} elseif ($action == 'csv'){
     ob_start();
     set_time_limit(300);
     raise_memory_limit(MEMORY_EXTRA);
@@ -511,11 +509,11 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
 
     $headers = $columnsexport;
 
-    foreach ($headers as $ckey => $column) {
+    foreach ($headers as $ckey => $column){
         $headers[$ckey] = get_string($column, 'report_ghs');
     }
 
-    if (ob_get_length()) {
+    if (ob_get_length()){
         ob_end_clean();
     }
     // Output headers so that the file is downloaded rather than displayed.
@@ -531,9 +529,9 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
     $counter = 0;
 
     $rs = $DB->get_recordset_sql($sql, $params);
-    foreach ($rs as $tablerow) {
-        $row = array();
-        foreach ($columnsexport as $column) {
+    foreach ($rs as $tablerow){
+        $row = [];
+        foreach ($columnsexport as $column){
             $row[] = \report_ghs\helper::group_enrollment_data($tablerow, $column, $counter, $pageparams, true);
         }
         fputcsv($outputcsv, $row);
@@ -542,17 +540,17 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
     exit;
 } else {
 
-    foreach ($columns as $column) {
+    foreach ($columns as $column){
         $string[$column] = get_string($column, 'report_ghs');
-        if ($sort != $column) {
+        if ($sort != $column){
             $columnicon = "";
             $columndir = "ASC";
         } else {
             $columndir = $dir == "ASC" ? "DESC" : "ASC";
             $columnicon = ($dir == "ASC") ? "sort_asc" : "sort_desc";
-            $columnicon = $OUTPUT->pix_icon('t/'.$columnicon, '', 'moodle', array('class' => 'iconsort'));
+            $columnicon = $OUTPUT->pix_icon('t/'.$columnicon, '', 'moodle', ['class' => 'iconsort']);
         }
-        if (($column == 'rowcount') || ($column == 'action') || ($column == 'kicadiff') || ($column == 'kicalink')) {
+        if (($column == 'rowcount') || ($column == 'action') || ($column == 'kicadiff') || ($column == 'kicalink')){
             $$column = $string[$column];
         } else {
             $sorturl = clone $fullpageurl;
@@ -565,11 +563,11 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
 
     $table = new html_table();
 
-    $table->head = array();
-    $table->wrap = array();
+    $table->head = [];
+    $table->wrap = [];
     $table->attributes = ['class' => 'nedtable fullwidth'];
 
-    foreach ($columns as $column) {
+    foreach ($columns as $column){
         $table->head[$column] = $$column;
         $table->wrap[$column] = '';
     }
@@ -588,20 +586,20 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
 
     $counter = ($page * $perpage);
 
-    foreach ($tablerows as $tablerow) {
+    foreach ($tablerows as $tablerow){
         $row = new html_table_row();
 
-        foreach ($columns as $column) {
+        foreach ($columns as $column){
             $varname = 'cell'.$column;
             $$varname = new html_table_cell(\report_ghs\helper::group_enrollment_data($tablerow, $column, $counter, $pageparams));
 
-            if (isset($tablerow->{$column.'cls'})) {
+            if (isset($tablerow->{$column.'cls'})){
                 $$varname->attributes['class'] = 'bg-alert';
             }
         }
 
-        $row->cells = array();
-        foreach ($columns as $column) {
+        $row->cells = [];
+        foreach ($columns as $column){
             $varname = 'cell' . $column;
             $row->cells[$column] = $$varname;
         }
@@ -615,7 +613,7 @@ if ($download && has_capability('report/ghs:downloadgradesbulk', $contextsystem)
 
     $pagingbar = new paging_bar($totalcount, $page, $perpage, $pagingurl, 'page');
 
-    if ($outputpagingbar = $OUTPUT->render($pagingbar)) {
+    if ($outputpagingbar = $OUTPUT->render($pagingbar)){
         $html .=  $outputpagingbar;
     } else {
         $html .=  html_writer::tag('div', '', ['class' => 'dummy-pagination']);

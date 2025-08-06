@@ -27,7 +27,7 @@ global $OUTPUT, $USER, $SITE, $CFG, $DB, $PAGE;
 
 $html = '';
 
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(__FILE__, 3). '/config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 use local_schoolmanager\school_handler as SH;
@@ -52,7 +52,7 @@ require_login(null, false);
 $contextsystem = context_system::instance();
 
 // Permission.
-if (!has_any_capability(['report/ghs:viewfrozenaccountsallschools', 'report/ghs:viewfrozenaccountsownschool'], $contextsystem)) {
+if (!has_any_capability(['report/ghs:viewfrozenaccountsallschools', 'report/ghs:viewfrozenaccountsownschool'], $contextsystem)){
     throw new required_capability_exception($contextsystem, 'report/ghs:viewfrozenaccountsownschool', 'nopermissions', '');
 }
 
@@ -94,12 +94,12 @@ $where = '';
 $schoolinsql = '';
 
 $multipleschools = true;
-if (has_capability('report/ghs:viewfrozenaccountsallschools', $contextsystem)) {
+if (has_capability('report/ghs:viewfrozenaccountsallschools', $contextsystem)){
     $sh = new SH();
-    if (!$schools = $sh->get_schools()) {
+    if (!$schools = $sh->get_schools()){
         $where .= " AND 0=1";
     } else {
-        if (count($schools) == 1) {
+        if (count($schools) == 1){
             $multipleschools = false;
         }
         list($schoolinsql, $schoolparams) = $DB->get_in_or_equal(array_keys($schools), SQL_PARAMS_NAMED);
@@ -116,26 +116,26 @@ $sql = "SELECT DISTINCT r.schoolid, coh.name  school
                $where
       ORDER BY coh.name ASC";
 
-if ($schoolid) {
+if ($schoolid){
     $where .= " AND ".$datacolumns['schoolid']." = :schoolid";
-    $params['schoolid'] = $schoolid ?? 0;
+    $params['schoolid'] = $schoolid;
 }
-if ($filterstatus) {
+if ($filterstatus){
     $where .= " AND ".$datacolumns['status']." = :status";
     $params['status'] = $filterstatus;
 }
-if ($filterreason) {
+if ($filterreason){
     $where .= " AND ".$datacolumns['reason']." = :reason";
     $params['reason'] = $filterreason;
 }
-if ($filterstudentid) {
+if ($filterstudentid){
     $where .= " AND ".$datacolumns['studentid']." = :studentid";
     $params['studentid'] = $filterstudentid;
 }
 
 // Sort.
 $order = '';
-if ($sort) {
+if ($sort){
     $order = " ORDER BY $datacolumns[$sort] $dir";
 }
 
@@ -162,7 +162,7 @@ $columns = [
     'action',
 ];
 
-if (!$multipleschools) {
+if (!$multipleschools){
     array_shift($columns);
 }
 
@@ -176,17 +176,17 @@ $sql = "SELECT  r.*,
                 $where
                 $order";
 
-foreach ($columns as $column) {
+foreach ($columns as $column){
     $string[$column] = get_string($column, 'report_ghs');
-    if ($sort != $column) {
+    if ($sort != $column){
         $columnicon = "";
         $columndir = "ASC";
     } else {
         $columndir = $dir == "ASC" ? "DESC" : "ASC";
         $columnicon = ($dir == "ASC") ? "sort_asc" : "sort_desc";
-        $columnicon = $OUTPUT->pix_icon('t/'.$columnicon, '', 'moodle', array('class' => 'iconsort'));
+        $columnicon = $OUTPUT->pix_icon('t/'.$columnicon, '', 'moodle', ['class' => 'iconsort']);
     }
-    if (($column == 'rowcount') || ($column == 'action')) {
+    if (($column == 'rowcount') || ($column == 'action')){
         $$column = $string[$column];
     } else {
         $sorturl = $thispageurl;
@@ -200,11 +200,11 @@ foreach ($columns as $column) {
 
 $table = new html_table();
 
-$table->head = array();
-$table->wrap = array();
+$table->head = [];
+$table->wrap = [];
 $table->attributes = ['class' => 'nedtable fullwidth frozen-accounts-table'];
 
-foreach ($columns as $column) {
+foreach ($columns as $column){
     $table->head[$column] = $$column;
     $table->wrap[$column] = '';
 }
@@ -216,24 +216,24 @@ $tablerows = $DB->get_records_sql($sql, $params, $page * $perpage, $perpage);
 
 $counter = ($page * $perpage);
 
-foreach ($tablerows as $tablerow) {
+foreach ($tablerows as $tablerow){
     $row = new html_table_row();
 
-    foreach ($columns as $column) {
+    foreach ($columns as $column){
         $varname = 'cell'.$column;
         $$varname = new html_table_cell(helper::frozen_accounts_data($tablerow, $column, $counter, $pageparams));
     }
 
-    $row->cells = array();
-    foreach ($columns as $column) {
+    $row->cells = [];
+    foreach ($columns as $column){
         $varname = 'cell' . $column;
         $row->cells[$column] = $$varname;
     }
     $table->data[] = $row;
 }
 
-$html .= html_writer::start_div('page-content-wrapper', array('id' => 'page-content'));
-$html .= html_writer::tag('h1', $title, array('class' => 'page-title'));
+$html .= html_writer::start_div('page-content-wrapper', ['id' => 'page-content']);
+$html .= html_writer::tag('h1', $title, ['class' => 'page-title']);
 
 $handler = new SH();
 $schoolfilter = $handler->get_control_form($schoolid, $fullpageurl, false, true);
@@ -276,7 +276,7 @@ $pagingurl = new moodle_url('/local/schoolmanager/view.php', [
 ]);
 
 $pagingbar = new paging_bar($totalcount, $page, $perpage, $pagingurl, 'page');
-if (has_capability('report/ghs:canmanagefrozenaccount', $contextsystem)) {
+if (has_capability('report/ghs:canmanagefrozenaccount', $contextsystem)){
     $html .= html_writer::div(
         html_writer::div(
             html_writer::link(
@@ -288,7 +288,7 @@ if (has_capability('report/ghs:canmanagefrozenaccount', $contextsystem)) {
     );
 }
 
-if ($outputpagingbar = $OUTPUT->render($pagingbar)) {
+if ($outputpagingbar = $OUTPUT->render($pagingbar)){
     $html .= $outputpagingbar;
 }
 $html .= html_writer::table($table);

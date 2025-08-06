@@ -24,10 +24,8 @@
 
 namespace local_schoolmanager\task;
 
-use cache_helper;
 use context_course;
 use context_system;
-use moodle_exception;
 use stdClass;
 
 
@@ -39,11 +37,11 @@ require_once($CFG->dirroot . '/group/lib.php');
 
 class sync_groups extends \core\task\scheduled_task {
 
-    public function get_name() {
+    public function get_name(){
         return get_string('syncgroups', 'local_schoolmanager');
     }
 
-    public function execute() {
+    public function execute(){
         global $DB;
 
         $contextsystem = context_system::instance();
@@ -69,27 +67,27 @@ class sync_groups extends \core\task\scheduled_task {
                  WHERE {$filter}";
 
         $rs = $DB->get_recordset('local_schoolmanager_school');
-        foreach ($rs as $school) {
+        foreach ($rs as $school){
             $params = [$school->code . '/%'];
 
-            if (!$groups = $DB->get_records_sql($sql, $params)) {
+            if (!$groups = $DB->get_records_sql($sql, $params)){
                 continue;
             }
 
             $schollogo = null;
 
-            if ($files = $fs->get_area_files($contextsystem->id, 'local_schoolmanager', 'compact_logo', $school->id, "itemid, filepath, filename", false)) {
+            if ($files = $fs->get_area_files($contextsystem->id, 'local_schoolmanager', 'compact_logo', $school->id, "itemid, filepath, filename", false)){
                 $file = reset($files);
-                if ($dir = make_temp_directory('forms')) {
-                    if ($tempfile = tempnam($dir, 'tempup_')) {
-                        if (!$schollogo = $file->copy_content_to($tempfile)) {
+                if ($dir = make_temp_directory('forms')){
+                    if ($tempfile = tempnam($dir, 'tempup_')){
+                        if (!$schollogo = $file->copy_content_to($tempfile)){
                             @unlink($tempfile);
                         }
                     }
                 }
             }
 
-            foreach ($groups as $group) {
+            foreach ($groups as $group){
                 $data = new stdClass();
                 $data->id = $group->id;
                 $data->description = $school->name;
@@ -101,8 +99,8 @@ class sync_groups extends \core\task\scheduled_task {
                     'component' => 'core_group', 'itemtype' => 'groups', 'itemid' => $group->id
                 ]);
 
-                if ($conversation) {
-                    if ($conversation->enabled == 0) {
+                if ($conversation){
+                    if ($conversation->enabled == 0){
                         \core_message\api::enable_conversation($group->conversationid);
                     }
                 } else {
@@ -118,10 +116,10 @@ class sync_groups extends \core\task\scheduled_task {
                     );
 
                     // Add members to conversation if they exists in the group.
-                    if ($groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id')) {
+                    if ($groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id')){
                         $users = [];
-                        foreach ($groupmemberroles as $roleid => $roledata) {
-                            foreach ($roledata->users as $member) {
+                        foreach ($groupmemberroles as $roleid => $roledata){
+                            foreach ($roledata->users as $member){
                                 $users[] = $member->id;
                             }
                         }
@@ -129,7 +127,7 @@ class sync_groups extends \core\task\scheduled_task {
                     }
                 }
 
-                if ($schollogo) {
+                if ($schollogo){
                     $fs->delete_area_files($contextcourse->id, 'group', 'icon', $group->id);
                     $newpicture = 0;
                     if (!empty($tempfile) && $rev = process_new_icon($contextcourse, 'group', 'icon', $group->id, $tempfile)){
@@ -138,8 +136,8 @@ class sync_groups extends \core\task\scheduled_task {
                         $fs->delete_area_files($contextcourse->id, 'group', 'icon', $group->id);
                     }
 
-                    if ($newpicture != $group->picture) {
-                        $DB->set_field('groups', 'picture', $newpicture, array('id' => $group->id));
+                    if ($newpicture != $group->picture){
+                        $DB->set_field('groups', 'picture', $newpicture, ['id' => $group->id]);
                     }
                 }
             }

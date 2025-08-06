@@ -78,7 +78,7 @@ use ($help_str){
     return new admin_setting_configtextarea($name, $visiblename, $description, $defaultsetting, $paramtype, $cols, $rows);
 };
 
-$configlink = function($name, $link, $text=null) use ($help_str) {
+$configlink = function($name, $link, $text=null) use ($help_str){
     $setting_name = NED::$PLUGIN_NAME . '/' . $name;
     $title = NED::str($name);
     if (is_bool($text) && $text){
@@ -104,7 +104,7 @@ $settings->add($configtextarea('academic_program','','',"1 Year",PARAM_TEXT, 10,
 $records = badges_get_badges(BADGE_TYPE_SITE, 0, 'name', 'ASC', 0, 0);
 
 $badgeoptions = [];
-foreach ($records as $record) {
+foreach ($records as $record){
     $badgeoptions[$record->id] = $record->name;
 }
 $badgeoptions = [0 => get_string('choose')] + $badgeoptions;

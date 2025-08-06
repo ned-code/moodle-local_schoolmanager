@@ -33,6 +33,10 @@ class edit_school_form extends \moodleform {
     protected $_schoolid;
     protected $_school;
 
+    /**
+     * Form definition
+     * @noinspection PhpOverridingMethodVisibilityInspection
+     */
     public function definition(){
         global $CFG, $USER;
 
@@ -47,7 +51,7 @@ class edit_school_form extends \moodleform {
             $school = $school->to_record();
         } elseif ($school = ($SM->get_potential_schools($this->_schoolid) ?? false)){
             $this->_new = true;
-        } else {
+        } else{
             NED::print_module_error('nopermissions', 'error', '', 'There is no school or potential school for edit!');
         }
 
@@ -73,18 +77,18 @@ class edit_school_form extends \moodleform {
         $mform->setDefault('name', $this->_school->name ?? '');
 
         if ($this->_can_manage_extra){
-            $cohortname = & $mform->createElement('text', 'cohortname', NED::str('schoolcohortname'), []);
+            $cohortname = &$mform->createElement('text', 'cohortname', NED::str('schoolcohortname'), []);
             $mform->setType('cohortname', PARAM_TEXT);
             $mform->setDefault('cohortname', $this->_school->name ?? '');
             $cohortname->freeze('cohortname');
 
-            $schoolcode = & $mform->createElement('text', 'code', NED::str('schoolid'), ['class' => 'school-code']);
+            $schoolcode = &$mform->createElement('text', 'code', NED::str('schoolid'), ['class' => 'school-code']);
             $schoolcode->freeze('code');
             $mform->addGroup(
                 [$cohortname, $schoolcode], 'school_name', NED::str('schoolcohortname'),
                 null, false
             );
-        } else {
+        } else{
             $mform->addElement('text', 'code', NED::str('schoolid'), []);
             $mform->hardFreeze(['name', 'code']);
         }
@@ -98,7 +102,7 @@ class edit_school_form extends \moodleform {
 
         $purpose = user_edit_map_field_purpose($user->id, 'country');
         $choices = get_string_manager()->get_list_of_countries();
-        $choices = array('' => get_string('selectacountry') . '...') + $choices;
+        $choices = ['' => get_string('selectacountry').'...'] + $choices;
         $mform->addElement('select', 'country', get_string('selectacountry'), $choices, $purpose);
         if ($school->country ?? false){
             $mform->setDefault('country', $school->country);
@@ -110,9 +114,9 @@ class edit_school_form extends \moodleform {
         $administrator = $SM->get_school_admin($this->_schoolid);
         $issiteadmin = is_siteadmin();
 
-        if ($issiteadmin) {
+        if ($issiteadmin){
             $regions = NED::get_region_list();
-            $regions = array('' => get_string('choose') . '...') + $regions;
+            $regions = ['' => get_string('choose').'...'] + $regions;
             $mform->addElement('select', 'region', NED::str('region'), $regions);
 
             $schoolgroups = NED::get_schoolgroup_list();
@@ -128,7 +132,7 @@ class edit_school_form extends \moodleform {
         $mform->addElement('select', 'timezone', get_string('timezone'), $choices);
         $mform->setDefault('timezone', $CFG->timezone);
 
-        if ($this->_can_manage_extra) {
+        if ($this->_can_manage_extra){
             // Sync timezone
             $mform->addElement('selectyesno', 'synctimezone', NED::str('synctimezone'));
             $mform->setDefault('synctimezone', 0);
@@ -136,8 +140,8 @@ class edit_school_form extends \moodleform {
 
         // Staff options.
         $staffoptions = [0 => get_string('choose')];
-        if ($staffs = $SM->get_school_students($this->_schoolid, true, $SM::STAFF_ROLES, false)) {
-            foreach ($staffs as $staff) {
+        if ($staffs = $SM->get_school_students($this->_schoolid, true, $SM::STAFF_ROLES, false)){
+            foreach ($staffs as $staff){
                 $staffoptions[$staff->id] = fullname($staff);
             }
         }
@@ -181,7 +185,7 @@ class edit_school_form extends \moodleform {
         $mform->addElement('html', NED::span(NED::str('aiv_title'), 'group-title'));
         $mform->addElement('html', NED::div_start('school-form-group'));
 
-        if ($this->_can_manage_extra) {
+        if ($this->_can_manage_extra){
             // Force proxy submission window
             $mform->addElement('select', 'forceproxysubmissionwindow', NED::str('forceproxysubmissionwindow'),
                 [0 => NED::str('activitysetting')] + NED::strings2menu(school::PROXY_SUBMISSION_WINDOWS));
@@ -196,7 +200,7 @@ class edit_school_form extends \moodleform {
             $mform->setDefault('videosubmissionrequired', 0);
         }
 
-        if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)) {
+        if ($this->_can_manage_extra || ($administrator && $administrator->id == $USER->id)){
             // Proctor Manager for tests/Exams.
             $mform->addElement('select', 'proctormanager', NED::str('proctormanager'), $staffoptions);
             $mform->setDefault('proctormanager', $administrator->id ?? 0);
@@ -206,21 +210,22 @@ class edit_school_form extends \moodleform {
         }
 
         // IP type
-        $mform->addElement('select', 'iptype', NED::str('iptype'), ['' => get_string('choose')] + NED::strings2menu(school::IP_TYPES));
+        $mform->addElement('select', 'iptype', NED::str('iptype'),
+            ['' => get_string('choose')] + NED::strings2menu(school::IP_TYPES));
         $mform->addRule('iptype', null, 'required');
         $mform->addHelpButton('iptype', 'iptype', NED::$PLUGIN_NAME);
 
         // Report IP changes, Show IP block, Report IP changes in TEM
-        if ($issiteadmin) {
+        if ($issiteadmin){
             $mform->addElement('selectyesno', 'reportipchange', NED::str('reportipchange'));
-        } else {
+        } else{
             $mform->addElement('hidden', 'reportipchange');
             $mform->setType('reportipchange', PARAM_INT);
         }
         $mform->setDefault('reportipchange', 0);
 
         $fields = ['showipchange', 'reportiptem'];
-        foreach ($fields as $field) {
+        foreach ($fields as $field){
             $mform->addElement('selectyesno', $field, NED::str($field));
             $mform->setDefault($field, 0);
             $mform->hideIf($field, 'reportipchange', NED::$form_element::COND_EQUAL, '0');
@@ -259,32 +264,32 @@ class edit_school_form extends \moodleform {
             $mform->addElement(
                 'checkbox',
                 'activatedeadlinesconfig',
-                NED::str('activatedeadlinesconfig') ,
+                NED::str('activatedeadlinesconfig'),
                 null,
                 ['class' => 'activatedeadlinesconfig-checkbox-field']
             );
             $mform->setDefault('activatedeadlinesconfig', $activatedeadlinesconfig);
 
             $deadlineselements = [
-                TT::X_DAYS_BETWEEN_DL_QUIZ => [
+                TT::X_DAYS_BETWEEN_DL_QUIZ  => [
                     'type' => 'text',
-                    'help' => 'deadline_config'
+                    'help' => 'deadline_config',
                 ],
                 TT::X_DAYS_BETWEEN_DL_OTHER => [
                     'type' => 'text',
-                    'help' => 'deadline_config'
+                    'help' => 'deadline_config',
                 ],
-                TT::X_DAYS_APPLY_TO_ALL => [
-                    'type' => 'select',
-                    'choices' => TT::get_x_days_apply_to_all_choices()
-                ]
+                TT::X_DAYS_APPLY_TO_ALL     => [
+                    'type'    => 'select',
+                    'choices' => TT::get_x_days_apply_to_all_choices(),
+                ],
             ];
 
-            foreach ($deadlineselements as $name => $element) {
-                if ($element['type'] === 'select') {
-                    $mform->addElement($element['type'], $name, NED::str($name,null,NED::TT), $element['choices']);
-                } else {
-                    $mform->addElement($element['type'], $name, NED::str($name,null,NED::TT));
+            foreach ($deadlineselements as $name => $element){
+                if ($element['type'] === 'select'){
+                    $mform->addElement($element['type'], $name, NED::str($name, null, NED::TT), $element['choices']);
+                } else{
+                    $mform->addElement($element['type'], $name, NED::str($name, null, NED::TT));
                 }
 
                 if (!empty($element['help'])){
@@ -305,7 +310,7 @@ class edit_school_form extends \moodleform {
             }
         }
 
-        if ($issiteadmin) {
+        if ($issiteadmin){
             $mform->addElement('selectyesno', 'hidecompliancereport', NED::str('hidecompliancereport'));
         }
 
@@ -344,7 +349,7 @@ class edit_school_form extends \moodleform {
         if ($cancel_link){
             $buttonarray[] = $mform->createElement('html',
                 NED::link([$cancel_link], get_string('cancel'), 'btn btn-default'));
-        } else {
+        } else{
             $buttonarray[] = $mform->createElement('cancel');
         }
 
@@ -358,7 +363,7 @@ class edit_school_form extends \moodleform {
         $mform = $this->_form;
 
         if (!$this->_can_manage){
-            /** @var \HTML_QuickForm_group | \HTML_QuickForm_select | \HTML_QuickForm_element  $elem */
+            /** @var \HTML_QuickForm_group | \HTML_QuickForm_select | \HTML_QuickForm_element $elem */
             foreach ($mform->_elements as $elem){
                 $type = $elem->getType();
                 if ($type != 'html' && $type != 'cancel'){
@@ -372,7 +377,7 @@ class edit_school_form extends \moodleform {
         }
 
         $SM = SM::get_school_manager();
-        if ($school = $SM->get_school_by_ids($this->_schoolid, true)) {
+        if ($school = $SM->get_school_by_ids($this->_schoolid, true)){
             $this->_school->timezone = $school->get_cohort()->timezone ?? 99;
         }
 
@@ -411,7 +416,7 @@ class edit_school_form extends \moodleform {
      *
      * @return object submitted data; NULL if not valid or not submitted or cancelled
      */
-    function get_data(){
+    public function get_data(){
         $data = parent::get_data();
         if ($data){
             $data->id = $data->schoolid ?? null;
@@ -434,9 +439,10 @@ class edit_school_form extends \moodleform {
      * Render & return form as html
      *
      * @param null $def_data
+     *
      * @return string
      */
-    public function draw($def_data=null){
+    public function draw($def_data = null){
         //finalize the form definition if not yet done
         if (!$this->_definition_finalized){
             $this->_definition_finalized = true;
